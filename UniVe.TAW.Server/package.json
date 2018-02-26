@@ -1,0 +1,13 @@
+{
+  "name": "unive.taw.server",
+  "version": "0.0.0",
+  "description": "Unive.TAW.Server",
+  "main": "app.js",
+  "author": {
+    "name": "Sergio"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.87"
+  },
+  "dependencies": {}
+}
