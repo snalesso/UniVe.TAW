@@ -1,13 +1,16 @@
 {
   "name": "unive.taw.server",
   "version": "0.0.0",
-  "description": "Unive.TAW.Server",
-  "main": "app.js",
+  "description": "UniVe.TAW.Server",
+  "main": "server.ts",
   "author": {
     "name": "Sergio"
   },
   "devDependencies": {
     "@types/node": "^6.0.101"
   },
-  "dependencies": {}
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2"
+  }
 }

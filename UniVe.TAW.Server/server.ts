@@ -1,12 +1,16 @@
-﻿import http = require('http');
+﻿var express = require('express');
+var bodyParser = require('body-parser')
+var app = express();
 
-var port = process.env.port || 1632
+app.use(bodyParser.json());
 
-console.log("Server starting ...");
+// respond with "hello world" when a GET request is made to the homepage
+app.get('/', function (req, res) {
+    res.send('hello world');
+});
 
-http.createServer(function (req, res) {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("Hello World\n");
-}).listen(port);
+app.post('/SendMessage', function (req, res) {
+    res.send('Message delivered!');
+});
 
-console.log("Server online @ http://127.0.0.1:" + port + "/");
+app.listen(3000, () => console.log('Example app listening on port 3000!'));

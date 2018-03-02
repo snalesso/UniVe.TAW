@@ -1,0 +1,12 @@
+{
+  "name": "uni-ve.taw.framework",
+  "version": "0.0.0",
+  "description": "UniVe.TAW.Framework",
+  "main": "app.js",
+  "author": {
+    "name": "Sergio"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.87"
+  }
+}

@@ -1,11 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var http = require("http");
-var port = process.env.port || 1632;
-console.log("Server starting ...");
-http.createServer(function (req, res) {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("Hello World\n");
-}).listen(port);
-console.log("Server online @ http://127.0.0.1:" + port + "/");
+var express = require('express');
+var bodyParser = require('body-parser');
+var app = express();
+app.use(bodyParser.json());
+// respond with "hello world" when a GET request is made to the homepage
+app.get('/', function (req, res) {
+    res.send('hello world');
+});
+app.post('/SendMessage', function (req, res) {
+    res.send('Message delivered!');
+});
+app.listen(3000, function () { return console.log('Example app listening on port 3000!'); });
 //# sourceMappingURL=server.js.map
