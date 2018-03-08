@@ -1,9 +1,9 @@
 var Auth;
 (function (Auth) {
-    var User = /** @class */ (function () {
-        function User() {
+    var UserDto = /** @class */ (function () {
+        function UserDto() {
         }
-        return User;
+        return UserDto;
     }());
 })(Auth || (Auth = {}));
 //# sourceMappingURL=User.js.map
