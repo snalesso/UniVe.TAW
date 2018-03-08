@@ -12,12 +12,23 @@ function onDeviceReady(): void {
     document.addEventListener('pause', onPause, false);
     document.addEventListener('resume', onResume, false);
 
-    // TODO: Cordova has been loaded. Perform any initialization that requires Cordova here.
-    var parentElement = document.getElementById('deviceready');
-    var listeningElement = parentElement.querySelector('.listening');
-    var receivedElement = parentElement.querySelector('.received');
-    listeningElement.setAttribute('style', 'display:none;');
-    receivedElement.setAttribute('style', 'display:block;');
+    // mine
+
+    let btn = document.getElementById("btnSendChatMessage");
+    btn.addEventListener("click", (event) => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "http://localhost:1632/SendMessage", true);
+        xhr.setRequestHeader("Content-type", "application/json");
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                alert(xhr.responseText);
+            }
+        }
+        xhr.send(JSON.stringify({ content: "This is a message sent from Android app" }));
+        navigator.notification.alert("navigator alert", () => { }, "reger", "fewfe");
+    });
 }
 
 function onPause(): void {

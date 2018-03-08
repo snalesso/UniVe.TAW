@@ -1,13 +1,11 @@
+/// <reference path="EndpointNames.ts" />
+var serverListenPort = 1632;
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 app.use(bodyParser.json());
-// respond with "hello world" when a GET request is made to the homepage
-app.get('/', function (req, res) {
-    res.send('hello world');
+app.post('/' + "SendMessage", function (request, response) {
+    response.send('Message received: ' + JSON.stringify(request.body));
 });
-app.post('/SendMessage', function (req, res) {
-    res.send('Message delivered!');
-});
-app.listen(3000, function () { return console.log('Example app listening on port 3000!'); });
-//# sourceMappingURL=server.js.map
+app.listen(serverListenPort, function () { return console.log('Example app listening on port ' + serverListenPort + '!'); });
+//# sourceMappingURL=Server.js.map

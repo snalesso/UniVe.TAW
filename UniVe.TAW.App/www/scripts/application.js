@@ -12,12 +12,20 @@ define(["require", "exports"], function (require, exports) {
     function onDeviceReady() {
         document.addEventListener('pause', onPause, false);
         document.addEventListener('resume', onResume, false);
-        // TODO: Cordova has been loaded. Perform any initialization that requires Cordova here.
-        var parentElement = document.getElementById('deviceready');
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+        // mine
+        var btn = document.getElementById("btnSendChatMessage");
+        btn.addEventListener("click", function (event) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "http://localhost:1632/SendMessage", true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    alert(xhr.responseText);
+                }
+            };
+            xhr.send(JSON.stringify({ content: "This is a message sent from Android app" }));
+            navigator.notification.alert("navigator alert", function () { }, "reger", "fewfe");
+        });
     }
     function onPause() {
         // TODO: This application has been suspended. Save application state here.

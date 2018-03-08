@@ -44,4 +44,4 @@ var Chat;
         return StampedMessage;
     }(RawMessage));
 })(Chat || (Chat = {}));
-//# sourceMappingURL=Chat.js.map
+//# sourceMappingURL=IChatService.js.map

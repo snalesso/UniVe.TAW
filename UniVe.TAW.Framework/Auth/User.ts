@@ -1,6 +1,6 @@
 namespace Auth {
 
-    class User {
+    class UserDto {
         public Id: number;
         public Nickname: string;
         public BirthDate: Date;

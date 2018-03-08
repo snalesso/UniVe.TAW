@@ -1,0 +1,43 @@
+﻿namespace Chat {
+
+    interface IChatService {
+        SendMessage(content: string): boolean;
+        Subscribe(someId: number, callback: (message: StampedMessage)=> void): Subscription;
+    }
+
+    class MobileChatService implements IChatService {
+
+        SendMessage(content: string): boolean {
+            throw new Error("Method not implemented.");
+        }
+
+        Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription {
+            throw new Error("Method not implemented.");
+        }
+    }
+
+    class Subscription {
+        public Unsubscribe(): void { }
+    }
+
+    class RawMessage {
+
+        public constructor(content: string, senderId: number) {
+            this.Content = content;
+            this.SenderId = senderId;
+        }
+
+        public readonly Content: string;
+        public readonly SenderId: number;
+    }
+
+    class StampedMessage extends RawMessage {
+
+        public constructor(rawMessage: RawMessage) {
+            super(rawMessage.Content, rawMessage.SenderId);
+            this.Timestamp = new Date();
+        }
+
+        public readonly Timestamp: Date;
+    }
+}

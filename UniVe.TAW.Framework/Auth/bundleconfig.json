@@ -1,0 +1,10 @@
+[
+  {
+    "outputFileName": "Auth.js",
+    "inputFiles": [
+      "Country.js",
+      "User.js"
+    ],
+    "minify": { "enabled": true }
+  }
+]

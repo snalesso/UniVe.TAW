@@ -4,7 +4,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>UniVe.TAW.Framework</Name>
     <RootNamespace>UniVe.TAW.Framework</RootNamespace>
-    <ToolsVersionPromptShown>2.5</ToolsVersionPromptShown>
+    <ToolsVersionPromptShown>2.3</ToolsVersionPromptShown>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -25,16 +25,22 @@
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptToolsVersion>2.5</TypeScriptToolsVersion>
     <EnableTypeScript>true</EnableTypeScript>
-    <StartWebBrowser>false</StartWebBrowser>
+    <StartWebBrowser>False</StartWebBrowser>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
+    <TypeScriptOutFile>$(ProjectDir)dist\js\myCombinedFile.js</TypeScriptOutFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Auth\tsconfig.json" />
+    <None Include="Auth\bundleconfig.json" />
+    <Content Include="Chat\tsconfig.json" />
+    <Content Include="Game\tsconfig.json" />
     <Content Include="package.json" />
+    <Content Include="tsconfig.full.json" />
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
@@ -47,7 +53,7 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Auth\User.ts" />
-    <TypeScriptCompile Include="Chat\Chat.ts">
+    <TypeScriptCompile Include="Chat\IChatService.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="Game\NavalBattleService.ts">
@@ -56,6 +62,10 @@
     <TypeScriptCompile Include="Game\Ship.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="Utils.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Auth\Auth.min.js" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
