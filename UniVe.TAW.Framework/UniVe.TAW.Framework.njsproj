@@ -5,6 +5,8 @@
     <Name>UniVe.TAW.Framework</Name>
     <RootNamespace>UniVe.TAW.Framework</RootNamespace>
     <ToolsVersionPromptShown>2.5</ToolsVersionPromptShown>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -29,18 +31,30 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
-    <TypeScriptOutFile>$(ProjectDir)dist\js\myCombinedFile.js</TypeScriptOutFile>
+    <TypeScriptOutFile>
+    </TypeScriptOutFile>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Auth\tsconfig.json" />
-    <None Include="Auth\bundleconfig.json" />
+    <Content Include="bundleconfig.json" />
     <Content Include="Chat\tsconfig.json" />
-    <Content Include="Game\tsconfig.json" />
     <Content Include="package.json" />
-    <Content Include="tsconfig.full.json" />
+    <Content Include="packages.config" />
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
@@ -65,7 +79,16 @@
     <TypeScriptCompile Include="Utils.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Auth\Auth.min.js" />
+    <Compile Include="Framework.js" />
+    <Compile Include="Framework.min.js">
+      <SubType>Code</SubType>
+      <DependentUpon>Framework.js</DependentUpon>
+    </Compile>
+    <Compile Include="Game\Game.js" />
+    <Compile Include="Game\Game.min.js">
+      <SubType>Code</SubType>
+      <DependentUpon>Game\Game.js</DependentUpon>
+    </Compile>
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
@@ -108,4 +131,11 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
+  <Import Project="..\packages\BuildBundlerMinifier.2.6.362\build\BuildBundlerMinifier.targets" Condition="Exists('..\packages\BuildBundlerMinifier.2.6.362\build\BuildBundlerMinifier.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\BuildBundlerMinifier.2.6.362\build\BuildBundlerMinifier.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\BuildBundlerMinifier.2.6.362\build\BuildBundlerMinifier.targets'))" />
+  </Target>
 </Project>

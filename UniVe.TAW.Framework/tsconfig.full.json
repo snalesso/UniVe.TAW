@@ -1,8 +1,0 @@
-{
-  "extends": "tsconfig.json",
-  "compilerOptions": {
-    "module": "none",
-    "rootDir": ".",
-    "outFile": "UniVe.TAW.Framework.js"
-  }
-}

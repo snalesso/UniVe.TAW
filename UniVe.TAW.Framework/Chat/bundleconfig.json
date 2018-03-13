@@ -1,0 +1,11 @@
+[
+  {
+    "outputFileName": "Chat.js",
+    "inputFiles": [
+      "*.js"
+    ],
+    "minify": {
+      "enabled": true
+    }
+  }
+]

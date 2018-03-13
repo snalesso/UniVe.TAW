@@ -1,4 +1,4 @@
-﻿namespace Auth {
+﻿namespace UniVe.TAW.Framework.Auth {
 
     enum Country {
         Afghanistan,

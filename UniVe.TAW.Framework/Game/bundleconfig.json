@@ -1,0 +1,20 @@
+[
+  {
+    "outputFileName": "Game.js",
+    "inputFiles": [
+      "*.js"
+    ],
+    "minify": {
+      "enabled": true
+    }
+  },
+  {
+    "outputFileName": "../../iweather/src/assets/scripts/UniVe.TAW.Framework/Game.js",
+    "inputFiles": [
+      "*.js"
+    ],
+    "minify": {
+      "enabled": true
+    }
+  }
+]

@@ -1,4 +1,4 @@
-namespace Auth {
+namespace UniVe.TAW.Framework.Auth {
 
     class UserDto {
         public Id: number;

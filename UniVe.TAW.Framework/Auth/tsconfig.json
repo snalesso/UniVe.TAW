@@ -1,8 +1,8 @@
-//{
-//  "extends": "../tsconfig.json",
-//  "compilerOptions": {
-//    "module": "none",
-//    "rootDir": ".",
-//    "outFile": "Auth.js"
-//  }
-//}
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "system",
+    "rootDir": ".",
+    "outFile": "Auth.js"
+  }
+}

@@ -1,4 +1,4 @@
-﻿namespace Game {
+﻿namespace UniVe.TAW.Framework.Game {
 
     abstract class Ship {
 
@@ -40,7 +40,7 @@
 
         public ReceiveEnemyFire(coord: Coord) {
             if (!coord)
-                throw "coord cannot be null";
+                throw new Error("coord cannot be null");
         }
     }
 

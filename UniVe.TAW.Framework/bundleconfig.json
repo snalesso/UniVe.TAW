@@ -1,0 +1,53 @@
+[
+  //{
+  //  "outputFileName": "Framework.js",
+  //  "inputFiles": [
+  //    "Auth/Auth.js",
+  //    "Chat/Chat.js",
+  //    "Game/Game.js",
+  //    "Utils.js"
+  //  ],
+  //  "minify": {
+  //    "enabled": true
+  //  }
+  //},
+  //{
+  //  "outputFileName": "../iweather/src/assets/scripts/UniVe.TAW.Framework/Framework.js",
+  //  "inputFiles": [
+  //    "Auth/Auth.js",
+  //    "Chat/Chat.js",
+  //    "Game/Game.js",
+  //    "*.js"
+  //  ],
+  //  "minify": {
+  //    "enabled": true
+  //  }
+  //}
+  //{
+  //  "outputFileName": "Auth/Auth.js",
+  //  "inputFiles": [
+  //    "Auth/*.js"
+  //  ],
+  //  "minify": {
+  //    "enabled": true
+  //  }
+  //},
+  //{
+  //  "outputFileName": "Chat/Chat.js",
+  //  "inputFiles": [
+  //    "Chat/*.js"
+  //  ],
+  //  "minify": {
+  //    "enabled": true
+  //  }
+  //},
+  //{
+  //  "outputFileName": "Game/Game.js",
+  //  "inputFiles": [
+  //    "Game/*.js"
+  //  ],
+  //  "minify": {
+  //    "enabled": true
+  //  }
+  //}
+]

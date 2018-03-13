@@ -1,11 +1,11 @@
-﻿namespace Chat {
+﻿namespace UniVe.TAW.Framework.Chat {
 
-    interface IChatService {
+    export interface IChatService {
         SendMessage(content: string): boolean;
-        Subscribe(someId: number, callback: (message: StampedMessage)=> void): Subscription;
+        Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription;
     }
 
-    class MobileChatService implements IChatService {
+    export class MobileChatService implements IChatService {
 
         SendMessage(content: string): boolean {
             throw new Error("Method not implemented.");
@@ -14,13 +14,17 @@
         Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription {
             throw new Error("Method not implemented.");
         }
+
+        SubscribeNew(someId: number, callback: () => void): Subscription {
+            throw new Error("Method not implemented.");
+        }
     }
 
-    class Subscription {
+    export class Subscription {
         public Unsubscribe(): void { }
     }
 
-    class RawMessage {
+    export class RawMessage {
 
         public constructor(content: string, senderId: number) {
             this.Content = content;
@@ -31,13 +35,14 @@
         public readonly SenderId: number;
     }
 
-    class StampedMessage extends RawMessage {
+    export class StampedMessage extends RawMessage {
 
         public constructor(rawMessage: RawMessage) {
             super(rawMessage.Content, rawMessage.SenderId);
-            this.Timestamp = new Date();
+            this.UnixTimestamp = Date.now();
         }
 
-        public readonly Timestamp: Date;
+        public readonly UnixTimestamp: number;
     }
+
 }
