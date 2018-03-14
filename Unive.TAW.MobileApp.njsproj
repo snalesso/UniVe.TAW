@@ -45,6 +45,18 @@
     <Content Include="plugins\cordova-plugin-dialogs\tests\package.json" />
     <Content Include="plugins\cordova-plugin-dialogs\tests\plugin.xml" />
     <Compile Include="plugins\cordova-plugin-dialogs\tests\tests.js" />
+    <TypeScriptCompile Include="..\UniVe.TAW.Framework\Auth.ts">
+      <Link>src\assets\scripts\Unive.TAW.Framework\Auth.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\UniVe.TAW.Framework\Chat.ts">
+      <Link>src\assets\scripts\Unive.TAW.Framework\Chat.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\UniVe.TAW.Framework\Game.ts">
+      <Link>src\assets\scripts\Unive.TAW.Framework\Game.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\UniVe.TAW.Framework\Utils.ts">
+      <Link>src\assets\scripts\Unive.TAW.Framework\Utils.ts</Link>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="plugins\cordova-plugin-dialogs\types\index.d.ts" />
     <Compile Include="plugins\cordova-plugin-dialogs\www\notification.js" />
     <Content Include="plugins\cordova-plugin-dialogs\doc\de\index.md" />

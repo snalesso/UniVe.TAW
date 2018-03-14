@@ -1,13 +1,28 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "noImplicitAny": false,
-    "noEmitOnError": true,
-    "removeComments": false,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "module": "es2015",
+    "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "www/scripts",
-    //"module": "amd",
-    "target": "es6"
+    "target": "es5"
   },
-  "exclude": ["platforms", "node_modules", "bower_components", "plugins", "merges", "res", "bin", "bld"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/**/*.spec.ts",
+    "src/**/__tests__/*.ts"
+  ],
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
 }
