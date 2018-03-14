@@ -259,8 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-/UniVe.TAW.Framework/Utils.js.map
-/UniVe.TAW.Framework/Utils.js
 *.ts
 *.map
-/UniVe.TAW.Framework/Game.js
+
+# Ionic generated shit
+**/.sourcemaps
