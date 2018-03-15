@@ -13,12 +13,12 @@ var ApiServer = /** @class */ (function () {
         this.ServerConfig();
     }
     ApiServer.prototype.DbConfig = function () {
-        mongoose.connect('mongodb://localhost/univetaw', function (error) {
-            console.log(JSON.stringify(error));
+        mongoose.connect('mongodb://localhost:27017/univetaw', function (error) {
+            console.log("Mongoose connect error: " + JSON.stringify(error));
         });
         var db = mongoose.connection;
-        db.once('open', function () {
-            console.log('Mongoose: Siamo dentro!');
+        db.once('open', function (data) {
+            console.log('Mongoose on-open: Siamo dentro!');
         });
     };
     ApiServer.prototype.ServerConfig = function () {
