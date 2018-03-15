@@ -1,11 +1,11 @@
-var UniVe;
-(function (UniVe) {
-    var TAW;
-    (function (TAW) {
-        var Framework;
-        (function (Framework) {
-            var Game;
-            (function (Game) {
+var unive;
+(function (unive) {
+    var taw;
+    (function (taw) {
+        var framework;
+        (function (framework) {
+            var game;
+            (function (game) {
                 var Ship = /** @class */ (function () {
                     function Ship(size) {
                         this.Size = size;
@@ -15,20 +15,20 @@ var UniVe;
                     };
                     return Ship;
                 }());
-                Game.Ship = Ship;
+                game.Ship = Ship;
                 var Direction;
                 (function (Direction) {
                     Direction[Direction["Up"] = 0] = "Up";
                     Direction[Direction["Down"] = 1] = "Down";
                     Direction[Direction["Left"] = 2] = "Left";
                     Direction[Direction["Right"] = 3] = "Right";
-                })(Direction = Game.Direction || (Game.Direction = {}));
+                })(Direction = game.Direction || (game.Direction = {}));
                 var Match = /** @class */ (function () {
                     function Match() {
                     }
                     return Match;
                 }());
-                Game.Match = Match;
+                game.Match = Match;
                 var Coord = /** @class */ (function () {
                     function Coord(x, y) {
                         this.X = x;
@@ -36,7 +36,7 @@ var UniVe;
                     }
                     return Coord;
                 }());
-                Game.Coord = Coord;
+                game.Coord = Coord;
                 var PlayerSide = /** @class */ (function () {
                     function PlayerSide() {
                     }
@@ -46,21 +46,20 @@ var UniVe;
                     };
                     return PlayerSide;
                 }());
-                Game.PlayerSide = PlayerSide;
+                game.PlayerSide = PlayerSide;
                 var Fleet = /** @class */ (function () {
                     function Fleet() {
                     }
                     return Fleet;
                 }());
-                Game.Fleet = Fleet;
+                game.Fleet = Fleet;
                 var Action = /** @class */ (function () {
                     function Action() {
                     }
                     return Action;
                 }());
-                Game.Action = Action;
-            })(Game = Framework.Game || (Framework.Game = {}));
-        })(Framework = TAW.Framework || (TAW.Framework = {}));
-    })(TAW = UniVe.TAW || (UniVe.TAW = {}));
-})(UniVe || (UniVe = {}));
-//# sourceMappingURL=Game.js.map
+                game.Action = Action;
+            })(game = framework.game || (framework.game = {}));
+        })(framework = taw.framework || (taw.framework = {}));
+    })(taw = unive.taw || (unive.taw = {}));
+})(unive || (unive = {}));

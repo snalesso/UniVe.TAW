@@ -1,0 +1,17 @@
+const gulp = require("gulp");
+const ts = require("gulp-typescript");
+
+const tsProject = ts.createProject("tsconfig.json");
+const copyToDirs = ["dist", "../UniVe.TAW.Server/src/libs/UniVe.TAW.Framework"]
+
+gulp.task("default", function () {
+
+    const compiledTs = tsProject
+        .src()
+        .pipe(tsProject());
+
+    copyToDirs.forEach((dirPath) => {
+        compiledTs.js.pipe(gulp.dest(dirPath));
+        compiledTs.dts.pipe(gulp.dest(dirPath));
+    });
+});

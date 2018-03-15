@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "name": "Server - Launch",
-            "program": "${workspaceFolder}\\server.ts",
+            "program": "${workspaceFolder}/src/server.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],

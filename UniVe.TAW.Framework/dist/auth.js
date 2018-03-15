@@ -1,24 +1,29 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var $ = require("jquery");
-var UniVe;
-(function (UniVe) {
-    var TAW;
-    (function (TAW) {
-        var Framework;
-        (function (Framework) {
-            var Auth;
-            (function (Auth) {
-                var AuthService = /** @class */ (function () {
-                    function AuthService(fullServerEndpoint) {
-                        this.FullServerEndpoint = fullServerEndpoint;
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var unive;
+(function (unive) {
+    var taw;
+    (function (taw) {
+        var framework;
+        (function (framework) {
+            var auth;
+            (function (auth) {
+                var ServerAuthService = /** @class */ (function () {
+                    function ServerAuthService(port) {
+                        if (port === void 0) { port = 1632; }
+                        this.Port = port;
                     }
-                    AuthService.prototype.Signup = function (signupRequest, successCallback) {
-                        $.post(this.FullServerEndpoint, JSON.stringify(signupRequest), successCallback);
-                    };
-                    return AuthService;
+                    return ServerAuthService;
                 }());
-                Auth.AuthService = AuthService;
+                auth.ServerAuthService = ServerAuthService;
                 var Country;
                 (function (Country) {
                     Country[Country["Afghanistan"] = 0] = "Afghanistan";
@@ -218,30 +223,31 @@ var UniVe;
                     Country[Country["Yemen"] = 194] = "Yemen";
                     Country[Country["Zambia"] = 195] = "Zambia";
                     Country[Country["Zimbabwe"] = 196] = "Zimbabwe";
-                })(Country = Auth.Country || (Auth.Country = {}));
-                var SignupRequest = /** @class */ (function () {
-                    function SignupRequest(username, email, password, unixBirthDate, nationality) {
+                })(Country = auth.Country || (auth.Country = {}));
+                var SignupRequestDto = /** @class */ (function () {
+                    function SignupRequestDto(username, password, birthDate, country) {
                         this.Username = username;
-                        this.Email = email;
                         this.Password = password;
-                        this.UnixBirthDate = unixBirthDate;
-                        this.Nationality = nationality;
-                    }
-                    return SignupRequest;
-                }());
-                Auth.SignupRequest = SignupRequest;
-                var UserDto = /** @class */ (function () {
-                    function UserDto(id, username, birthDate, nationality) {
-                        this.Id = id;
-                        this.Username = username;
                         this.BirthDate = birthDate;
-                        this.Nationality = nationality;
+                        this.Country = country;
                     }
-                    return UserDto;
+                    return SignupRequestDto;
                 }());
-                Auth.UserDto = UserDto;
-            })(Auth = Framework.Auth || (Framework.Auth = {}));
-        })(Framework = TAW.Framework || (TAW.Framework = {}));
-    })(TAW = UniVe.TAW || (UniVe.TAW = {}));
-})(UniVe || (UniVe = {}));
-//# sourceMappingURL=Auth.js.map
+                auth.SignupRequestDto = SignupRequestDto;
+                var UserDto = /** @class */ (function (_super) {
+                    __extends(UserDto, _super);
+                    function UserDto(id, username, password, birthDate, country) {
+                        var _this = _super.call(this, username, password, birthDate, country) || this;
+                        _this.Id = id;
+                        return _this;
+                    }
+                    UserDto.CreateFrom = function (signupRequest, id) {
+                        return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
+                    };
+                    return UserDto;
+                }(SignupRequestDto));
+                auth.UserDto = UserDto;
+            })(auth = framework.auth || (framework.auth = {}));
+        })(framework = taw.framework || (taw.framework = {}));
+    })(taw = unive.taw || (unive.taw = {}));
+})(unive || (unive = {}));

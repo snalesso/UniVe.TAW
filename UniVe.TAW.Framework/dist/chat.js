@@ -8,14 +8,14 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var UniVe;
-(function (UniVe) {
-    var TAW;
-    (function (TAW) {
-        var Framework;
-        (function (Framework) {
-            var Chat;
-            (function (Chat) {
+var unive;
+(function (unive) {
+    var taw;
+    (function (taw) {
+        var framework;
+        (function (framework) {
+            var chat;
+            (function (chat) {
                 var MobileChatService = /** @class */ (function () {
                     function MobileChatService() {
                     }
@@ -30,14 +30,14 @@ var UniVe;
                     };
                     return MobileChatService;
                 }());
-                Chat.MobileChatService = MobileChatService;
+                chat.MobileChatService = MobileChatService;
                 var Subscription = /** @class */ (function () {
                     function Subscription() {
                     }
                     Subscription.prototype.Unsubscribe = function () { };
                     return Subscription;
                 }());
-                Chat.Subscription = Subscription;
+                chat.Subscription = Subscription;
                 var RawMessage = /** @class */ (function () {
                     function RawMessage(content, senderId) {
                         this.Content = content;
@@ -45,7 +45,7 @@ var UniVe;
                     }
                     return RawMessage;
                 }());
-                Chat.RawMessage = RawMessage;
+                chat.RawMessage = RawMessage;
                 var StampedMessage = /** @class */ (function (_super) {
                     __extends(StampedMessage, _super);
                     function StampedMessage(rawMessage) {
@@ -55,9 +55,8 @@ var UniVe;
                     }
                     return StampedMessage;
                 }(RawMessage));
-                Chat.StampedMessage = StampedMessage;
-            })(Chat = Framework.Chat || (Framework.Chat = {}));
-        })(Framework = TAW.Framework || (TAW.Framework = {}));
-    })(TAW = UniVe.TAW || (UniVe.TAW = {}));
-})(UniVe || (UniVe = {}));
-//# sourceMappingURL=Chat.js.map
+                chat.StampedMessage = StampedMessage;
+            })(chat = framework.chat || (framework.chat = {}));
+        })(framework = taw.framework || (taw.framework = {}));
+    })(taw = unive.taw || (unive.taw = {}));
+})(unive || (unive = {}));

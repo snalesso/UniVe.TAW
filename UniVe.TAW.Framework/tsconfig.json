@@ -2,11 +2,17 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
-    "lib": [ "es5" ],
-    "sourceMap": true,"declaration": true
-  },  
+    "lib": [
+      "es5"
+    ],
+    "sourceMap": true,
+    "declaration": true
+  },
   "compileOnSave": true,
   "exclude": [
     "node_modules"
+  ],
+  "files": [
+    "src/*"
   ]
 }
