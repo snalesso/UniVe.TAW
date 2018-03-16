@@ -5,9 +5,9 @@ var User_1 = require("../models/User");
 var UsersRouter = /** @class */ (function () {
     function UsersRouter() {
         this.router = express.Router();
-        this.routes();
+        this.Routes();
     }
-    UsersRouter.prototype.GetUser = function (req, res) {
+    UsersRouter.prototype.GetUsers = function (req, res) {
         User_1.default
             .find({})
             .then(function (data) {
@@ -19,10 +19,18 @@ var UsersRouter = /** @class */ (function () {
             res.json({ status: status, error: error });
         });
     };
-    UsersRouter.prototype.routes = function () {
-        this.router.get('/users', this.GetUser);
+    UsersRouter.prototype.GetUser = function (req, res) {
+        var userId = req.params["id"];
+        res.json({ id: userId, username: "Daedalus" });
+    };
+    UsersRouter.prototype.Routes = function () {
+        this.router.get('/', this.GetUsers);
+        this.router.get('/:id', this.GetUser);
+        // this.router.post('/', this.AddUser);
+        // this.router.put('/:user', this.UpdateUser);
+        // this.router.delete('/:id', this.DeleteUser);
     };
     return UsersRouter;
 }());
 exports.default = new UsersRouter().router;
-//# sourceMappingURL=usersRouter.js.map
+//# sourceMappingURL=UsersRouter.js.map

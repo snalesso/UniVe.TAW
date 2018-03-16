@@ -3,18 +3,24 @@ import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
 import * as mongodb from 'mongodb';
 
-import UsersRouter from './api/routers/usersRouter';
+import UsersRouter from './api/routers/UsersRouter';
 
-class ApiServer {
+export default class ApiServer {
 
+    private readonly ExpressApp: express.Application;
     public readonly Port: number;
-    public readonly ExpressApp: express.Application;
 
-    constructor(port: number = 1631) {
+    constructor(port: number) {
+        if (!port) throw new RangeError(port + " is not a valid port number");
         this.Port = port;
         this.ExpressApp = express();
         this.DbConfig();
         this.ServerConfig();
+        this.Routes();
+    }
+
+    public Listen() {
+        this.ExpressApp.listen(this.Port, () => console.log("ApiServer listening on port " + this.Port + "!"));
     }
 
     private DbConfig() {
@@ -40,5 +46,3 @@ class ApiServer {
         this.ExpressApp.use('/api/users', UsersRouter);
     }
 }
-
-export default new ApiServer().ExpressApp;

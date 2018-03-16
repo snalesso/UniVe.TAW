@@ -8,12 +8,12 @@
             "console": "internalConsole",
             "type": "node",
             "request": "launch",
-            "name": "Server - Launch",
-            "program": "${workspaceFolder}/src/server.ts",
+            "name": "Launch all servers",
+            "program": "${workspaceFolder}/src/bootstrapper.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "preLaunchTask": "Server - transpile",
+            "preLaunchTask": "Transpile Typescript",
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

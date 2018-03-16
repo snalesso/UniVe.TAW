@@ -2,7 +2,7 @@
   "name": "unive.taw.server",
   "version": "0.0.0",
   "description": "UniVe.TAW.Server",
-  "main": "server.ts",
+  "main": "src/ootstrapper.ts",
   "author": {
     "name": "Sergio"
   },
