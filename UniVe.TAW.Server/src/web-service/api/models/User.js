@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var userSchema = new mongoose.Schema({
-    Id: Number,
+    // Id: mongoose.Types.ObjectId,
     Username: {
         type: String,
         unique: true,

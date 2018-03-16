@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 
 let userSchema = new mongoose.Schema({
-    Id: Number,
+    // Id: mongoose.Types.ObjectId,
     Username: {
         type: String,
         unique: true,
