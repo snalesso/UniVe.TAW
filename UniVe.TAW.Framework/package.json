@@ -2,14 +2,13 @@
   "name": "uni-ve.taw.framework",
   "version": "0.0.0",
   "description": "UniVe.TAW.Framework",
-  "main": "app.js",
   "author": {
     "name": "Sergio"
   },
   "devDependencies": {
     "@types/gulp": "^4.0.5",
     "@types/gulp-typescript": "^2.13.0",
-    "@types/node": "^6.0.87",
+    "@types/node": "^9.4.7",
     "gulp": "^3.9.1",
     "gulp-typescript": "^4.0.1",
     "typescript": "^2.7.2"
