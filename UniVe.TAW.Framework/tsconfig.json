@@ -6,13 +6,10 @@
       "es5"
     ],
     "sourceMap": true,
-    "declaration": true
+    "rootDir": "src"
   },
   "compileOnSave": true,
   "exclude": [
     "node_modules"
-  ],
-  "files": [
-    "src/*"
   ]
 }

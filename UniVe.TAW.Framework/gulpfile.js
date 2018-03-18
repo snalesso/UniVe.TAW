@@ -10,6 +10,8 @@ const copyToDirs = [
 
 gulp.task("default", function () {
 
+    tsProject.options.declaration = true;
+
     const compiledTs = tsProject
         .src()
         .pipe(tsProject());
