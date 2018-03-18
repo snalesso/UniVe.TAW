@@ -11,7 +11,7 @@ export default class ApiServer {
     public readonly Port: number;
 
     constructor(port: number) {
-        if (!port) throw new RangeError(port + " is not a valid port number");
+        if (!port) throw new RangeError(port + ' is not a valid port number');
         this.Port = port;
         this.ExpressApp = express();
         this.DbConfig();
@@ -20,18 +20,19 @@ export default class ApiServer {
     }
 
     public Listen() {
-        this.ExpressApp.listen(this.Port, () => console.log("ApiServer listening on port " + this.Port + "!"));
+        this.ExpressApp.listen(this.Port, () => console.log('ApiServer listening on port ' + this.Port + '!'));
     }
 
     private DbConfig() {
 
-        mongoose.connect('mongodb://localhost:27017/univetaw');
+        const dbUrl = 'mongodb://localhost:27017/univetaw';
+        mongoose.connect(dbUrl);
         let db = mongoose.connection;
         db.on('error', (error) => {
-            console.log("Mongoose connect error: " + JSON.stringify(error));
+            console.log('Mongoose couldn\'t connect to ' + dbUrl + ' error: ' + JSON.stringify(error));
         });
         db.once('open', () => {
-            console.log('Mongoose on-open: Siamo dentro!');
+            console.log('Mongoose connected to' + dbUrl);
         });
     }
 
@@ -51,7 +52,7 @@ export default class ApiServer {
 
             // // Set to true if you need the website to include cookies in the requests sent
             // // to the API (e.g. in case you use sessions)
-            // res.setHeader('Access-Control-Allow-Credentials', "true");
+            // res.setHeader('Access-Control-Allow-Credentials', 'true');
 
             // Pass to next layer of middleware
             next();
