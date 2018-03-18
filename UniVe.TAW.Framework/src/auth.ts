@@ -12,6 +12,44 @@
         }
     }
 
+    export class SignupRequestDto {
+
+        public constructor(
+            username: string,
+            password: string,
+            birthDate: Date,
+            country: string) {
+            this.Username = username;
+            this.Password = password;
+            this.BirthDate = birthDate;
+            this.Country = country;
+        }
+
+        public readonly Username: string;
+        public readonly Password: string;
+        public readonly BirthDate: Date;
+        public readonly Country: string;
+    }
+
+    export class UserDto extends SignupRequestDto {
+
+        public constructor(
+            id: number,
+            username: string,
+            password: string,
+            birthDate: Date,
+            country: string) {
+            super(username, password, birthDate, country)
+            this.Id = id;
+        }
+
+        public readonly Id: number;
+
+        public static CreateFrom(signupRequest: SignupRequestDto, id: number) {
+            return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
+        }
+    }
+
     export enum Country {
         Afghanistan,
         Albania,
@@ -211,43 +249,4 @@
         Zambia,
         Zimbabwe
     }
-
-    export class SignupRequestDto {
-
-        public constructor(
-            username: string,
-            password: string,
-            birthDate: Date,
-            country: string) {
-            this.Username = username;
-            this.Password = password;
-            this.BirthDate = birthDate;
-            this.Country = country;
-        }
-
-        public readonly Username: string;
-        public readonly Password: string;
-        public readonly BirthDate: Date;
-        public readonly Country: string;
-    }
-
-    export class UserDto extends SignupRequestDto {
-
-        public constructor(
-            id: number,
-            username: string,
-            password: string,
-            birthDate: Date,
-            country: string) {
-            super(username, password, birthDate, country)
-            this.Id = id;
-        }
-
-        public readonly Id: number;
-
-        public static CreateFrom(signupRequest: SignupRequestDto, id: number) {
-            return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
-        }
-    }
-
 }

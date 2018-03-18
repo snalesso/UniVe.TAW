@@ -21,7 +21,11 @@ var SiteServer = /** @class */ (function () {
         this.ExpressApp.use(bodyParser.json());
         this.ExpressApp.use("/", express.static(__dirname + "/public"));
         this.ExpressApp.use("/styles", express.static(__dirname + "/public/styles"));
+        // scripts
         this.ExpressApp.use("/scripts", express.static(__dirname + "/public/scripts"));
+        this.ExpressApp.use("/scripts/jquery", express.static("D:/Dev/Repos/GitHub/snalesso/UniVe.TAW/UniVe.TAW.Server/node_modules/jquery/dist"));
+        this.ExpressApp.use("/scripts/UniVe.TAW.Framework", express.static("D:/Dev/Repos/GitHub/snalesso/UniVe.TAW/UniVe.TAW.Server/src/libs/UniVe.TAW.Framework"));
+        // views
         this.ExpressApp.use("/views", express.static(__dirname + "/public/views"));
         this.ExpressApp.get("*", function (request, response) {
             var paths = request.path.split(path.posix.sep);

@@ -1,7 +1,7 @@
 import * as express from 'express';
 import User from '../models/User';
 import * as mongoose from 'mongoose';
-//import * as Auth from '../../../libs/UniVe.TAW.Framework/Auth';
+//import * as auth from '../../../libs/UniVe.TAW.Framework/auth';
 
 class UsersRouter {
 

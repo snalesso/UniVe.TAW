@@ -4,9 +4,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Transpile Typescript",
+            "label": "Transpile site",
             "type": "typescript",
-            "tsconfig": "tsconfig.json",
+            "tsconfig": "src/web-site/tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "label": "Transpile service",
+            "type": "typescript",
+            "tsconfig": "src/web-service/tsconfig.json",
             "problemMatcher": [
                 "$tsc"
             ]

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var User_1 = require("../models/User");
-//import * as Auth from '../../../libs/UniVe.TAW.Framework/Auth';
+//import * as auth from '../../../libs/UniVe.TAW.Framework/auth';
 var UsersRouter = /** @class */ (function () {
     function UsersRouter() {
         this.router = express.Router();

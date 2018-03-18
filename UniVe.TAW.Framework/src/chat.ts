@@ -1,48 +1,44 @@
-﻿namespace unive.taw.framework.chat {
+﻿interface IChatService {
+    SendMessage(content: string): boolean;
+    Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription;
+}
 
-    export interface IChatService {
-        SendMessage(content: string): boolean;
-        Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription;
+class MobileChatService implements IChatService {
+
+    SendMessage(content: string): boolean {
+        throw new Error("Method not implemented.");
     }
 
-    export class MobileChatService implements IChatService {
-
-        SendMessage(content: string): boolean {
-            throw new Error("Method not implemented.");
-        }
-
-        Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription {
-            throw new Error("Method not implemented.");
-        }
-
-        SubscribeNew(someId: number, callback: () => void): Subscription {
-            throw new Error("Method not implemented.");
-        }
+    Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription {
+        throw new Error("Method not implemented.");
     }
 
-    export class Subscription {
-        public Unsubscribe(): void { }
+    SubscribeNew(someId: number, callback: () => void): Subscription {
+        throw new Error("Method not implemented.");
+    }
+}
+
+class Subscription {
+    public Unsubscribe(): void { }
+}
+
+class RawMessage {
+
+    public constructor(content: string, senderId: number) {
+        this.Content = content;
+        this.SenderId = senderId;
     }
 
-    export class RawMessage {
+    public readonly Content: string;
+    public readonly SenderId: number;
+}
 
-        public constructor(content: string, senderId: number) {
-            this.Content = content;
-            this.SenderId = senderId;
-        }
+class StampedMessage extends RawMessage {
 
-        public readonly Content: string;
-        public readonly SenderId: number;
+    public constructor(rawMessage: RawMessage) {
+        super(rawMessage.Content, rawMessage.SenderId);
+        this.UnixTimestamp = Date.now();
     }
 
-    export class StampedMessage extends RawMessage {
-
-        public constructor(rawMessage: RawMessage) {
-            super(rawMessage.Content, rawMessage.SenderId);
-            this.UnixTimestamp = Date.now();
-        }
-
-        public readonly UnixTimestamp: number;
-    }
-
+    public readonly UnixTimestamp: number;
 }

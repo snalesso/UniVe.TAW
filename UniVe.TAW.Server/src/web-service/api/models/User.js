@@ -12,10 +12,13 @@ var userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    BirthDate: Date,
+    BirthDate: {
+        type: Date,
+        required: false
+    },
     Country: {
         type: String,
-        required: true
+        required: false
     }
 });
 exports.default = mongoose.model('User', userSchema);

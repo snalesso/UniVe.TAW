@@ -5,6 +5,18 @@ declare namespace unive.taw.framework.auth {
         readonly Port: number;
         constructor(port?: number);
     }
+    class SignupRequestDto {
+        constructor(username: string, password: string, birthDate: Date, country: string);
+        readonly Username: string;
+        readonly Password: string;
+        readonly BirthDate: Date;
+        readonly Country: string;
+    }
+    class UserDto extends SignupRequestDto {
+        constructor(id: number, username: string, password: string, birthDate: Date, country: string);
+        readonly Id: number;
+        static CreateFrom(signupRequest: SignupRequestDto, id: number): UserDto;
+    }
     enum Country {
         Afghanistan = 0,
         Albania = 1,
@@ -203,17 +215,5 @@ declare namespace unive.taw.framework.auth {
         Yemen = 194,
         Zambia = 195,
         Zimbabwe = 196,
-    }
-    class SignupRequestDto {
-        constructor(username: string, password: string, birthDate: Date, country: string);
-        readonly Username: string;
-        readonly Password: string;
-        readonly BirthDate: Date;
-        readonly Country: string;
-    }
-    class UserDto extends SignupRequestDto {
-        constructor(id: number, username: string, password: string, birthDate: Date, country: string);
-        readonly Id: number;
-        static CreateFrom(signupRequest: SignupRequestDto, id: number): UserDto;
     }
 }

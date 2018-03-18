@@ -24,6 +24,29 @@ var unive;
                     return ServerAuthService;
                 }());
                 auth.ServerAuthService = ServerAuthService;
+                var SignupRequestDto = /** @class */ (function () {
+                    function SignupRequestDto(username, password, birthDate, country) {
+                        this.Username = username;
+                        this.Password = password;
+                        this.BirthDate = birthDate;
+                        this.Country = country;
+                    }
+                    return SignupRequestDto;
+                }());
+                auth.SignupRequestDto = SignupRequestDto;
+                var UserDto = /** @class */ (function (_super) {
+                    __extends(UserDto, _super);
+                    function UserDto(id, username, password, birthDate, country) {
+                        var _this = _super.call(this, username, password, birthDate, country) || this;
+                        _this.Id = id;
+                        return _this;
+                    }
+                    UserDto.CreateFrom = function (signupRequest, id) {
+                        return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
+                    };
+                    return UserDto;
+                }(SignupRequestDto));
+                auth.UserDto = UserDto;
                 var Country;
                 (function (Country) {
                     Country[Country["Afghanistan"] = 0] = "Afghanistan";
@@ -224,29 +247,6 @@ var unive;
                     Country[Country["Zambia"] = 195] = "Zambia";
                     Country[Country["Zimbabwe"] = 196] = "Zimbabwe";
                 })(Country = auth.Country || (auth.Country = {}));
-                var SignupRequestDto = /** @class */ (function () {
-                    function SignupRequestDto(username, password, birthDate, country) {
-                        this.Username = username;
-                        this.Password = password;
-                        this.BirthDate = birthDate;
-                        this.Country = country;
-                    }
-                    return SignupRequestDto;
-                }());
-                auth.SignupRequestDto = SignupRequestDto;
-                var UserDto = /** @class */ (function (_super) {
-                    __extends(UserDto, _super);
-                    function UserDto(id, username, password, birthDate, country) {
-                        var _this = _super.call(this, username, password, birthDate, country) || this;
-                        _this.Id = id;
-                        return _this;
-                    }
-                    UserDto.CreateFrom = function (signupRequest, id) {
-                        return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
-                    };
-                    return UserDto;
-                }(SignupRequestDto));
-                auth.UserDto = UserDto;
             })(auth = framework.auth || (framework.auth = {}));
         })(framework = taw.framework || (taw.framework = {}));
     })(taw = unive.taw || (unive.taw = {}));
