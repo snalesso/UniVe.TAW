@@ -1,0 +1,17 @@
+{
+    "name": "postmessages",
+    "main": "postmessages",
+    "version": "0.0.1",
+    "author": "Filippo Bergamasco",
+    "dependencies": {
+        "colors": "1.2.1"
+    },
+    "devDependencies": {
+        "typescript": "2.7.2",
+        "@types/node": "6.0.60"
+    },
+    "scripts": {
+        "compile": "tsc"
+    },
+    "private": true
+}
