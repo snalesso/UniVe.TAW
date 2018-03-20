@@ -1,6 +1,6 @@
 # UniVe.TAW
 
-Progetto per l'esame di Tecnologie & applicazioni web
+Progetto per l'esame di **Tecnologie & applicazioni web**
 
 ri932qir0b93iq'ri23'r9qi32faolw '3  
 rr2o3rob2q'o3lr  
@@ -10,6 +10,6 @@ r230kredpgèvkàrèes ihs'0iqiì
 90fi3q90rt23  
 9faewèfkj34krpqà3itg34rfswùèf+a  
 
-Stay tuned
+_Stay tuned!_
 
-f3q4n89bur8934bu89tu34 .....
+... f3q4n89bur8934bu89tu34 ...
