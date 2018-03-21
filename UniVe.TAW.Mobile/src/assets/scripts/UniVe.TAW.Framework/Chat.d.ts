@@ -1,4 +1,4 @@
-declare namespace UniVe.TAW.Framework.Chat {
+declare namespace unive.taw.framework.chat {
     interface IChatService {
         SendMessage(content: string): boolean;
         Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription;

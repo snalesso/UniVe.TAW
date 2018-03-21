@@ -1,5 +1,5 @@
-declare namespace UniVe.TAW.Framework {
+declare namespace unive.taw.framework {
     class Utils {
-        static NameOf_Function(fn: Function): string;
+        static nameOfFunction(fn: Function): string;
     }
 }

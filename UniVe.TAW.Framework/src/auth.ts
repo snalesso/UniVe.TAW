@@ -18,17 +18,17 @@
             username: string,
             password: string,
             birthDate: Date,
-            country: string) {
+            countryId: number) {
             this.Username = username;
             this.Password = password;
             this.BirthDate = birthDate;
-            this.Country = country;
+            this.CountryId = countryId;
         }
 
         public readonly Username: string;
         public readonly Password: string;
         public readonly BirthDate: Date;
-        public readonly Country: string;
+        public readonly CountryId: number;
     }
 
     export class UserDto extends SignupRequestDto {
@@ -38,20 +38,20 @@
             username: string,
             password: string,
             birthDate: Date,
-            country: string) {
-            super(username, password, birthDate, country)
+            countryId: number) {
+            super(username, password, birthDate, countryId)
             this.Id = id;
         }
 
         public readonly Id: number;
 
         public static CreateFrom(signupRequest: SignupRequestDto, id: number) {
-            return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.Country);
+            return new UserDto(id, signupRequest.Username, signupRequest.Password, signupRequest.BirthDate, signupRequest.CountryId);
         }
     }
 
     export enum Country {
-        Afghanistan,
+        Afghanistan = 1,
         Albania,
         Algeria,
         Andorra,

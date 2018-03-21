@@ -30,12 +30,12 @@ export class SignupPage {
   public canSendSignupRequest: boolean = true;
 
   public sendSignupRequest() {
-    var sr = {
-      username: this.username,
-      email: this.email,
-      password: this.password,
-      unixBirthDate: Date.now(),
-      nationality: "Italy"
+    var sr: unive.taw.framework.auth.SignupRequestDto = {
+      Username: this.username,
+      //Email: this.email,
+      Password: this.password,
+      BirthDate: new Date(),
+      CountryId: unive.taw.framework.auth.Country.Italy
     };
     // var obs = this.http.post("http://localhost:1632/Signup", JSON.stringify(sr));
     var xhr = new XMLHttpRequest();

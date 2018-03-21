@@ -1,4 +1,4 @@
-declare namespace UniVe.TAW.Framework.Game {
+declare namespace unive.taw.framework.game {
     abstract class Ship {
         constructor(size: number);
         readonly Size: number;

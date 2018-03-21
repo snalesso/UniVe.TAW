@@ -5,10 +5,10 @@ import * as mongoose from 'mongoose';
 
 class UsersRouter {
 
-    public readonly router: express.Router;
+    public readonly Router: express.Router;
 
     constructor() {
-        this.router = express.Router();
+        this.Router = express.Router();
         this.Routes();
     }
 
@@ -45,7 +45,7 @@ class UsersRouter {
     public AddUser(req: express.Request, res: express.Response) {
 
         const sr = req.body as unive.taw.framework.auth.SignupRequestDto;
-        let newUser = new User({ Username: sr.Username, Password: sr.Password, BirthDate: sr.BirthDate, Country: sr.Country });
+        let newUser = new User({ Username: sr.Username, Password: sr.Password, BirthDate: sr.BirthDate, CountryId: sr.CountryId });
 
         newUser
             .save()
@@ -62,7 +62,7 @@ class UsersRouter {
     public UpdateUser(req: express.Request, res: express.Response) {
 
         const sr = req.body as unive.taw.framework.auth.SignupRequestDto;
-        let propsToUpdate = { Username: "sr.Username", Password: sr.Password, BirthDate: sr.BirthDate, Country: sr.Country };
+        let propsToUpdate = { Username: "sr.Username", Password: sr.Password, BirthDate: sr.BirthDate, CountryId: sr.CountryId };
 
         User
             .findByIdAndUpdate(req.params["id"], propsToUpdate)
@@ -77,13 +77,13 @@ class UsersRouter {
     }
 
     private Routes() {
-        this.router.get('/', this.GetUsers);
-        this.router.get('/:id', this.GetUser);
-        this.router.post('/', this.AddUser);
-        this.router.put('/:id', this.UpdateUser);
+        this.Router.get('/', this.GetUsers);
+        this.Router.get('/:id', this.GetUser);
+        this.Router.post('/', this.AddUser);
+        this.Router.put('/:id', this.UpdateUser);
         // this.router.delete('/:id', this.DeleteUser);
     }
 
 }
 
-export default new UsersRouter().router;
+export default new UsersRouter().Router;

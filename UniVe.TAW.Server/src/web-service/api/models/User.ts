@@ -15,8 +15,8 @@ let userSchema = new mongoose.Schema({
         type: Date,
         required: false
     },
-    Country: {
-        type: String,
+    CountryId: {
+        type: Number,
         required: false
     }
 });
