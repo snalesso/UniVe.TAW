@@ -1,11 +1,11 @@
 ﻿import * as express from "express";
 import * as bodyParser from "body-parser";
 //import * as path from "path";
-import ApiServer from './web-service/api-server';
-import SiteServer from './web-site/site-server';
+import WebServiceApp from './webService/WebServiceApp';
+import WebSiteApp from './webSite/WebSiteApp';
 
-const apiService = new ApiServer(1631);
-const webSite = new SiteServer(1632);
+const webServiceApp = new WebServiceApp(1632);
+const WebSiteApp = new WebSiteApp(1632);
 
-webSite.Listen();
-apiService.Listen();
+WebSiteApp.Listen();
+webServiceApp.Listen();

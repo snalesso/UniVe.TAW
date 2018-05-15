@@ -1,54 +1,70 @@
-﻿namespace unive.taw.framework.game {
+﻿//import * as Observable from 'rxjs/Observable';
 
-    export abstract class Ship {
+export abstract class Ship {
 
-        public constructor(size: number) {
-            this.Size = size;
-        }
-
-        public readonly Size: number;
-
-
-        public IsWrecked(): boolean {
-            return false;
-        }
+    public constructor() {
     }
 
-    export enum Direction {
-        Up,
-        Down,
-        Left,
-        Right,
+    public abstract readonly size: number;
+
+    public isWrecked(): boolean {
+        return false;
+    }
+}
+
+export enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+export class Coord {
+
+    public constructor(x: number, y: number) {
+        if (x < 0
+            || x >= BattleField.Width
+            || y < 0
+            || y >= BattleField.Height)
+            throw new Error("Invalid coords!");
+
+        this.X = x;
+        this.Y = y;
     }
 
-    export class Match {
+    public readonly X: number;
+    public readonly Y: number;
+}
 
+export declare enum BattleFieldCellStatus {
+    Unknown,
+    Water,
+    Hit
+}
+
+export class BattleFieldCell {
+    public readonly Status: BattleFieldCellStatus;
+}
+
+export class BattleField {
+
+    // TODO: move to server side
+    public static readonly Height: number = 8;
+    public static readonly Width: number = 8;
+
+    public ReceiveEnemyFire(coord: Coord) {
+        if (!coord)
+            throw new Error("coord cannot be null");
     }
 
-    export class Coord {
+    private _isLocked: boolean = true;
+    public get isLocked(): boolean { return this._isLocked; }
+}
 
-        public constructor(x: number, y: number) {
-            this.X = x;
-            this.Y = y;
-        }
+export abstract class Action {
+    public abstract Execute
+}
 
-        public readonly X: number;
-        public readonly Y: number;
-    }
+export abstract class MatchPhase {
 
-    export class PlayerSide {
-
-        public ReceiveEnemyFire(coord: Coord) {
-            if (!coord)
-                throw new Error("coord cannot be null");
-        }
-    }
-
-    export class Fleet {
-
-    }
-
-    export abstract class Action {
-        public abstract Execute
-    }
 }

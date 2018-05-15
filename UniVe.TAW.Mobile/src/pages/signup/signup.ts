@@ -39,7 +39,7 @@ export class SignupPage {
     };
     // var obs = this.http.post("http://localhost:1632/Signup", JSON.stringify(sr));
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", 'http://localhost:1632/Signup', true);
+    xhr.open("POST", 'http://localhost:1632/users', true);
     xhr.setRequestHeader("Content-type", "application/json");
 
     xhr.onreadystatechange = function (ev) {//Call a function when the state changes.

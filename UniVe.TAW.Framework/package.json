@@ -1,17 +1,21 @@
 {
-  "name": "uni-ve.taw.framework",
+  "name": "unive.taw.framework",
   "version": "0.0.0",
   "description": "UniVe.TAW.Framework",
   "author": {
     "name": "Sergio"
   },
   "devDependencies": {
+    "@types/colors": "^1.2.1",
     "@types/gulp": "^4.0.5",
     "@types/gulp-typescript": "^2.13.0",
-    "@types/node": "^9.4.7",
+    "@types/node": "^9.6.0",
+    "colors": "^1.2.1",
     "gulp": "^3.9.1",
-    "gulp-typescript": "^4.0.1",
-    "typescript": "^2.7.2"
+    "gulp-typescript": "^4.0.2",
+    "typescript": "^2.8.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "rxjs": "^6.1.0"
+  }
 }

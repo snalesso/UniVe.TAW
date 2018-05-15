@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>proca puttanega</title>
+    <link rel="stylesheet" href="styles/site.css">
+</head>
+
+<body>
+    <p>Pagina di prova</p>
+    <form>
+        <input id="signup-username" type="text" placeholder="Username" value="username" />
+        <input id="signup-password" type="password" placeholder="Password" value="aaa" />
+        <input id="signup-passwordRepeated" type="password" placeholder="Repeat password" value="aaa" />
+        <!--<input id="signup-email" type="email" placeholder="email" />-->
+        <input id="signup-birthDate" type="date" placeholder="birth date" value="1993-03-16" />
+        <!-- <input id="signup-country" type="country" placeholder="country" value="Italy" /> -->
+        <select id="signup-countries">
+        </select>
+        <input value="Signup!" type="button" onclick="signup()" />
+        <p id="responseError"></p>
+    </form>
+    <script src="scripts/jquery/jquery.min.js"></script>
+    <script src="scripts/UniVe.TAW.Framework/auth.js"></script>
+    <script src="views/signup/signup.js"></script>
+</body>
+
+</html>

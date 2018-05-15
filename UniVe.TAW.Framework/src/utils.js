@@ -13,6 +13,9 @@ var unive;
                     ret = ret.substr(0, ret.indexOf('('));
                     return ret;
                 };
+                Utils.prototype.getPropertyName = function (propertyFunction) {
+                    return /\.([^\.;]+);?\s*\}$/.exec(propertyFunction.toString())[1];
+                };
                 return Utils;
             }());
             framework.Utils = Utils;

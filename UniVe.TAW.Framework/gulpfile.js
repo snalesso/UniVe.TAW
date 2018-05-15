@@ -1,24 +1,56 @@
-const gulp = require("gulp");
-const ts = require("gulp-typescript");
+const gulp = require('gulp');
+const gulpTs = require('gulp-typescript');
+const path = require('path');
+const fs = require('fs');
+const colors = require('colors');
+//const del = require('del');
 
-const tsProject = ts.createProject("tsconfig.json");
+const packageJson = JSON.parse(fs.readFileSync('./package.json'));
+const tsProject = gulpTs.createProject('tsconfig.json');
+
+const copyTs = true;
+const copyDTs = false;
+const copyJs = false;
+
 const copyToDirs = [
-    "../UniVe.TAW.Server/src/libs/UniVe.TAW.Framework",
-    "../UniVe.TAW.Mobile/src/assets/scripts/UniVe.TAW.Framework"
-    // ,"../UniVe.TAW.Server/src/web-site/public/scripts/UniVe.TAW.Framework"
-    // ,"../UniVe.TAW.Server/src/web-service/api/libs/UniVe.TAW.Framework"
+    //'dist'
+    , '../UniVe.TAW.WebService/src/libs'
+    , '../UniVe.TAW.WebSite/src/assets/scripts'
+    , '../UniVe.TAW.Mobile/src/assets/scripts'
+    , '../Angular5Test/src/assets/scripts'
+    //, '../Angular5Test/src/assets/scripts'
+    // ,'../UniVe.TAW.Server/src/web-site/public/scripts/UniVe.TAW.Framework'
+    // ,'../UniVe.TAW.Server/src/web-service/api/libs/UniVe.TAW.Framework'
 ]
+    .map(dirPath => path.join(dirPath, packageJson.name));
 
-gulp.task("default", function () {
+gulp.task('transpile-and-copy', function () {
 
     tsProject.options.declaration = true;
 
+    const rawTs = tsProject.src();
     const compiledTs = tsProject
         .src()
         .pipe(tsProject());
 
+    let missionName = "Copy of " + packageJson.name;
     copyToDirs.forEach((dirPath) => {
-        compiledTs.js.pipe(gulp.dest(dirPath));
-        compiledTs.dts.pipe(gulp.dest(dirPath));
+        try {
+            //process.stdout.write('Cleaning'.yellow + ' ' + dirPath + ' ...');
+            // del(dirPath);
+            process.stdout.write('Copying'.yellow + ' to: ' + dirPath + ' ...');
+            if (copyTs)
+                rawTs.pipe(gulp.dest(dirPath));
+            if (copyJs)
+                compiledTs.js.pipe(gulp.dest(dirPath));
+            if (copyDTs)
+                compiledTs.dts.pipe(gulp.dest(dirPath));
+            console.log(" DONE".green);
+        } catch (error) {
+            console.log(" FAILED".red);
+            console.log((missionName + " failed - reason: " + error).red);
+        }
     });
+
+    console.log((missionName + ' completed').green);
 });

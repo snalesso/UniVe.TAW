@@ -1,8 +1,0 @@
-[
-  {
-    "inputFiles": [ "*.js" ],
-    "outputFileName": "../UniVe.TAW.Server/libs/UniVe.TAW.Framework/Framework.js",    
-    "includeInProject": false,
-    "minify": { "enabled": true }
-  }
-]

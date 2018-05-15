@@ -59,6 +59,12 @@ var unive;
                     return Action;
                 }());
                 game.Action = Action;
+                var MatchPhase = /** @class */ (function () {
+                    function MatchPhase() {
+                    }
+                    return MatchPhase;
+                }());
+                game.MatchPhase = MatchPhase;
             })(game = framework.game || (framework.game = {}));
         })(framework = taw.framework || (taw.framework = {}));
     })(taw = unive.taw || (unive.taw = {}));

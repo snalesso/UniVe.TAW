@@ -1,15 +1,17 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
-    "module": "commonjs",
+    //"module": "commonjs",
     "target": "es5",
     "lib": [
-      "es5"
+      "es5",
+      "dom"
     ],
     "sourceMap": true,
     "rootDir": "src"
   },
-  "compileOnSave": true,
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

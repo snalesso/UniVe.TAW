@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "UniVe.TAW.WebService"
+		},
+		{
+			"path": "UniVe.TAW.WebSite"
+		},
+		{
+			"path": "UniVe.TAW.Framework"
+		},
+		{
+			"path": "UniVe.TAW.Mobile"
+		}
+	],
+	"settings": {}
+}
