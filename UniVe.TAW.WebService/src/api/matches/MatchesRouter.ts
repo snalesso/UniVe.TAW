@@ -1,5 +1,5 @@
 import * as express from 'express';
-import * as match from './Match';
+import * as Match from './Match';
 import * as mongoose from 'mongoose';
 import * as auth from '../../libs/unive.taw.framework/auth';
 import * as net from '../../libs/unive.taw.framework/net';
@@ -15,10 +15,11 @@ class MatchesRouter {
 
     public CreateMatch(req: express.Request, res: express.Response) {
 
-        const userId = req.params["id"];
+        const challengerToken = req.params["challengerToken"];
 
+        let newMatch = Match.create({});
         Match.getModel()
-            .findById(userId)
+            .findById(matchId)
             .then((data) => {
                 const status = res.statusCode;
                 res.json({ status, data });

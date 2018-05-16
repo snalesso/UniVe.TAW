@@ -1,4 +1,6 @@
-﻿//import * as Observable from 'rxjs/Observable';
+﻿import { IMatch } from "./Match";
+
+//import * as Observable from 'rxjs/Observable';
 
 export abstract class Ship {
 
@@ -44,45 +46,100 @@ export class ShipPositionValidator {
 
 }
 
-export class MatchRules {
-    public static readonly BattleFieldHeight: number = 10;
-    public static readonly BattleFieldWidth: number = 10;
+// TODO: enrich rules combinations checks
+export class MatchSettings {
+
+    public static readonly battleFieldMinWidth: number = 10;
+    public static readonly battleFieldMinHeight: number = 10;
+
+    constructor(
+        public readonly battleFieldWidth: number = 10,
+        public readonly battleFieldHeight: number = 10,
+
+        public readonly cacciatorpedinieri: number = 4,
+        public readonly sottomarini: number = 2,
+        public readonly corazzate: number = 2,
+        public readonly portaerei: number = 1) {
+
+        if (this.battleFieldHeight <= 0
+            || this.battleFieldHeight <= 0
+            || this.battleFieldWidth < MatchSettings.battleFieldMinWidth
+            || this.battleFieldHeight < MatchSettings.battleFieldMinHeight)
+            throw new Error("invalid BattleField size");
+
+        let shipQs = new Array(cacciatorpedinieri, sottomarini, corazzate, portaerei);
+        if (!shipQs.every((sq) => sq >= 0)
+            || shipQs.some((sq) => sq < 0))
+            throw new Error("Invalid ships quantities!");
+    }
 }
 
-export class BattleField {
-
-    public static readonly MinWidth: number = 10;
-    public static readonly MinHeight: number = 10; // BattleField.MinWidth;
-
-    public readonly Width: number;
-    public readonly Height: number;
+export class BattleFieldSide {
 
     private readonly cells: BattleFieldCell[][];
 
-    constructor(width: number = BattleField.MinWidth, height: number = BattleField.MinHeight) {
-        if (width <= 0 || height <= 0
-            || width < BattleField.MinWidth || height < BattleField.MinHeight)
-            throw new Error("invalid BattleField size");
+    constructor(
+        public readonly playerId: any,
+        public readonly width: number,
+        public readonly height: number,
+        readonly ships: Ship[]) {
 
-        this.cells = new BattleFieldCell[this.Width][this.Height];
+        this.cells = new BattleFieldCell[this.width][this.height];
+    }
+
+
+    public placeShip(ship: Ship, coord: Coord, direction: Direction) {
 
     }
 
-    public PlaceShip(ship: Ship) {
-
-    }
-
-    public ReceiveEnemyFire(coord: Coord) {
-        if (!coord)
-            throw new Error("coord cannot be null");
-        if (
-            coord.X < 0
-            || coord.X >= this.Width
-            || coord.Y < 0
-            || coord.Y >= this.Height)
+    public receiveEnemyFire(coord: Coord) {
+        if (!this.isValidCoord(coord))
             throw new Error("coord is outside battlefield boundaries");
+    }
+
+    // TODO: should check coord != undefined too???
+    private isValidCoord(coord: Coord): boolean {
+        return coord
+            && coord != undefined
+            && coord.X >= 0
+            && coord.X < this.width
+            && coord.Y >= 0
+            && coord.Y < this.height;
     }
 
     private _isLocked: boolean = true;
     public get isLocked(): boolean { return this._isLocked; }
+}
+
+export class Match /*implements IMatch*/ {
+
+    private readonly _battleFieldSides: BattleFieldSide[];//{ [playerId: string]: BattleField } = {};
+    private readonly _history: MatchAction[] = [];
+
+    constructor(
+        public readonly settings: MatchSettings,
+        firstPlayerId: any,
+        secondPlayerId: any) {
+        this._battleFieldSides = new Array(
+            new BattleFieldSide(firstPlayerId, this.settings.battleFieldWidth, this.settings.battleFieldHeight),
+            new BattleFieldSide(secondPlayerId, this.settings.battleFieldWidth, this.settings.battleFieldHeight));
+    }
+
+    public executeAction(action: MatchAction) {
+        if (!action) throw new Error("invalid match action!");
+
+        this._history.push(action);
+
+        let targetBattleFieldSide = this._battleFieldSides.filter(bfs => bfs.playerId != action.attackingPlayerId)[0];
+        return targetBattleFieldSide.receiveEnemyFire(action.coord);
+    }
+
+}
+
+export class MatchAction {
+    constructor(
+        public readonly attackingPlayerId: any,
+        public readonly coord: Coord
+    ) {
+    }
 }

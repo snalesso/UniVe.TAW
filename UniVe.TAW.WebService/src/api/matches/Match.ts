@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 import crypto = require('crypto');
 
-export interface Match extends mongoose.Document {
+export interface IMatch extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     firstPlayerId: mongoose.Schema.Types.ObjectId,
     secondPlayerId: mongoose.Schema.Types.ObjectId,
@@ -48,14 +48,14 @@ export function getSchema() { return MatchSchema; }
 
 // Mongoose Model
 let MatchModel;  // This is not exposed outside the model
-export function getModel(): mongoose.Model<Match> { // Return Model as singleton
+export function getModel(): mongoose.Model<IMatch> { // Return Model as singleton
     if (!MatchModel) {
         MatchModel = mongoose.model('Match', getSchema())
     }
     return MatchModel;
 }
 
-export function create(data): Match {
+export function create(data): IMatch {
     var MatchModelCtor = getModel();
     var Match = new MatchModelCtor(data);
 
