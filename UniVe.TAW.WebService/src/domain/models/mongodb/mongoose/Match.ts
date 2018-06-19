@@ -4,20 +4,30 @@ export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     FirstPlayerId: mongoose.Schema.Types.ObjectId,
     SecondPlayerId: mongoose.Schema.Types.ObjectId,
-    // PlayersPairingMode: challenge/random
     CreationDateTime: Date
+    // PlayersPairingMode: challenge/random
 }
 
 const matchSchema = new mongoose.Schema({
+    FirstPlayerId: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId
+    },
+    SecondPlayerId: {
+        required: true,
+        type: mongoose.Schema.Types.ObjectId
+    },
+    CreationDateTime: {
+        required: true,
+        type: mongoose.SchemaTypes.Date,
+        default: Date.now
+    }
 });
 
-//export function getSchema() { return MatchSchema; }
-
-// Mongoose Model
-let matchModel;  // This is not exposed outside the model
-export function GetModel(): mongoose.Model<IMongooseMatch> { // Return Model as singleton
+let matchModel;
+export function GetModel(): mongoose.Model<IMongooseMatch> {
     if (!matchModel) {
-        matchModel = mongoose.model('Match', matchSchema); // getSchema());
+        matchModel = mongoose.model('Match', matchSchema);
     }
     return matchModel;
 }

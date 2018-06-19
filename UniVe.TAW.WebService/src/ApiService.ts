@@ -6,6 +6,7 @@ import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 
 import UsersRouter from './routes/UsersRouter';
+import AuthRouter from './routes/AuthRouter';
 import MatchesRouter from './routes/MatchesRouter';
 
 export default class ApiService {
@@ -88,6 +89,7 @@ export default class ApiService {
         // const router = express.Router();
         // this._expressApp.use('/api', router);
         this._expressApp.use('/users', UsersRouter);
+        this._expressApp.use('/auth', AuthRouter);
         this._expressApp.use('/matches', MatchesRouter);
     }
 }

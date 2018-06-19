@@ -42,7 +42,12 @@ const userSchema = new mongoose.Schema({
     Digest: {
         type: mongoose.SchemaTypes.String,
         required: true
-    }
+    }/*,
+    IsOpenToPlay: {
+        required: true,
+        default: false,
+        type: mongoose.SchemaTypes.Boolean
+    }*/
 });
 userSchema.methods.SetPassword = function (pwd: string): void {
     this.Salt = crypto.randomBytes(16).toString('hex');

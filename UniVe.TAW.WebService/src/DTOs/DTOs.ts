@@ -39,3 +39,15 @@ export class UserJWTData {
         public readonly Username: string) {
     }
 }
+
+export class MatchCreationRequestDto {
+    public constructor(
+        public readonly PlayerId: string) {
+    }
+}
+
+export class PendingMatchDto {
+    public constructor(
+        public readonly PlayerId: string) {
+    }
+}

@@ -24,46 +24,48 @@ router.post('/', (req: express.Request, res: express.Response, next: express.Nex
 
     let signupReq = req.body as DTOs.SignupRequestDto;
 
-    if (!signupReq)
+    // TODO: test all branches
+    if (!signupReq) {
         res.status(httpStatusCodes.FORBIDDEN);
+    } else {
+        //let feawfw = signupReq as User.IMongoUser;
+        let newUserSkel = {} as User.IMongooseUser;
+        newUserSkel.Username = signupReq.Username;
+        newUserSkel.CountryId = signupReq.CountryId;
+        newUserSkel.BirthDate = signupReq.BirthDate;
+        newUserSkel.Roles = user_enums.UserRoles.Player;
 
-    //let feawfw = signupReq as User.IMongoUser;
-    let newUserSkel = {} as User.IMongooseUser;
-    newUserSkel.Username = signupReq.Username;
-    newUserSkel.CountryId = signupReq.CountryId;
-    newUserSkel.BirthDate = signupReq.BirthDate;
-    newUserSkel.Roles = user_enums.UserRoles.Player;
+        let newUser = User.Create(newUserSkel);
+        newUser.SetPassword(signupReq.Password);
+        newUser.save()
+            .then(result => {
+                console.log("user created: " + JSON.stringify(result));
+                responseData = new net.HttpMessage<boolean>(true);
+                res
+                    .status(httpStatusCodes.CREATED)
+                    .json(responseData);
+            })
+            .catch((error: mongodb.MongoError) => {
+                console.log("user creation failed: " + JSON.stringify(error));
 
-    let newUser = User.Create(newUserSkel);
-    newUser.SetPassword(signupReq.Password);
-    newUser.save()
-        .then(result => {
-            console.log("user created: " + JSON.stringify(result));
-            responseData = new net.HttpMessage<boolean>(true);
-            res
-                .status(httpStatusCodes.CREATED)
-                .json(responseData);
-        })
-        .catch((error: mongodb.MongoError) => {
-            console.log("user creation failed: " + JSON.stringify(error));
-
-            let errMsg: string;
-            let statusCode: number;
-            switch (error.code) {
-                case 11000:
-                    errMsg = "Username taken";
-                    statusCode = httpStatusCodes.CONFLICT;
-                    break;
-                default:
-                    errMsg = "Uknown error";
-                    statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                    break;
-            }
-            responseData = new net.HttpMessage<boolean>(false, errMsg);
-            res
-                .status(statusCode)
-                .json(responseData);
-        })
+                let errMsg: string;
+                let statusCode: number;
+                switch (error.code) {
+                    case 11000:
+                        errMsg = "Username taken";
+                        statusCode = httpStatusCodes.CONFLICT;
+                        break;
+                    default:
+                        errMsg = "Uknown error";
+                        statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
+                        break;
+                }
+                responseData = new net.HttpMessage<boolean>(false, errMsg);
+                res
+                    .status(statusCode)
+                    .json(responseData);
+            });
+    }
 });
 
 router.get('/:userId', (req: express.Request, res: express.Response, next: express.NextFunction) => {
