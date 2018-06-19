@@ -1,7 +1,7 @@
 ﻿import * as express from "express";
 import * as bodyParser from "body-parser";
-import WebServiceApp from './WebServiceApp';
+import ApiService from './ApiService';
 
-const webServiceApp = new WebServiceApp(1632);
+const webServiceApp = new ApiService(1632);
 
 webServiceApp.Start();

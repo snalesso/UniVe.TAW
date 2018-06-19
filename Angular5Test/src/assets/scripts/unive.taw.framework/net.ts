@@ -1,10 +1,10 @@
 //namespace unive.taw.framework.net {
 
-export class HttpResponse<T> {
+export class HttpMessage<T> {
 
     public constructor(
         public readonly content: T,
-        public readonly error?: Object,
+        //public readonly error?: Object,
         public readonly errorMessage?: string) {
     }
 }

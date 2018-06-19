@@ -14,7 +14,7 @@ const copyJs = false;
 
 const copyToDirs = [
     //'dist'
-    , '../UniVe.TAW.WebService/src/libs'
+    , '../UniVe.TAW.WebService/libs'
     , '../UniVe.TAW.WebSite/src/assets/scripts'
     , '../UniVe.TAW.Mobile/src/assets/scripts'
     , '../Angular5Test/src/assets/scripts'
@@ -24,6 +24,8 @@ const copyToDirs = [
 ]
     .map(dirPath => path.join(dirPath, packageJson.name));
 
+// TODO: empty dest folder
+// TODO: make dest copied files readonly
 gulp.task('transpile-and-copy', function () {
 
     tsProject.options.declaration = true;

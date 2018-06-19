@@ -2,7 +2,7 @@
 
 export interface IChatService {
     SendMessage(content: string): boolean;
-    Subscribe(someId: number, callback: (message: StampedMessage) => void): Subscription;
+    Subscribe(someId: number, callback: (message: TimeStampedMessage) => void): Subscription;
 }
 
 // export class MobileChatService implements IChatService {
@@ -35,7 +35,7 @@ export class RawMessage {
     public readonly SenderId: number;
 }
 
-export class StampedMessage extends RawMessage {
+export class TimeStampedMessage extends RawMessage {
 
     public constructor(rawMessage: RawMessage) {
         super(rawMessage.Content, rawMessage.SenderId);

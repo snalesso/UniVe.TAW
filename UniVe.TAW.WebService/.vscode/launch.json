@@ -13,7 +13,8 @@
                 "${workspaceFolder}/**/*.js"
             ],
             "internalConsoleOptions": "openOnSessionStart",
-            "preLaunchTask": "transpile"
+            "preLaunchTask": "transpile",
+            "envFile": "${workspaceFolder}/.env",
         }
     ]
 }
