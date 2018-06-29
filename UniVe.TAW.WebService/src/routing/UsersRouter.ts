@@ -18,7 +18,7 @@ const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-router.post('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post('/signup', (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     let responseData: net.HttpMessage<boolean>;
 
@@ -69,7 +69,7 @@ router.post('/', (req: express.Request, res: express.Response, next: express.Nex
 });
 
 router.get('/:userId', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    let userId = req.body.userId;
+    let userId = req.params["userId"];
     let responseData: net.HttpMessage<DTOs.UserDto> = null;
     User.GetModel()
         .findById(userId)

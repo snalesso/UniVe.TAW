@@ -1,27 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
-var matchSchema = new mongoose.Schema({
-    FirstPlayerId: {
+var pendingMatchSchema = new mongoose.Schema({
+    PlayerId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "User"
-    },
-    SecondPlayerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "User"
-    },
-    CreationDateTime: {
-        required: true,
-        type: mongoose.SchemaTypes.Date,
-        default: Date.now
     }
 });
 var matchModel;
 function GetModel() {
     if (!matchModel) {
-        matchModel = mongoose.model('Match', matchSchema);
+        matchModel = mongoose.model('Match', pendingMatchSchema);
     }
     return matchModel;
 }
@@ -32,4 +22,4 @@ function Create(data) {
     return newMatch;
 }
 exports.Create = Create;
-//# sourceMappingURL=Match.js.map
+//# sourceMappingURL=PendingMatch.js.map

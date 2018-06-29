@@ -7,8 +7,9 @@ export interface IMongoosePendingMatch extends mongoose.Document {
 
 const pendingMatchSchema = new mongoose.Schema({
     PlayerId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        type: mongoose.Schema.Types.ObjectId
+        ref: "User"
     }
 });
 

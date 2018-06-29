@@ -6,6 +6,7 @@ var mongoose = require("mongoose");
 //import * as mongodb from 'mongodb';
 var httpStatusCodes = require("http-status-codes");
 var UsersRouter_1 = require("./routes/UsersRouter");
+var AuthRouter_1 = require("./routes/AuthRouter");
 var MatchesRouter_1 = require("./routes/MatchesRouter");
 var ApiService = /** @class */ (function () {
     function ApiService(port) {
@@ -15,8 +16,6 @@ var ApiService = /** @class */ (function () {
         this.Port = port;
         this._expressApp = express();
         this.ConfigRoutes();
-        //this.DbConfig();
-        //this.ServerConfig();
     }
     ApiService.prototype.Start = function () {
         var _this = this;
@@ -33,15 +32,6 @@ var ApiService = /** @class */ (function () {
             //throw new Error("error thrown manually alongside express.listen");
         }, function (reason) { return console.log("Error during expressapp listen: " + reason); });
     };
-    // private DbConfig() {
-    //     // let db = mongoose.connection;
-    //     // db.on('error', (error) => {
-    //     //     console.log('Mongoose couldn\'t connect to ' + this.DbUrl + ' error: ' + JSON.stringify(error));
-    //     // });
-    //     // db.once('open', () => {
-    //     //     console.log('Mongoose connected (once("open")) to ' + this.DbUrl);
-    //     // });
-    // }
     ApiService.prototype.ServerConfig = function () {
         this._expressApp.use(bodyParser.urlencoded({ extended: true }));
         this._expressApp.use(bodyParser.json());
@@ -61,9 +51,8 @@ var ApiService = /** @class */ (function () {
         //throw new Error("fefakwpoefkaew");
     };
     ApiService.prototype.ConfigRoutes = function () {
-        // const router = express.Router();
-        // this._expressApp.use('/api', router);
         this._expressApp.use('/users', UsersRouter_1.default);
+        this._expressApp.use('/auth', AuthRouter_1.default);
         this._expressApp.use('/matches', MatchesRouter_1.default);
     };
     return ApiService;

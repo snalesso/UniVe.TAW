@@ -1,21 +1,9 @@
-import * as mongoose from 'mongoose';
-import * as crypto from 'crypto';
-
-import * as enums from '../../../enums/user';
-
-export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
-    Username: string,
-    BirthDate: Date,
-    CountryId: enums.Country,
-    Roles: enums.UserRoles,
-    Salt: string,
-    Digest: string,
-    SetPassword: (pwd: string) => void,
-    ValidatePassword: (pwd: string) => boolean
-}
-
-const userSchema = new mongoose.Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var mongoose = require("mongoose");
+var crypto = require("crypto");
+var enums = require("../../../enums/user");
+var userSchema = new mongoose.Schema({
     // Id: mongoose.Types.ObjectId,
     Username: {
         type: mongoose.SchemaTypes.String,
@@ -44,40 +32,35 @@ const userSchema = new mongoose.Schema({
         required: true
     }
 });
-
 //userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
-
-userSchema.methods.SetPassword = function (pwd: string): void {
+userSchema.methods.SetPassword = function (pwd) {
     this.Salt = crypto.randomBytes(16).toString('hex');
-    let hmac = crypto.createHmac('sha512', this.Salt);
+    var hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
     this.Digest = hmac.digest('hex');
 };
-userSchema.methods.ValidatePassword = function (pwd: string): boolean {
-    let hmac = crypto.createHmac('sha512', this.Salt);
+userSchema.methods.ValidatePassword = function (pwd) {
+    var hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
-    let digest = hmac.digest('hex');
+    var digest = hmac.digest('hex');
     return (this.Digest === digest);
-}
-
+};
 //export function GetSchema() { return userSchema; }
-
-let userModel;
-export function GetModel(): mongoose.Model<IMongooseUser> {
+var userModel;
+function GetModel() {
     if (!userModel) {
         userModel = mongoose.model('User', userSchema); //GetSchema());
     }
     return userModel;
 }
-
+exports.GetModel = GetModel;
 // export function create(data: IUser) : mongoose.Document<IUser> {
-export function Create(data: any): IMongooseUser {
-    let userModelCtor = GetModel();
-    let user = new userModelCtor(data);
-
+function Create(data) {
+    var userModelCtor = GetModel();
+    var user = new userModelCtor(data);
     return user;
 }
-
+exports.Create = Create;
 // export function CreateDto(mongoUser: IMongoUser) {
 //     return new auth.UserDto(
 //         JSON.stringify(mongoUser._id),
@@ -85,3 +68,4 @@ export function Create(data: any): IMongooseUser {
 //         utils.GetAge(mongoUser.BirthDate),
 //         mongoUser.CountryId);
 // }
+//# sourceMappingURL=User.js.map

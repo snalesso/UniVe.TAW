@@ -32,12 +32,9 @@ export class LoginCredentials {
     }
 }
 
-export class UserJWTData {
-
-    public constructor(
-        public readonly Id: string,
-        public readonly Username: string) {
-    }
+export interface IUserJWTData {
+    readonly Id: string;
+    readonly Username: string;
 }
 
 export class MatchCreationRequestDto {
@@ -49,5 +46,21 @@ export class MatchCreationRequestDto {
 export class PendingMatchDto {
     public constructor(
         public readonly PlayerId: string) {
+    }
+}
+
+export class JoinPendingMatchRequestDto {
+    public constructor(
+        public readonly PendingMatchId: string,
+        public readonly PlayerId: string) {
+    }
+}
+
+export class MatchDto {
+    public constructor(
+        public readonly Id: string,
+        public readonly FirstPlayerId: string,
+        public readonly SecondPlayerId: string,
+        public readonly CreationDateTime: Date) {
     }
 }

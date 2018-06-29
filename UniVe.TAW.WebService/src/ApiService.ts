@@ -5,10 +5,11 @@ import * as mongoose from 'mongoose';
 //import * as mongodb from 'mongodb';
 import * as httpStatusCodes from 'http-status-codes';
 
-import UsersRouter from './routes/UsersRouter';
-import AuthRouter from './routes/AuthRouter';
-import MatchesRouter from './routes/MatchesRouter';
+import UsersRouter from './routing/UsersRouter';
+import AuthRouter from './routing/AuthRouter';
+import MatchesRouter from './routing/MatchesRouter';
 
+// TODO: rename into WebService?
 export default class ApiService {
 
     private readonly _dbUrl = 'mongodb://localhost:27017/univetaw';
@@ -21,13 +22,12 @@ export default class ApiService {
         this.Port = port;
         this._expressApp = express();
         this.ConfigRoutes();
-        //this.DbConfig();
-        //this.ServerConfig();
     }
 
     public Start() {
 
-        console.log("Server starting!")
+        // TODO: get rid of magic string
+        console.log("ApiService starting!")
 
         mongoose
             .connect(
@@ -46,6 +46,7 @@ export default class ApiService {
             //.catch(reason => console.log("Catch del server config " + reason))
             .then(
                 () => {
+                    // TODO: get rid of magic string
                     this._expressApp.listen(this.Port, () => console.log('ApiServer listening on http://localhost:' + this.Port + '!'));
                     //throw new Error("error thrown manually alongside express.listen");
                 },
@@ -53,17 +54,6 @@ export default class ApiService {
             //.then(() => this.ExpressApp.listen(this.Port, () => console.log('ApiServer listening on port ' + this.Port + '!')))
             ;
     }
-
-    // private DbConfig() {
-
-    //     // let db = mongoose.connection;
-    //     // db.on('error', (error) => {
-    //     //     console.log('Mongoose couldn\'t connect to ' + this.DbUrl + ' error: ' + JSON.stringify(error));
-    //     // });
-    //     // db.once('open', () => {
-    //     //     console.log('Mongoose connected (once("open")) to ' + this.DbUrl);
-    //     // });
-    // }
 
     private ServerConfig() {
         this._expressApp.use(bodyParser.urlencoded({ extended: true }));
@@ -86,8 +76,6 @@ export default class ApiService {
     }
 
     private ConfigRoutes() {
-        // const router = express.Router();
-        // this._expressApp.use('/api', router);
         this._expressApp.use('/users', UsersRouter);
         this._expressApp.use('/auth', AuthRouter);
         this._expressApp.use('/matches', MatchesRouter);

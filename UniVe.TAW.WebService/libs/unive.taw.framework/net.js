@@ -2,9 +2,10 @@
 //namespace unive.taw.framework.net {
 Object.defineProperty(exports, "__esModule", { value: true });
 var HttpMessage = /** @class */ (function () {
-    function HttpMessage(content, error, errorMessage) {
+    function HttpMessage(content, 
+    //public readonly error?: Object,
+    errorMessage) {
         this.content = content;
-        this.error = error;
         this.errorMessage = errorMessage;
     }
     return HttpMessage;

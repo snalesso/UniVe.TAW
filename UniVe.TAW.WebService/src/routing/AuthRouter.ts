@@ -9,17 +9,46 @@ import * as mongoose from 'mongoose';
 import * as DTOs from '../DTOs/DTOs';
 import * as net from '../../libs/unive.taw.framework/net';
 import * as utils from '../../libs/unive.taw.framework/utils';
+import * as passport from 'passport';
+import * as passportHTTP from 'passport-http';
 
 import * as User from '../domain/models/mongodb/mongoose/User';
-import * as user_enums from '../domain/enums/user';
-import { IMongooseMatch } from '../domain/models/mongodb/mongoose/Match';
 
 const router = express.Router();
+
+// middlewares
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-router.post('/login', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+passport.use(new passportHTTP.BasicStrategy(
+    (username, password, done) => {
+
+        // Delegate function we provide to passport middleware
+        // to verify user credentials
+
+        console.log("New login attempt from ".green + username);
+        const criteria = {} as User.IMongooseUser;
+        criteria.Username = username;
+        User.GetModel()
+            .findOne(criteria, (error, user) => {
+                if (error) {
+                    return done({ statusCode: 500, error: true, errormessage: error });
+                }
+                if (!user) {
+                    return done({ statusCode: 500, error: true, errormessage: "Invalid user" });
+                }
+                if (user.ValidatePassword(password)) {
+                    return done(null, user);
+                }
+                return done({ statusCode: 500, error: true, errormessage: "Invalid password" });
+            });
+    }
+));
+
+// routes
+
+router.post('/login', passport.authenticate('basic', { session: false }), (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const lc = req.body as DTOs.LoginCredentials;
 
     let statusCode: number;
@@ -33,6 +62,7 @@ router.post('/login', (req: express.Request, res: express.Response, next: expres
 
     const criteria = {} as User.IMongooseUser;
     criteria.Username = lc.Username;
+    // TODO: use req.user instead (passed by passport)
     User.GetModel()
         .findOne(criteria)
         .then(user => {
@@ -45,9 +75,10 @@ router.post('/login', (req: express.Request, res: express.Response, next: expres
             }
             else if (user.ValidatePassword(lc.Password)) {
                 statusCode = httpStatusCodes.OK;
-                let jwtPayload = new DTOs.UserJWTData(
-                    JSON.stringify(user._id),
-                    user.Username);
+                let jwtPayload: DTOs.IUserJWTData = {
+                    Id: JSON.stringify(user._id),
+                    Username: user.Username
+                };
                 let token = jwt.sign(
                     jwtPayload,
                     process.env.JWT_KEY,
@@ -55,7 +86,7 @@ router.post('/login', (req: express.Request, res: express.Response, next: expres
                         expiresIn: 60 * 60
                     });
                 responseData = new net.HttpMessage<string>(token);
-                console.log("LOGIN: " + user.Username + " authenticated successfully!");
+                console.log("LOGIN SUCCESSFUL for " + user.Username + " (id: " + user._id + ")");
             } else {
                 statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
                 errMsg = InvalidCredentialsErrorMessage;
@@ -66,6 +97,7 @@ router.post('/login', (req: express.Request, res: express.Response, next: expres
                 .json(responseData);
         })
         .catch((error: mongodb.MongoError) => {
+            console.log("LOGIN FAILED: " + error.message);
             statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
             responseData = new net.HttpMessage<string>(null, error.message);
             res

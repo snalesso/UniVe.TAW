@@ -1,21 +1,29 @@
 import * as mongoose from 'mongoose';
 
+export interface IMatchMove {
+
+}
+
 export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     FirstPlayerId: mongoose.Schema.Types.ObjectId,
     SecondPlayerId: mongoose.Schema.Types.ObjectId,
-    CreationDateTime: Date
+    CreationDateTime: Date,
+    WinnerId: mongoose.Schema.Types.ObjectId,
+    GetHistory: () => IMatchMove[],
     // PlayersPairingMode: challenge/random
 }
 
 const matchSchema = new mongoose.Schema({
     FirstPlayerId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        type: mongoose.Schema.Types.ObjectId
+        ref: "User"
     },
     SecondPlayerId: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
-        type: mongoose.Schema.Types.ObjectId
+        ref: "User"
     },
     CreationDateTime: {
         required: true,
