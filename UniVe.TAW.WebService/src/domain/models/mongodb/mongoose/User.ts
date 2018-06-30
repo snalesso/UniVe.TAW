@@ -15,6 +15,8 @@ export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
     ValidatePassword: (pwd: string) => boolean
 }
 
+// TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
+
 const userSchema = new mongoose.Schema({
     // Id: mongoose.Types.ObjectId,
     Username: {

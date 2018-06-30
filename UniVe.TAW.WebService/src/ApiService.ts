@@ -21,41 +21,50 @@ export default class ApiService {
         if (!port) throw new RangeError(port + ' is not a valid port number');
         this.Port = port;
         this._expressApp = express();
-        this.ConfigRoutes();
     }
 
     public Start() {
 
         // TODO: get rid of magic string
-        console.log("ApiService starting!")
+        console.log("ApiService starting ...");
+
+        // mongoose.connection.on("connected", () => {
+        //     console.log("mongoose connected");
+        // });
+        // mongoose.connection.on("error", (error: mongodb.MongoError) => {
+        //     console.log("mongoose connection error: ".red + error.message);
+        // });
+        mongoose.connection.on("disconnected", (a) => {
+            console.log("mongoose disconnected");
+        });
+        mongoose.connection.on("SIGINT", (a) => {
+            console.log("Recived SIGINT");
+            mongoose.connection.close(() => {
+                console.log('mongoose default connection disconnected through app termination');
+                process.exit(0);
+            });
+        });
 
         mongoose
-            .connect(
-                this._dbUrl
-                //,undefined
-                //,(error: mongodb.MongoError) => console.log("mongoose connection failed (.connect().catch)! Error: " + error.message)
-            )
-            //() => console.log("mongoose connected! (.connect().then)")
-            //.catch((error: mongodb.MongoError) => console.log("mongoose connection failed (.connect().catch)! Error: " + error.message))
-            .then(
-                (dbConnection: mongoose.Mongoose) => console.log("Mongoose connected! (.connect().then(fullfilled))"),
-                (error: mongodb.MongoError) => console.log("Mongoose connection failed (.connect().then(rejected))! Error: " + error.message))
-            .then(
-                () => this.ServerConfig(),
-                (reason: any) => console.log("Error during serverconfig: " + reason))
-            //.catch(reason => console.log("Catch del server config " + reason))
+            .connect(this._dbUrl)
             .then(
                 () => {
-                    // TODO: get rid of magic string
-                    this._expressApp.listen(this.Port, () => console.log('ApiServer listening on http://localhost:' + this.Port + '!'));
-                    //throw new Error("error thrown manually alongside express.listen");
+                    console.log(("mongoose connected to " + this._dbUrl).green);
+
+                    this.ConfigMiddlewares();
+                    this.ConfigRoutes();
+                    this._expressApp.listen(
+                        this.Port,
+                        () => console.log(("ApiServer listening on http://localhost:" + this.Port).green));
                 },
-                (reason: any) => console.log("Error during expressapp listen: " + reason))
-            //.then(() => this.ExpressApp.listen(this.Port, () => console.log('ApiServer listening on port ' + this.Port + '!')))
-            ;
+                (error: mongodb.MongoError) => {
+                    console.log("mongoose connection failed! Reason: ".red + error.message);
+                });
     }
 
-    private ServerConfig() {
+    private ConfigMiddlewares() {
+        console.log("Configuring middlewares ...");
+
         this._expressApp.use(bodyParser.urlencoded({ extended: true }));
         this._expressApp.use(bodyParser.json());
         this._expressApp.use((req, res, next) => {
@@ -67,15 +76,22 @@ export default class ApiService {
             }
             next();
         });
-        // // handle unresolved requests (404)
-        // this._expressApp.use((req, res, next) => {
-        //     res.status(404).json({ error: true, errormessage: "Invalid endpoint" });
-        // });
+        // handles unhandled errors
+        this._expressApp.use(function (err, req, res, next) {
 
-        //throw new Error("fefakwpoefkaew");
+            console.log("Request error: ".red + JSON.stringify(err));
+            res.status(err.statusCode || 500).json(err);
+
+        });
+        // handle request that point to invalid endpoints
+        this._expressApp.use((req, res, next) => {
+            res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint ".red + req.url });
+        });
     }
 
     private ConfigRoutes() {
+        console.log("Configuring routes ...");
+
         this._expressApp.use('/users', UsersRouter);
         this._expressApp.use('/auth', AuthRouter);
         this._expressApp.use('/matches', MatchesRouter);

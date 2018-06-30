@@ -7,10 +7,12 @@ var PendingMatch = require("../domain/models/mongodb/mongoose/PendingMatch");
 var DTOs = require("../DTOs/DTOs");
 var httpStatusCodes = require("http-status-codes");
 var net = require("../../libs/unive.taw.framework/net");
+var expressJwt = require("express-jwt");
+require("colors");
+var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
-router.post("/create", function (req, res, next) {
+router.post("/create", jwtValidator, function (req, res) {
     var responseData = null;
-    var challengerToken = req.body["challengerToken"];
     var mcr = req.body;
     if (!mcr) {
         responseData = new net.HttpMessage(null, "Invalid request");
@@ -32,7 +34,7 @@ router.post("/create", function (req, res, next) {
         });
     }
 });
-router.get("/pending", function (req, res, next) {
+router.get("/pending", function (res) {
     var responseData = null;
     PendingMatch.GetModel()
         .find()
@@ -50,7 +52,7 @@ router.get("/pending", function (req, res, next) {
             .json(responseData);
     });
 });
-router.post("/join/:pendingMatchId", function (req, res, next) {
+router.post("/join/:pendingMatchId", function (req, res) {
     var responseData = null;
     var pendingMatchId = req.params["pendingMatchId"];
     var pmjr = req.body;
@@ -73,7 +75,7 @@ router.post("/join/:pendingMatchId", function (req, res, next) {
                 var newMatchDto = new DTOs.MatchDto(JSON.stringify(createdMatch._id), JSON.stringify(createdMatch.FirstPlayerId), JSON.stringify(createdMatch.SecondPlayerId), createdMatch.CreationDateTime);
                 responseData = new net.HttpMessage(newMatchDto);
             })
-                .catch(function (error) {
+                .catch(function () {
                 responseStatus = httpStatusCodes.INTERNAL_SERVER_ERROR;
             });
             res
@@ -88,7 +90,7 @@ router.post("/join/:pendingMatchId", function (req, res, next) {
         });
     }
 });
-router.get("/:matchId", function (req, res, next) {
+router.get("/:matchId", function (req, res) {
     var responseData = null;
     var matchId = req.params["matchId"];
     PendingMatch.GetModel()
@@ -107,7 +109,7 @@ router.get("/:matchId", function (req, res, next) {
             .json(responseData);
     });
 });
-router.post("/:matchId", function (req, res, next) {
+router.post("/:matchId", function () {
 });
 exports.default = router;
 //# sourceMappingURL=MatchesRouter.js.map

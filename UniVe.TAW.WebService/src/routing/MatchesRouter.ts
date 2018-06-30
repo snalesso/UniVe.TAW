@@ -6,22 +6,17 @@ import * as DTOs from '../DTOs/DTOs';
 import * as httpStatusCodes from 'http-status-codes';
 import * as net from '../../libs/unive.taw.framework/net';
 import * as mongodb from 'mongodb';
-import * as jwt from 'jsonwebtoken';
 import * as expressJwt from 'express-jwt';
-import * as passport from 'passport';
-import * as passportHTTP from 'passport-http';
-import * as User from '../domain/models/mongodb/mongoose/User';
 import 'colors';
 
 let jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
 const router: express.Router = express.Router();
 
-router.post("/create", jwtValidator, (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post("/create", jwtValidator, (req: express.Request, res: express.Response) => {
 
     let responseData: net.HttpMessage<string> = null;
 
-    const challengerToken = req.body["challengerToken"];
     const mcr = req.body as DTOs.MatchCreationRequestDto;
 
     if (!mcr) {
@@ -45,7 +40,7 @@ router.post("/create", jwtValidator, (req: express.Request, res: express.Respons
     }
 });
 
-router.get("/pending", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.get("/pending", (res: express.Response) => {
 
     let responseData: net.HttpMessage<DTOs.PendingMatchDto[]> = null;
 
@@ -66,7 +61,7 @@ router.get("/pending", (req: express.Request, res: express.Response, next: expre
         });
 });
 
-router.post("/join/:pendingMatchId", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post("/join/:pendingMatchId", (req: express.Request, res: express.Response) => {
 
     let responseData: net.HttpMessage<DTOs.MatchDto> = null;
 
@@ -98,7 +93,7 @@ router.post("/join/:pendingMatchId", (req: express.Request, res: express.Respons
                             createdMatch.CreationDateTime);
                         responseData = new net.HttpMessage<DTOs.MatchDto>(newMatchDto);
                     })
-                    .catch((error: mongodb.MongoError) => {
+                    .catch(() => {
                         responseStatus = httpStatusCodes.INTERNAL_SERVER_ERROR;
                     });
 
@@ -117,7 +112,7 @@ router.post("/join/:pendingMatchId", (req: express.Request, res: express.Respons
     }
 });
 
-router.get("/:matchId", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.get("/:matchId", (req: express.Request, res: express.Response) => {
 
     let responseData: net.HttpMessage<DTOs.PendingMatchDto> = null;
 
@@ -140,7 +135,7 @@ router.get("/:matchId", (req: express.Request, res: express.Response, next: expr
         });
 });
 
-router.post("/:matchId", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router.post("/:matchId", () => {
 
 });
 

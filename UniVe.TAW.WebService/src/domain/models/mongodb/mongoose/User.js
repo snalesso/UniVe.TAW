@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var crypto = require("crypto");
 var enums = require("../../../enums/user");
+// TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
 var userSchema = new mongoose.Schema({
     // Id: mongoose.Types.ObjectId,
     Username: {
