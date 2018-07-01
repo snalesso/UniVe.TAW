@@ -5,11 +5,11 @@ export interface IMatchMove {
 }
 
 export interface IMongooseMatch extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
-    FirstPlayerId: mongoose.Schema.Types.ObjectId,
-    SecondPlayerId: mongoose.Schema.Types.ObjectId,
+    readonly _id: mongoose.Types.ObjectId,
+    FirstPlayerId: mongoose.Types.ObjectId,
+    SecondPlayerId: mongoose.Types.ObjectId,
     CreationDateTime: Date,
-    WinnerId: mongoose.Schema.Types.ObjectId,
+    WinnerId: mongoose.Types.ObjectId,
     GetHistory: () => IMatchMove[],
     // PlayersPairingMode: challenge/random
 }
@@ -27,7 +27,7 @@ const matchSchema = new mongoose.Schema({
     },
     CreationDateTime: {
         required: true,
-        type: mongoose.SchemaTypes.Date,
+        type: mongoose.Schema.Types.Date,
         default: Date.now
     }
 });

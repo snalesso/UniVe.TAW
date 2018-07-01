@@ -1,8 +1,8 @@
 import * as mongoose from 'mongoose';
 
 export interface IMongoosePendingMatch extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
-    PlayerId: mongoose.Schema.Types.ObjectId
+    readonly _id: mongoose.Types.ObjectId,
+    PlayerId: mongoose.Types.ObjectId
 }
 
 const pendingMatchSchema = new mongoose.Schema({

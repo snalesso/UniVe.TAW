@@ -7,29 +7,29 @@ var enums = require("../../../enums/user");
 var userSchema = new mongoose.Schema({
     // Id: mongoose.Types.ObjectId,
     Username: {
-        type: mongoose.SchemaTypes.String,
+        type: mongoose.Schema.Types.String,
         unique: true,
         required: true
     },
     BirthDate: {
-        type: mongoose.SchemaTypes.Date,
+        type: mongoose.Schema.Types.Date,
         required: false
     },
     Roles: {
-        type: mongoose.SchemaTypes.Number,
+        type: mongoose.Schema.Types.Number,
         required: true,
         default: enums.UserRoles.Player
     },
     CountryId: {
-        type: mongoose.SchemaTypes.Number,
+        type: mongoose.Schema.Types.Number,
         required: false
     },
     Salt: {
-        type: mongoose.SchemaTypes.String,
+        type: mongoose.Schema.Types.String,
         required: true
     },
     Digest: {
-        type: mongoose.SchemaTypes.String,
+        type: mongoose.Schema.Types.String,
         required: true
     }
 });

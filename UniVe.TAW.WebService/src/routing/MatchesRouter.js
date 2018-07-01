@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
+var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var Match = require("../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../domain/models/mongodb/mongoose/PendingMatch");
@@ -11,43 +12,67 @@ var expressJwt = require("express-jwt");
 require("colors");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
-router.post("/create", jwtValidator, function (req, res) {
-    var responseData = null;
-    var mcr = req.body;
-    if (!mcr) {
-        responseData = new net.HttpMessage(null, "Invalid request");
-        res
-            .status(httpStatusCodes.FORBIDDEN)
-            .json(responseData);
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
+router.post("/create", jwtValidator, function (request, response) {
+    if (!request.user) {
+        response
+            .status(httpStatusCodes.NETWORK_AUTHENTICATION_REQUIRED);
     }
     else {
-        var newPendingMatch = PendingMatch.Create(mcr);
-        PendingMatch.GetModel()
-            .create(newPendingMatch)
-            .then(function (data) {
-            var status = res.statusCode;
-            res.json({ status: status, data: data });
+        var responseData_1 = null;
+        var jwtUser = request.user;
+        var criteria_1 = {};
+        criteria_1.PlayerId = new mongoose.Types.ObjectId(jwtUser.Id);
+        PendingMatch
+            .GetModel()
+            .findOne(criteria_1)
+            .then(function (existingPendingMatch) {
+            if (existingPendingMatch) {
+                responseData_1 = new net.HttpMessage(new DTOs.PendingMatchDto(existingPendingMatch.id, existingPendingMatch.PlayerId.toHexString()), "You already have a pending match!");
+                response
+                    .status(httpStatusCodes.FORBIDDEN)
+                    .json(responseData_1);
+            }
+            else {
+                var pendingMatchSkel = criteria_1;
+                var newPendingMatch = PendingMatch.Create(pendingMatchSkel);
+                PendingMatch
+                    .GetModel()
+                    .create(newPendingMatch)
+                    .then(function (newPendingMatch) {
+                    responseData_1 = new net.HttpMessage(new DTOs.PendingMatchDto(newPendingMatch.id, newPendingMatch.PlayerId.toHexString()));
+                    response
+                        .status(httpStatusCodes.CREATED)
+                        .json(responseData_1);
+                })
+                    .catch(function (error) {
+                    responseData_1 = new net.HttpMessage(null, error.message);
+                    response
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData_1);
+                });
+            }
         })
             .catch(function (error) {
-            var status = res.statusCode;
-            res.json({ status: status, error: error });
+            console.log("+++ Why are we here?".red);
         });
     }
 });
-router.get("/pending", function (res) {
+router.get("/pending", function (request, response) {
     var responseData = null;
     PendingMatch.GetModel()
         .find()
         .then(function (matches) {
-        var matchDtos = matches.map(function (m) { return new DTOs.PendingMatchDto(JSON.stringify(m.PlayerId)); });
+        var matchDtos = matches.map(function (m) { return new DTOs.PendingMatchDto(JSON.stringify(m.id), JSON.stringify(m.PlayerId)); });
         responseData = new net.HttpMessage(matchDtos);
-        res
+        response
             .status(httpStatusCodes.OK)
             .json(matchDtos);
     })
         .catch(function (error) {
         responseData = new net.HttpMessage(null, error.message);
-        res
+        response
             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
             .json(responseData);
     });
@@ -66,13 +91,13 @@ router.post("/join/:pendingMatchId", function (req, res) {
             var responseStatus;
             var newMatchSkeleton = {};
             newMatchSkeleton.FirstPlayerId = pendingMatch.PlayerId;
-            newMatchSkeleton.SecondPlayerId = new mongoose.Schema.Types.ObjectId(pmjr.PlayerId);
+            newMatchSkeleton.SecondPlayerId = new mongoose.Types.ObjectId(pmjr.PlayerId);
             var newMatch = Match.Create(newMatchSkeleton);
             newMatch
                 .save()
                 .then(function (createdMatch) {
                 responseStatus = httpStatusCodes.CREATED;
-                var newMatchDto = new DTOs.MatchDto(JSON.stringify(createdMatch._id), JSON.stringify(createdMatch.FirstPlayerId), JSON.stringify(createdMatch.SecondPlayerId), createdMatch.CreationDateTime);
+                var newMatchDto = new DTOs.MatchDto(JSON.stringify(createdMatch.id), JSON.stringify(createdMatch.FirstPlayerId), JSON.stringify(createdMatch.SecondPlayerId), createdMatch.CreationDateTime);
                 responseData = new net.HttpMessage(newMatchDto);
             })
                 .catch(function () {
@@ -96,7 +121,7 @@ router.get("/:matchId", function (req, res) {
     PendingMatch.GetModel()
         .findById(matchId)
         .then(function (match) {
-        var matchDto = new DTOs.PendingMatchDto(JSON.stringify(match.PlayerId));
+        var matchDto = new DTOs.PendingMatchDto(JSON.stringify(match.id), JSON.stringify(match.PlayerId));
         responseData = new net.HttpMessage(matchDto);
         res
             .status(httpStatusCodes.OK)

@@ -14,7 +14,7 @@ var matchSchema = new mongoose.Schema({
     },
     CreationDateTime: {
         required: true,
-        type: mongoose.SchemaTypes.Date,
+        type: mongoose.Schema.Types.Date,
         default: Date.now
     }
 });

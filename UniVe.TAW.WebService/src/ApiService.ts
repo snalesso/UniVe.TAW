@@ -8,6 +8,8 @@ import * as httpStatusCodes from 'http-status-codes';
 import UsersRouter from './routing/UsersRouter';
 import AuthRouter from './routing/AuthRouter';
 import MatchesRouter from './routing/MatchesRouter';
+import * as expressJwt from 'express-jwt';
+import { HttpMessage } from '../libs/unive.taw.framework/net';
 
 // TODO: rename into WebService?
 export default class ApiService {
@@ -51,8 +53,8 @@ export default class ApiService {
                 () => {
                     console.log(("mongoose connected to " + this._dbUrl).green);
 
-                    this.ConfigMiddlewares();
                     this.ConfigRoutes();
+                    this.ConfigMiddlewares();
                     this._expressApp.listen(
                         this.Port,
                         () => console.log(("ApiServer listening on http://localhost:" + this.Port).green));
@@ -76,17 +78,23 @@ export default class ApiService {
             }
             next();
         });
+        // handles express-jwt invalid tokens
+        this._expressApp.use((error: expressJwt.UnauthorizedError, request: express.Request, response: express.Response, next: express.NextFunction) => {
+            console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
+            response
+                .status(httpStatusCodes.UNAUTHORIZED)
+                .json(new HttpMessage<string>(null, error.message));
+        });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {
-
             console.log("Request error: ".red + JSON.stringify(err));
             res.status(err.statusCode || 500).json(err);
 
         });
         // handle request that point to invalid endpoints
-        this._expressApp.use((req, res, next) => {
-            res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint ".red + req.url });
-        });
+        // this._expressApp.use((req, res, next) => {
+        //     res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint " + req.url });
+        // });
     }
 
     private ConfigRoutes() {

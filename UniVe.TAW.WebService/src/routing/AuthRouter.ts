@@ -1,3 +1,4 @@
+import * as http from 'http';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as httpStatusCodes from 'http-status-codes';
@@ -20,25 +21,22 @@ router.use(bodyParser.json());
 
 passport.use(new passportHTTP.BasicStrategy(
     (username, password, done) => {
+        console.log("Passport validating credentials ... ".yellow);
 
-        // Delegate function we provide to passport middleware
-        // to verify user credentials
-
-        console.log("New login attempt from ".green + username);
         const criteria = {} as User.IMongooseUser;
         criteria.Username = username;
         User.GetModel()
-            .findOne(criteria, (error, user) => {
+            .findOne(criteria, (error, user: User.IMongooseUser) => {
                 if (error) {
-                    return done({ statusCode: 500, error: true, errormessage: error });
+                    return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
                 }
                 if (!user) {
-                    return done({ statusCode: 500, error: true, errormessage: "Invalid user" });
+                    return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid user" });
                 }
                 if (user.ValidatePassword(password)) {
                     return done(null, user);
                 }
-                return done({ statusCode: 500, error: true, errormessage: "Invalid password" });
+                return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid password" });
             });
     }
 ));
@@ -49,62 +47,36 @@ router.post(
     '/login',
     passport.authenticate('basic', { session: false }),
     (req: express.Request, res: express.Response) => {
-        const lc = req.body as DTOs.LoginCredentials;
+        const user = req.user as User.IMongooseUser;
 
         let statusCode: number;
         let errMsg: string;
         let responseData: net.HttpMessage<string>;
 
-        if (!lc.Username || lc.Username.length <= 0)
-            errMsg = "Username missing";
-        if (!lc.Password || lc.Password.length <= 0)
-            errMsg = "Password missing";
+        if (!user) {
+            console.log("Login failed!".red);
+            statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
+            responseData = new net.HttpMessage<string>(null, "Invalid credentials");
+        }
+        else {
+            console.log("Login successful for " + user.Username + " (id: " + user.id + ")");
+            statusCode = httpStatusCodes.OK;
+            let jwtPayload: DTOs.IUserJWTData = {
+                Id: user.id,
+                Username: user.Username
+            };
+            let token = jwt.sign(
+                jwtPayload,
+                process.env.JWT_KEY,
+                {
+                    expiresIn: 60 * 60 // 60 mins
+                });
+            responseData = new net.HttpMessage<string>(token);
+        }
 
-        const criteria = {} as User.IMongooseUser;
-        criteria.Username = lc.Username;
-        // TODO: use req.user instead (passed by passport)
-        User.GetModel()
-            .findOne(criteria)
-            .then(user => {
-
-                // TODO: create DB dictionary
-                const InvalidCredentialsErrorMessage = "Invalid credentials";
-
-                if (!user) {
-                    statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                    responseData = new net.HttpMessage<string>(null, InvalidCredentialsErrorMessage)
-                }
-                else if (user.ValidatePassword(lc.Password)) {
-                    statusCode = httpStatusCodes.OK;
-                    let jwtPayload: DTOs.IUserJWTData = {
-                        Id: JSON.stringify(user._id),
-                        Username: user.Username
-                    };
-                    let token = jwt.sign(
-                        jwtPayload,
-                        process.env.JWT_KEY,
-                        {
-                            expiresIn: 60 * 60
-                        });
-                    responseData = new net.HttpMessage<string>(token);
-                    console.log("LOGIN SUCCESSFUL for " + user.Username + " (id: " + user._id + ")");
-                } else {
-                    statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                    errMsg = InvalidCredentialsErrorMessage;
-                }
-
-                res
-                    .status(statusCode)
-                    .json(responseData);
-            })
-            .catch((error: mongodb.MongoError) => {
-                console.log("LOGIN FAILED: " + error.message);
-                statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                responseData = new net.HttpMessage<string>(null, error.message);
-                res
-                    .status(statusCode)
-                    .json(responseData);
-            });
+        res
+            .status(statusCode)
+            .json(responseData);
     });
 
 router.post('/logout', () => { });

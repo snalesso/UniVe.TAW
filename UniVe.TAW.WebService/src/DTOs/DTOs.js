@@ -20,27 +20,14 @@ var UserDto = /** @class */ (function () {
     return UserDto;
 }());
 exports.UserDto = UserDto;
-var LoginCredentials = /** @class */ (function () {
-    function LoginCredentials(Username, Password) {
-        this.Username = Username;
-        this.Password = Password;
-        // if (!Username || Username.length <= 0)
-        //     throw new Error("Username cannot be null");
-        // if (!Password || Password.length <= 0)
-        //     throw new Error("Password cannot be null");
-    }
-    return LoginCredentials;
-}());
-exports.LoginCredentials = LoginCredentials;
-var MatchCreationRequestDto = /** @class */ (function () {
-    function MatchCreationRequestDto(PlayerId) {
-        this.PlayerId = PlayerId;
-    }
-    return MatchCreationRequestDto;
-}());
-exports.MatchCreationRequestDto = MatchCreationRequestDto;
+// export class MatchCreationRequestDto {
+//     public constructor(
+//         public readonly PlayerId: string) {
+//     }
+// }
 var PendingMatchDto = /** @class */ (function () {
-    function PendingMatchDto(PlayerId) {
+    function PendingMatchDto(Id, PlayerId) {
+        this.Id = Id;
         this.PlayerId = PlayerId;
     }
     return PendingMatchDto;

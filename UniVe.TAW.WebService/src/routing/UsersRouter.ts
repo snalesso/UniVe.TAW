@@ -48,34 +48,39 @@ router.post('/signup', (req: express.Request, res: express.Response, next: expre
             .catch((error: mongodb.MongoError) => {
                 console.log("user creation failed: " + JSON.stringify(error));
 
-                let errMsg: string;
-                let statusCode: number;
-                switch (error.code) {
-                    case 11000:
-                        errMsg = "Username taken";
-                        statusCode = httpStatusCodes.CONFLICT;
-                        break;
-                    default:
-                        errMsg = "Uknown error";
-                        statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                        break;
-                }
-                responseData = new net.HttpMessage<boolean>(false, errMsg);
-                res
-                    .status(statusCode)
-                    .json(responseData);
+                let aeuCriteria = {} as User.IMongooseUser;
+                aeuCriteria.Username = newUser.Username;
+                const alreadyExistingUser = User.GetModel().findOne(aeuCriteria).then((takenUser) => {
+
+                    let errMsg: string;
+                    let statusCode: number;
+                    switch (error.code) {
+                        case 11000:
+                            errMsg = "Username taken";
+                            statusCode = httpStatusCodes.CONFLICT;
+                            break;
+                        default:
+                            errMsg = "Uknown error";
+                            statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
+                            break;
+                    }
+                    responseData = new net.HttpMessage<boolean>(false, errMsg);
+                    res
+                        .status(statusCode)
+                        .json(responseData);
+                });
             });
     }
 });
 
 router.get('/:userId', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    let userId = req.params["userId"];
+    const userId = req.params["userId"];
     let responseData: net.HttpMessage<DTOs.UserDto> = null;
     User.GetModel()
         .findById(userId)
         .then((mongoUser) => {
             let userDto: DTOs.UserDto = new DTOs.UserDto(
-                JSON.stringify(mongoUser._id),
+                mongoUser.id,
                 mongoUser.Username,
                 utils.GetAge(mongoUser.BirthDate),
                 mongoUser.CountryId);
@@ -90,6 +95,35 @@ router.get('/:userId', (req: express.Request, res: express.Response, next: expre
                 .status(httpStatusCodes.OK)
                 .json(responseData);
         });
+});
+
+// TODO: add authentication and allow delete only to same user
+router.delete("/:userId", (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const userId = req.params["userId"];
+    let responseData: net.HttpMessage<boolean> = null;
+    User.GetModel()
+        .findByIdAndRemove(
+            userId,
+            (error: mongodb.MongoError, deletedUser) => {
+                if (error) {
+                    responseData = new net.HttpMessage<boolean>(null, error.message);
+                    res
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
+                }
+                else if (!deletedUser) {
+                    responseData = new net.HttpMessage<boolean>(null, "User not found!");
+                    res
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
+                }
+                else {
+                    responseData = new net.HttpMessage<boolean>(true);
+                    res
+                        .status(httpStatusCodes.OK)
+                        .json(responseData);
+                }
+            });
 });
 
 export default router;

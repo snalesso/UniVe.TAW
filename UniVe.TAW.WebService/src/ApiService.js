@@ -8,6 +8,7 @@ var httpStatusCodes = require("http-status-codes");
 var UsersRouter_1 = require("./routing/UsersRouter");
 var AuthRouter_1 = require("./routing/AuthRouter");
 var MatchesRouter_1 = require("./routing/MatchesRouter");
+var net_1 = require("../libs/unive.taw.framework/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
     function ApiService(port) {
@@ -40,10 +41,10 @@ var ApiService = /** @class */ (function () {
         mongoose
             .connect(this._dbUrl)
             .then(function () {
-            console.log(("mongoose connected to " + _this._dbUrl + "!").green);
-            _this.ConfigMiddlewares();
+            console.log(("mongoose connected to " + _this._dbUrl).green);
             _this.ConfigRoutes();
-            _this._expressApp.listen(_this.Port, function () { return console.log(("ApiServer listening on http://localhost:" + _this.Port + "!").green); });
+            _this.ConfigMiddlewares();
+            _this._expressApp.listen(_this.Port, function () { return console.log(("ApiServer listening on http://localhost:" + _this.Port).green); });
         }, function (error) {
             console.log("mongoose connection failed! Reason: ".red + error.message);
         });
@@ -61,15 +62,22 @@ var ApiService = /** @class */ (function () {
             }
             next();
         });
+        // handles express-jwt invalid tokens
+        this._expressApp.use(function (error, request, response, next) {
+            console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
+            response
+                .status(httpStatusCodes.UNAUTHORIZED)
+                .json(new net_1.HttpMessage(null, error.message));
+        });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {
             console.log("Request error: ".red + JSON.stringify(err));
             res.status(err.statusCode || 500).json(err);
         });
         // handle request that point to invalid endpoints
-        this._expressApp.use(function (req, res, next) {
-            res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint ".red + req.url });
-        });
+        // this._expressApp.use((req, res, next) => {
+        //     res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint " + req.url });
+        // });
     };
     ApiService.prototype.ConfigRoutes = function () {
         console.log("Configuring routes ...");

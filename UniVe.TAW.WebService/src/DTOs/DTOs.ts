@@ -20,16 +20,10 @@ export class UserDto {
     }
 }
 
-export class LoginCredentials {
+export interface ILoginCredentials {
 
-    public constructor(
-        public readonly Username: string,
-        public readonly Password: string) {
-        // if (!Username || Username.length <= 0)
-        //     throw new Error("Username cannot be null");
-        // if (!Password || Password.length <= 0)
-        //     throw new Error("Password cannot be null");
-    }
+    readonly Username: string;
+    readonly Password: string;
 }
 
 export interface IUserJWTData {
@@ -37,14 +31,15 @@ export interface IUserJWTData {
     readonly Username: string;
 }
 
-export class MatchCreationRequestDto {
-    public constructor(
-        public readonly PlayerId: string) {
-    }
-}
+// export class MatchCreationRequestDto {
+//     public constructor(
+//         public readonly PlayerId: string) {
+//     }
+// }
 
 export class PendingMatchDto {
     public constructor(
+        public readonly Id: string,
         public readonly PlayerId: string) {
     }
 }
