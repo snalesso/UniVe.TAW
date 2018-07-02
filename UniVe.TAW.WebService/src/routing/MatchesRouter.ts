@@ -9,7 +9,6 @@ import * as net from '../../libs/unive.taw.framework/net';
 import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 import 'colors';
-import { IMongooseUser } from '../domain/models/mongodb/mongoose/User';
 
 const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
