@@ -1,7 +1,7 @@
 {
-  "name": "unive.taw.framework",
+  "name": "unive.taw.common",
   "version": "0.0.0",
-  "description": "UniVe.TAW.Framework",
+  "description": "UniVe.TAW.Common",
   "author": {
     "name": "Sergio"
   },
@@ -15,7 +15,5 @@
     "gulp-typescript": "^4.0.2",
     "typescript": "^2.8.1"
   },
-  "dependencies": {
-    "rxjs": "^6.1.0"
-  }
+  "dependencies": {}
 }

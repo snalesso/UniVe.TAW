@@ -26,7 +26,7 @@ const copyToDirs = [
 
 // TODO: empty dest folder
 // TODO: make dest copied files readonly
-gulp.task('transpile-and-copy', function () {
+gulp.task('export', function () {
 
     tsProject.options.declaration = true;
 
@@ -40,19 +40,19 @@ gulp.task('transpile-and-copy', function () {
         try {
             //process.stdout.write('Cleaning'.yellow + ' ' + dirPath + ' ...');
             // del(dirPath);
-            process.stdout.write('Copying'.yellow + ' to: ' + dirPath + ' ...');
+            process.stdout.write('Copying' + ' to: ' + dirPath + ' ...');
             if (copyTs)
                 rawTs.pipe(gulp.dest(dirPath));
             if (copyJs)
                 compiledTs.js.pipe(gulp.dest(dirPath));
             if (copyDTs)
                 compiledTs.dts.pipe(gulp.dest(dirPath));
-            console.log(" DONE".green);
+            console.log(" DONE");
         } catch (error) {
-            console.log(" FAILED".red);
-            console.log((missionName + " failed - reason: " + error).red);
+            console.log(" FAILED");
+            console.log((missionName + " failed - reason: " + error));
         }
     });
 
-    console.log((missionName + ' completed').green);
+    console.log((missionName + ' completed'));
 });
