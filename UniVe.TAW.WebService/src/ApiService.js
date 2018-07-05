@@ -8,7 +8,7 @@ var httpStatusCodes = require("http-status-codes");
 var UsersRouter_1 = require("./routing/UsersRouter");
 var AuthRouter_1 = require("./routing/AuthRouter");
 var MatchesRouter_1 = require("./routing/MatchesRouter");
-var net_1 = require("../libs/unive.taw.framework/net");
+var net = require("../libs/unive.taw.framework/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
     function ApiService(port) {
@@ -67,7 +67,7 @@ var ApiService = /** @class */ (function () {
             console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
             response
                 .status(httpStatusCodes.UNAUTHORIZED)
-                .json(new net_1.HttpMessage(null, error.message));
+                .json(new net.HttpMessage(null, error.message));
         });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {

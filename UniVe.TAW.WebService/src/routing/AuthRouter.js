@@ -17,7 +17,7 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
     console.log("Passport validating credentials ... ".yellow);
     var criteria = {};
     criteria.Username = username;
-    User.GetModel()
+    User.getModel()
         .findOne(criteria, function (error, user) {
         if (error) {
             return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
@@ -25,15 +25,15 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
         if (!user) {
             return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid user" });
         }
-        if (user.ValidatePassword(password)) {
+        if (user.validatePassword(password)) {
             return done(null, user);
         }
         return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid password" });
     });
 }));
 // routes
-router.post('/login', passport.authenticate('basic', { session: false }), function (req, res) {
-    var user = req.user;
+router.post('/login', passport.authenticate('basic', { session: false }), function (request, response) {
+    var user = request.user;
     var statusCode;
     var errMsg;
     var responseData;
@@ -43,7 +43,7 @@ router.post('/login', passport.authenticate('basic', { session: false }), functi
         responseData = new net.HttpMessage(null, "Invalid credentials");
     }
     else {
-        console.log("Login successful for " + user.Username + " (id: " + user.id + ")");
+        console.log("Login successful for ".green + user.Username + " (id: " + user.id + ")");
         statusCode = httpStatusCodes.OK;
         var jwtPayload = {
             Id: user.id,
@@ -54,7 +54,7 @@ router.post('/login', passport.authenticate('basic', { session: false }), functi
         });
         responseData = new net.HttpMessage(token);
     }
-    res
+    response
         .status(statusCode)
         .json(responseData);
 });

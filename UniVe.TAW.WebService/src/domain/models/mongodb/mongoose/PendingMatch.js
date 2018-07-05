@@ -9,17 +9,17 @@ var pendingMatchSchema = new mongoose.Schema({
     }
 });
 var matchModel;
-function GetModel() {
+function getModel() {
     if (!matchModel) {
         matchModel = mongoose.model('Match', pendingMatchSchema);
     }
     return matchModel;
 }
-exports.GetModel = GetModel;
-function Create(data) {
-    var matchModelCtor = GetModel();
+exports.getModel = getModel;
+function create(data) {
+    var matchModelCtor = getModel();
     var newMatch = new matchModelCtor(data);
     return newMatch;
 }
-exports.Create = Create;
+exports.create = create;
 //# sourceMappingURL=PendingMatch.js.map

@@ -33,14 +33,6 @@ var PendingMatchDto = /** @class */ (function () {
     return PendingMatchDto;
 }());
 exports.PendingMatchDto = PendingMatchDto;
-var JoinPendingMatchRequestDto = /** @class */ (function () {
-    function JoinPendingMatchRequestDto(PendingMatchId, PlayerId) {
-        this.PendingMatchId = PendingMatchId;
-        this.PlayerId = PlayerId;
-    }
-    return JoinPendingMatchRequestDto;
-}());
-exports.JoinPendingMatchRequestDto = JoinPendingMatchRequestDto;
 var MatchDto = /** @class */ (function () {
     function MatchDto(Id, FirstPlayerId, SecondPlayerId, CreationDateTime) {
         this.Id = Id;

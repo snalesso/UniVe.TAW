@@ -9,7 +9,7 @@ import UsersRouter from './routing/UsersRouter';
 import AuthRouter from './routing/AuthRouter';
 import MatchesRouter from './routing/MatchesRouter';
 import * as expressJwt from 'express-jwt';
-import { HttpMessage } from '../libs/unive.taw.framework/net';
+import * as net from '../libs/unive.taw.framework/net';
 
 // TODO: rename into WebService?
 export default class ApiService {
@@ -83,7 +83,7 @@ export default class ApiService {
             console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
             response
                 .status(httpStatusCodes.UNAUTHORIZED)
-                .json(new HttpMessage<string>(null, error.message));
+                .json(new net.HttpMessage<string>(null, error.message));
         });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {

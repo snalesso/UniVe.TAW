@@ -34,13 +34,13 @@ var userSchema = new mongoose.Schema({
     }
 });
 //userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
-userSchema.methods.SetPassword = function (pwd) {
+userSchema.methods.setPassword = function (pwd) {
     this.Salt = crypto.randomBytes(16).toString('hex');
     var hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
     this.Digest = hmac.digest('hex');
 };
-userSchema.methods.ValidatePassword = function (pwd) {
+userSchema.methods.validatePassword = function (pwd) {
     var hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
     var digest = hmac.digest('hex');
@@ -48,20 +48,20 @@ userSchema.methods.ValidatePassword = function (pwd) {
 };
 //export function GetSchema() { return userSchema; }
 var userModel;
-function GetModel() {
+function getModel() {
     if (!userModel) {
         userModel = mongoose.model('User', userSchema); //GetSchema());
     }
     return userModel;
 }
-exports.GetModel = GetModel;
+exports.getModel = getModel;
 // export function create(data: IUser) : mongoose.Document<IUser> {
-function Create(data) {
-    var userModelCtor = GetModel();
+function create(data) {
+    var userModelCtor = getModel();
     var user = new userModelCtor(data);
     return user;
 }
-exports.Create = Create;
+exports.create = create;
 // export function CreateDto(mongoUser: IMongoUser) {
 //     return new auth.UserDto(
 //         JSON.stringify(mongoUser._id),
