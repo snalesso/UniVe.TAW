@@ -33,15 +33,15 @@ const matchSchema = new mongoose.Schema({
 });
 
 let matchModel;
-export function GetModel(): mongoose.Model<IMongooseMatch> {
+export function getModel(): mongoose.Model<IMongooseMatch> {
     if (!matchModel) {
         matchModel = mongoose.model('Match', matchSchema);
     }
     return matchModel;
 }
 
-export function Create(data: any): IMongooseMatch {
-    let matchModelCtor = GetModel();
+export function create(data: any): IMongooseMatch {
+    let matchModelCtor = getModel();
     let newMatch = new matchModelCtor(data);
 
     return newMatch;

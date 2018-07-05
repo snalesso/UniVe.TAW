@@ -13,8 +13,8 @@ export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
     Roles: enums.UserRoles,
     Salt: string,
     Digest: string,
-    SetPassword: (pwd: string) => void,
-    ValidatePassword: (pwd: string) => boolean
+    setPassword: (pwd: string) => void,
+    validatePassword: (pwd: string) => boolean
 }
 
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
@@ -51,13 +51,13 @@ const userSchema = new mongoose.Schema({
 
 //userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
 
-userSchema.methods.SetPassword = function (pwd: string): void {
+userSchema.methods.setPassword = function (pwd: string): void {
     this.Salt = crypto.randomBytes(16).toString('hex');
     let hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
     this.Digest = hmac.digest('hex');
 };
-userSchema.methods.ValidatePassword = function (pwd: string): boolean {
+userSchema.methods.validatePassword = function (pwd: string): boolean {
     let hmac = crypto.createHmac('sha512', this.Salt);
     hmac.update(pwd);
     let digest = hmac.digest('hex');
@@ -67,7 +67,7 @@ userSchema.methods.ValidatePassword = function (pwd: string): boolean {
 //export function GetSchema() { return userSchema; }
 
 let userModel;
-export function GetModel(): mongoose.Model<IMongooseUser> {
+export function getModel(): mongoose.Model<IMongooseUser> {
     if (!userModel) {
         userModel = mongoose.model('User', userSchema); //GetSchema());
     }
@@ -75,8 +75,8 @@ export function GetModel(): mongoose.Model<IMongooseUser> {
 }
 
 // export function create(data: IUser) : mongoose.Document<IUser> {
-export function Create(data: any): IMongooseUser {
-    let userModelCtor = GetModel();
+export function create(data: any): IMongooseUser {
+    let userModelCtor = getModel();
     let user = new userModelCtor(data);
 
     return user;

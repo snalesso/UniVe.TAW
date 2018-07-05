@@ -44,13 +44,6 @@ export class PendingMatchDto {
     }
 }
 
-export class JoinPendingMatchRequestDto {
-    public constructor(
-        public readonly PendingMatchId: string,
-        public readonly PlayerId: string) {
-    }
-}
-
 export class MatchDto {
     public constructor(
         public readonly Id: string,

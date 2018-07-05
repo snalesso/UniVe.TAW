@@ -14,15 +14,15 @@ const pendingMatchSchema = new mongoose.Schema({
 });
 
 let matchModel;
-export function GetModel(): mongoose.Model<IMongoosePendingMatch> {
+export function getModel(): mongoose.Model<IMongoosePendingMatch> {
     if (!matchModel) {
         matchModel = mongoose.model('Match', pendingMatchSchema);
     }
     return matchModel;
 }
 
-export function Create(data: any): IMongoosePendingMatch {
-    let matchModelCtor = GetModel();
+export function create(data: any): IMongoosePendingMatch {
+    let matchModelCtor = getModel();
     let newMatch = new matchModelCtor(data);
 
     return newMatch;

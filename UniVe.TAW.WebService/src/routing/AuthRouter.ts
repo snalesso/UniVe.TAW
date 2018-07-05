@@ -25,7 +25,7 @@ passport.use(new passportHTTP.BasicStrategy(
 
         const criteria = {} as User.IMongooseUser;
         criteria.Username = username;
-        User.GetModel()
+        User.getModel()
             .findOne(criteria, (error, user: User.IMongooseUser) => {
                 if (error) {
                     return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
@@ -33,7 +33,7 @@ passport.use(new passportHTTP.BasicStrategy(
                 if (!user) {
                     return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid user" });
                 }
-                if (user.ValidatePassword(password)) {
+                if (user.validatePassword(password)) {
                     return done(null, user);
                 }
                 return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid password" });
@@ -46,8 +46,8 @@ passport.use(new passportHTTP.BasicStrategy(
 router.post(
     '/login',
     passport.authenticate('basic', { session: false }),
-    (req: express.Request, res: express.Response) => {
-        const user = req.user as User.IMongooseUser;
+    (request: express.Request, response: express.Response) => {
+        const user = request.user as User.IMongooseUser;
 
         let statusCode: number;
         let errMsg: string;
@@ -59,7 +59,7 @@ router.post(
             responseData = new net.HttpMessage<string>(null, "Invalid credentials");
         }
         else {
-            console.log("Login successful for " + user.Username + " (id: " + user.id + ")");
+            console.log("Login successful for ".green + user.Username + " (id: " + user.id + ")");
             statusCode = httpStatusCodes.OK;
             let jwtPayload: DTOs.IUserJWTData = {
                 Id: user.id,
@@ -74,7 +74,7 @@ router.post(
             responseData = new net.HttpMessage<string>(token);
         }
 
-        res
+        response
             .status(statusCode)
             .json(responseData);
     });
