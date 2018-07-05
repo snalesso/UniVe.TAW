@@ -9,7 +9,17 @@
             "tsconfig": "tsconfig.json",
             "problemMatcher": [
                 "$tsc"
+            ]
+        },
+        {
+            "identifier": "compile-export",
+            "label": "Compile and export",
+            "command": "gulp",
+            "args": [
+                "compile-export"
             ],
+            "type": "shell",
+            "dependsOn": "transpile",
             "group": {
                 "kind": "build",
                 "isDefault": true
