@@ -4,23 +4,51 @@ export class ServerSideBattleFieldCell {
 
     public constructor(
         shipType: game.ShipType = game.ShipType.NoShip,
-        isHit: boolean = false) {
+        hasReceivedFire: boolean = false,
+        receiveFireDateTime?: Date) {
+
+        if ((hasReceivedFire && receiveFireDateTime == null)
+            || (!hasReceivedFire && receiveFireDateTime != null))
+            throw new Error("Mismatch between having been shot and shooting date!");
+
         this.ShipType = shipType;
+        this._hasReceivedFire = hasReceivedFire;
+        this._receiveFireDateTime = receiveFireDateTime;
     }
 
     public readonly ShipType: game.ShipType;
 
-    private _isHit: boolean;
-    public isHit(): boolean {
-        return this._isHit;
+    private _hasReceivedFire: boolean;
+    public get HasReceivedFire(): boolean {
+        return this._hasReceivedFire;
+    }
+
+    private _receiveFireDateTime: Date;
+    public get ReceiveFireDateTime(): Date {
+        return this._receiveFireDateTime;
     }
 
     public receiveFire(): boolean {
-        if (this._isHit == true)
-            throw new Error("Cannot fire 2 times to the same coord!");
+        if (this._hasReceivedFire == true)
+            throw new Error("This cell has already been shot to!");
 
-        this._isHit = true;
+        this._receiveFireDateTime = new Date();
+        this._hasReceivedFire = true;
 
-        return this._isHit;
+        return this.HasReceivedFire;
     }
+
+    ///////////////////////////////////
+
+    // GET + SET with validation in SET
+
+    // private _hasReceivedFire: boolean;
+    // public get HasReceivedFire(): boolean {
+    //     return this._hasReceivedFire;
+    // }
+    // public set HasReceivedFire(value: boolean) {
+    //     if (this._hasReceivedFire)
+    //         throw new Error("This cell has already been shot to!");
+    //     this._hasReceivedFire = true;
+    // }
 }

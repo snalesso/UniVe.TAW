@@ -5,6 +5,7 @@ import * as identity from '../../../../core/identity';
 import * as Constants from './Constants';
 
 // TODO: add registration date
+// TODO: trim username spaces
 
 export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,

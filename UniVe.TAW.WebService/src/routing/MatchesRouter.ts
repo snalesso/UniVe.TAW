@@ -63,9 +63,9 @@ router.post(
                     else {
                         // ensure the user isn't already playing
                         const matchCriteria1 = {} as Match.IMongooseMatch;
-                        matchCriteria1.FirstPlayerId = pendingMatchCriteria.PlayerId;
+                        matchCriteria1.FirstPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
                         const matchCriteria2 = {} as Match.IMongooseMatch;
-                        matchCriteria2.SecondPlayerId = pendingMatchCriteria.PlayerId;
+                        matchCriteria2.SecondPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
                         Match.getModel()
                             .findOne({ $or: [matchCriteria1, matchCriteria2] })
                             .then((existingMatch) => {
@@ -174,8 +174,8 @@ router.post(
 
                     } else {
                         const newMatchSkeleton = {} as Match.IMongooseMatch;
-                        newMatchSkeleton.FirstPlayerId = pendingMatch.PlayerId;
-                        newMatchSkeleton.SecondPlayerId = jwtUserObjectId;
+                        newMatchSkeleton.FirstPlayerSide.PlayerId = pendingMatch.PlayerId;
+                        newMatchSkeleton.SecondPlayerSide.PlayerId = jwtUserObjectId;
 
                         Match
                             .create(newMatchSkeleton)
@@ -193,8 +193,8 @@ router.post(
                                         responseData = new net.HttpMessage<DTOs.MatchDto>(
                                             new DTOs.MatchDto(
                                                 createdMatch.id,
-                                                createdMatch.FirstPlayerId.toHexString(),
-                                                createdMatch.SecondPlayerId.toHexString(),
+                                                createdMatch.FirstPlayerSide.PlayerId.toHexString(),
+                                                createdMatch.SecondPlayerSide.PlayerId.toHexString(),
                                                 createdMatch.CreationDateTime));
                                         response
                                             .status(httpStatusCodes.CREATED)
@@ -246,8 +246,8 @@ router.get(
             .then((match) => {
                 const matchDto = new DTOs.MatchDto(
                     match.id,
-                    match.FirstPlayerId.toHexString(),
-                    match.SecondPlayerId.toHexString(),
+                    match.FirstPlayerSide.PlayerId.toHexString(),
+                    match.SecondPlayerSide.PlayerId.toHexString(),
                     match.CreationDateTime);
                 responseData = new net.HttpMessage<DTOs.MatchDto>(matchDto);
                 response

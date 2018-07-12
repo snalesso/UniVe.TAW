@@ -21,21 +21,17 @@
 
 export class RawMessage {
 
-    public constructor(text: string, senderId: number) {
-        this.Text = text;
-        this.SenderId = senderId;
+    public constructor(
+        public readonly Text: string,
+        public readonly SenderId: string) {
     }
-
-    public readonly Text: string;
-    public readonly SenderId: number;
 }
 
 export class TimeStampedMessage extends RawMessage {
 
     public constructor(rawMessage: RawMessage) {
         super(rawMessage.Text, rawMessage.SenderId);
-        this.DateTime = new Date();
     }
 
-    public readonly DateTime: Date;
+    public readonly DateTime: Date = new Date();
 }
