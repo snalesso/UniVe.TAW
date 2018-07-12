@@ -1,4 +1,4 @@
-import * as enums from "../domain/enums/user";
+import * as enums from "../core/identity";
 
 export class SignupRequestDto {
 

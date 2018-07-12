@@ -7,7 +7,7 @@ var Match = require("../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../domain/models/mongodb/mongoose/PendingMatch");
 var DTOs = require("../DTOs/DTOs");
 var httpStatusCodes = require("http-status-codes");
-var net = require("../../libs/unive.taw.framework/net");
+var net = require("../../libs/unive.taw.common/net");
 var expressJwt = require("express-jwt");
 require("colors");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
@@ -29,8 +29,13 @@ router.post("/create", jwtValidator, function (request, response) {
     else {
         var responseData_1 = null;
         var jwtUser = request.user;
-        var jwtUserObjectId_1 = new mongoose.Types.ObjectId(jwtUser.Id);
-        getUserPendingMatches(jwtUserObjectId_1)
+        var jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
+        var pendingMatchCriteria_1 = {};
+        pendingMatchCriteria_1.PlayerId = jwtUserObjectId;
+        return PendingMatch
+            .getModel()
+            // ensure the user has no pending matches opened
+            .findOne(pendingMatchCriteria_1)
             .then(function (existingPendingMatch) {
             if (existingPendingMatch) {
                 responseData_1 = new net.HttpMessage(existingPendingMatch.id, "You already have a pending match!");
@@ -39,24 +44,43 @@ router.post("/create", jwtValidator, function (request, response) {
                     .json(responseData_1);
             }
             else {
-                var pendingMatchSkel = {};
-                pendingMatchSkel.PlayerId = jwtUserObjectId_1;
-                var newPendingMatch = PendingMatch.create(pendingMatchSkel);
-                PendingMatch
-                    .getModel()
-                    .create(newPendingMatch)
-                    .then(function (newPendingMatch) {
-                    responseData_1 = new net.HttpMessage(newPendingMatch.id);
-                    response
-                        .status(httpStatusCodes.CREATED)
-                        .json(responseData_1);
+                // ensure the user isn't already playing
+                var matchCriteria1 = {};
+                matchCriteria1.FirstPlayerId = pendingMatchCriteria_1.PlayerId;
+                var matchCriteria2 = {};
+                matchCriteria2.SecondPlayerId = pendingMatchCriteria_1.PlayerId;
+                Match.getModel()
+                    .findOne({ $or: [matchCriteria1, matchCriteria2] })
+                    .then(function (existingMatch) {
+                    // if the user is already playing
+                    if (existingMatch) {
+                        responseData_1 = new net.HttpMessage(existingMatch.id, "You are already playing!");
+                        response
+                            .status(httpStatusCodes.FORBIDDEN)
+                            .json(responseData_1);
+                    }
+                    else {
+                        // if the user has no pending matches nor matches
+                        var pendingMatchSkel = pendingMatchCriteria_1;
+                        var newPendingMatch = PendingMatch.create(pendingMatchSkel);
+                        PendingMatch
+                            .getModel()
+                            .create(newPendingMatch)
+                            .then(function (newPendingMatch) {
+                            responseData_1 = new net.HttpMessage(newPendingMatch.id);
+                            response
+                                .status(httpStatusCodes.CREATED)
+                                .json(responseData_1);
+                        })
+                            .catch(function (error) {
+                            responseData_1 = new net.HttpMessage(null, error.message);
+                            response
+                                .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                                .json(responseData_1);
+                        });
+                    }
                 })
-                    .catch(function (error) {
-                    responseData_1 = new net.HttpMessage(null, error.message);
-                    response
-                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                        .json(responseData_1);
-                });
+                    .catch();
             }
         })
             .catch(function (error) {
@@ -103,6 +127,7 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
             console.log("Pending match identified".green);
             var jwtUser = request.user;
             var jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
+            // ensure the pending match is not joined by the same player who created it
             if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
                 responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
                 response.status(httpStatusCodes.FORBIDDEN)

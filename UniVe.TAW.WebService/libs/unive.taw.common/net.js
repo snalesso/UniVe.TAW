@@ -1,5 +1,5 @@
 "use strict";
-//namespace unive.taw.framework.net {
+//namespace unive.taw.common.net {
 Object.defineProperty(exports, "__esModule", { value: true });
 var HttpMessage = /** @class */ (function () {
     function HttpMessage(content, 

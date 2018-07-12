@@ -8,7 +8,7 @@ var httpStatusCodes = require("http-status-codes");
 var UsersRouter_1 = require("./routing/UsersRouter");
 var AuthRouter_1 = require("./routing/AuthRouter");
 var MatchesRouter_1 = require("./routing/MatchesRouter");
-var net = require("../libs/unive.taw.framework/net");
+var net = require("../libs/unive.taw.common/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
     function ApiService(port) {

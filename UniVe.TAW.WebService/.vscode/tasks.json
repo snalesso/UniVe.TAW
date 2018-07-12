@@ -12,11 +12,11 @@
             ]
         },
         {
-            "identifier": "compile-export",
-            "label": "Compile and export",
+            "identifier": "export",
+            "label": "Export dependencies to other workspaces libs folders",
             "command": "gulp",
             "args": [
-                "compile-export"
+                "export"
             ],
             "type": "shell",
             "dependsOn": "transpile",

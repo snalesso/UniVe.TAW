@@ -1,17 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function NameOfFunction(fn) {
-    var ret = fn.toString();
+export function NameOfFunction(fn: Function): string {
+    let ret = fn.toString();
     ret = ret.substr('function '.length);
     ret = ret.substr(0, ret.indexOf('('));
     return ret;
 }
-exports.NameOfFunction = NameOfFunction;
-function GetPropertyName(propertyFunction) {
+
+export function GetPropertyName(propertyFunction: Function) {
     return /\.([^\.;]+);?\s*\}$/.exec(propertyFunction.toString())[1];
 }
-exports.GetPropertyName = GetPropertyName;
-function GetAge(birthDate) {
+
+export function GetAge(birthDate: Date) {
     var today = new Date();
     var age = today.getFullYear() - birthDate.getFullYear();
     var m = today.getMonth() - birthDate.getMonth();
@@ -20,5 +18,3 @@ function GetAge(birthDate) {
     }
     return age;
 }
-exports.GetAge = GetAge;
-//# sourceMappingURL=utils.js.map

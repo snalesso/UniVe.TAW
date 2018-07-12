@@ -5,7 +5,7 @@ import * as Match from '../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 import * as DTOs from '../DTOs/DTOs';
 import * as httpStatusCodes from 'http-status-codes';
-import * as net from '../../libs/unive.taw.framework/net';
+import * as net from '../../libs/unive.taw.common/net';
 import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 import 'colors';
@@ -17,8 +17,7 @@ const router: express.Router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-const getUserPendingMatches = function (
-    userId: mongoose.Types.ObjectId): Promise<PendingMatch.IMongoosePendingMatch> {
+const getUserPendingMatches = (userId: mongoose.Types.ObjectId): Promise<PendingMatch.IMongoosePendingMatch> => {
 
     const criteria = {} as PendingMatch.IMongoosePendingMatch;
     criteria.PlayerId = new mongoose.Types.ObjectId(userId);
@@ -43,7 +42,14 @@ router.post(
             const jwtUser = (request.user as DTOs.IUserJWTData);
             const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
-            getUserPendingMatches(jwtUserObjectId)
+
+            const pendingMatchCriteria = {} as PendingMatch.IMongoosePendingMatch;
+            pendingMatchCriteria.PlayerId = jwtUserObjectId;
+
+            return PendingMatch
+                .getModel()
+                // ensure the user has no pending matches opened
+                .findOne(pendingMatchCriteria)
                 .then((existingPendingMatch) => {
 
                     if (existingPendingMatch) {
@@ -52,28 +58,50 @@ router.post(
                             "You already have a pending match!");
                         response
                             .status(httpStatusCodes.FORBIDDEN)
-                            .json(responseData)
+                            .json(responseData);
                     }
                     else {
-                        const pendingMatchSkel = {} as PendingMatch.IMongoosePendingMatch;
-                        pendingMatchSkel.PlayerId = jwtUserObjectId;
-                        const newPendingMatch = PendingMatch.create(pendingMatchSkel);
+                        // ensure the user isn't already playing
+                        const matchCriteria1 = {} as Match.IMongooseMatch;
+                        matchCriteria1.FirstPlayerId = pendingMatchCriteria.PlayerId;
+                        const matchCriteria2 = {} as Match.IMongooseMatch;
+                        matchCriteria2.SecondPlayerId = pendingMatchCriteria.PlayerId;
+                        Match.getModel()
+                            .findOne({ $or: [matchCriteria1, matchCriteria2] })
+                            .then((existingMatch) => {
 
-                        PendingMatch
-                            .getModel()
-                            .create(newPendingMatch)
-                            .then((newPendingMatch) => {
-                                responseData = new net.HttpMessage<string>(newPendingMatch.id);
-                                response
-                                    .status(httpStatusCodes.CREATED)
-                                    .json(responseData);
+                                // if the user is already playing
+                                if (existingMatch) {
+                                    responseData = new net.HttpMessage<string>(
+                                        existingMatch.id,
+                                        "You are already playing!");
+                                    response
+                                        .status(httpStatusCodes.FORBIDDEN)
+                                        .json(responseData);
+                                }
+                                else {
+                                    // if the user has no pending matches nor matches
+                                    const pendingMatchSkel = pendingMatchCriteria;
+                                    const newPendingMatch = PendingMatch.create(pendingMatchSkel);
+
+                                    PendingMatch
+                                        .getModel()
+                                        .create(newPendingMatch)
+                                        .then((newPendingMatch) => {
+                                            responseData = new net.HttpMessage<string>(newPendingMatch.id);
+                                            response
+                                                .status(httpStatusCodes.CREATED)
+                                                .json(responseData);
+                                        })
+                                        .catch((error: mongodb.MongoError) => {
+                                            responseData = new net.HttpMessage<string>(null, error.message);
+                                            response
+                                                .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                                                .json(responseData);
+                                        });
+                                }
                             })
-                            .catch((error: mongodb.MongoError) => {
-                                responseData = new net.HttpMessage<string>(null, error.message);
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            });
+                            .catch();
                     }
                 })
                 .catch((error) => {
@@ -138,6 +166,7 @@ router.post(
                     const jwtUser = (request.user as DTOs.IUserJWTData);
                     const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
+                    // ensure the pending match is not joined by the same player who created it
                     if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
                         responseData = new net.HttpMessage<DTOs.MatchDto>(null, "You cannot join your own match! -.-\"");
                         response.status(httpStatusCodes.FORBIDDEN)

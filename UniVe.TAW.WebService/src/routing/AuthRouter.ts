@@ -5,16 +5,19 @@ import * as httpStatusCodes from 'http-status-codes';
 import * as passport from 'passport';
 import * as passportHTTP from 'passport-http';
 import * as jwt from 'jsonwebtoken';
+import * as expressJwt from 'express-jwt';
 import * as mongodb from 'mongodb';
 
 import * as User from '../domain/models/mongodb/mongoose/User';
 import * as DTOs from '../DTOs/DTOs';
 
-import * as net from '../../libs/unive.taw.framework/net';
+import * as net from '../../libs/unive.taw.common/net';
 
 const router = express.Router();
 
 // middlewares
+
+const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -43,6 +46,7 @@ passport.use(new passportHTTP.BasicStrategy(
 
 // routes
 
+// TODO: check not already logged in
 router.post(
     '/login',
     passport.authenticate('basic', { session: false }),
@@ -79,6 +83,26 @@ router.post(
             .json(responseData);
     });
 
-router.post('/logout', () => { });
+// TODO: check logged in
+// TODO: prevent requests from same account on different devices or set up so that multiple devices receive updates
+router.post(
+    '/logout',
+    jwtValidator,
+    (request: express.Request, response: express.Response) => {
+        const jwtUser = (request.user as DTOs.IUserJWTData);
+        let responseData: net.HttpMessage<boolean>;
+
+        if (!jwtUser) {
+            responseData = new net.HttpMessage<boolean>(false, "You need to be logged in to log out.");
+            response
+                .status(httpStatusCodes.BAD_REQUEST)
+                .json(responseData);
+        } else {
+            responseData = new net.HttpMessage<boolean>(true);
+            response
+                .status(httpStatusCodes.OK)
+                .json(responseData);
+        }
+    });
 
 export default router;

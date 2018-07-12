@@ -1,0 +1,6 @@
+- siluro
+- bomba AoE
+- arma potente che si attiva con una spree di 3/4 centri e fa saltare un turno
+- turni annullati, entrambi possono tirare 4 colpi in 3 secondi senza aspettare l'altro
+- resa
+- possibilità di spostare una barca

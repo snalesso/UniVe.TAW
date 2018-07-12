@@ -22,9 +22,14 @@
     "@types/colors": "^1.2.1",
     "@types/express": "^4.11.1",
     "@types/express-jwt": "0.0.40",
+    "@types/gulp": "^4.0.5",
     "@types/http-status-codes": "^1.2.0",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/mongoose": "^5.0.7",
-    "@types/node": "^9.4.7"
+    "@types/node": "^9.4.7",
+    "gulp": "^3.9.1",
+    "gulp-print": "^5.0.0",
+    "gulp-typescript": "^5.0.0-alpha.3",
+    "typescript": "^2.9.2"
   }
 }

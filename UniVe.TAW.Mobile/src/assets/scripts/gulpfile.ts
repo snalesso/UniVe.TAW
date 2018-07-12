@@ -3,7 +3,6 @@ const gulpTs = require('gulp-typescript');
 const path = require('path');
 const fs = require('fs');
 const colors = require('colors');
-const chalk = require("chalk");
 //const del = require('del');
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
@@ -36,7 +35,7 @@ gulp.task('export', function () {
         try {
             //process.stdout.write('Cleaning'.yellow + ' ' + dirPath + ' ...');
             // del(dirPath);
-            process.stdout.write(chalk.yellow('Copying') + ' to: ' + dirPath + ' ...');
+            process.stdout.write('Copying' + ' to: ' + dirPath + ' ...');
             if (copyTs)
                 rawTs.pipe(gulp.dest(dirPath));
             if (copyJs)

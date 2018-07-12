@@ -1,9 +1,11 @@
-var gulp = require('gulp');
-var gulpTs = require('gulp-typescript');
-var path = require('path');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var gulp = require("gulp");
+var gulpTs = require("gulp-typescript");
+var path = require("path");
 var fs = require('fs');
-var colors = require('colors');
-//const del = require('del');
+require("colors");
+var gulpPrint = require('gulp-print').default;
 var packageJson = JSON.parse(fs.readFileSync('./package.json'));
 var tsProject = gulpTs.createProject('tsconfig.json');
 var copyTs = true;
@@ -17,22 +19,18 @@ var exportDestinationPaths = [
     '../UniVe.TAW.WebSite/src/assets/scripts'
 ]
     .map(function (dirPath) { return path.join(dirPath, packageJson.name); });
-gulp.task('compile-export', function () {
+gulp.task('export', function () {
     var missionName = "Copy of " + packageJson.name;
-    exportSourcePaths.forEach(function (exportSource) {
-        try {
-            exportDestinationPaths.map(function (dp) {
-                return dp + exportSource.replace("src/", "");
-            }).forEach(function (dest) {
-                process.stdout.write('Copying'.yellow + ' to: ' + exportSource + ' ...');
-            });
-            console.log(" DONE".green);
-        }
-        catch (error) {
-            console.log(" FAILED".red);
-            console.log((missionName + " failed - reason: " + error).red);
-        }
+    exportDestinationPaths.forEach(function (dfp) {
+        gulp.src(exportSourcePaths)
+            .pipe(gulpPrint(function (path) { return "Copying ".yellow + path + " to ..."; }))
+            .pipe(gulp.dest(function (sourceFile) {
+            console.log(JSON.stringify(sourceFile));
+            var p = path.join(dfp, sourceFile.base, sourceFile.basename);
+            process.stdout.write(p + " ...");
+            return p;
+        }))
+            .pipe(gulpPrint(function (path) { return " DONE".green; }));
     });
-    console.log((missionName + ' completed').green);
 });
 //# sourceMappingURL=gulpfile.js.map

@@ -7,10 +7,12 @@ var httpStatusCodes = require("http-status-codes");
 var passport = require("passport");
 var passportHTTP = require("passport-http");
 var jwt = require("jsonwebtoken");
+var expressJwt = require("express-jwt");
 var User = require("../domain/models/mongodb/mongoose/User");
-var net = require("../../libs/unive.taw.framework/net");
+var net = require("../../libs/unive.taw.common/net");
 var router = express.Router();
 // middlewares
+var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
@@ -32,6 +34,7 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
     });
 }));
 // routes
+// TODO: check not already logged in
 router.post('/login', passport.authenticate('basic', { session: false }), function (request, response) {
     var user = request.user;
     var statusCode;
@@ -58,6 +61,23 @@ router.post('/login', passport.authenticate('basic', { session: false }), functi
         .status(statusCode)
         .json(responseData);
 });
-router.post('/logout', function () { });
+// TODO: check logged in
+// TODO: prevent requests from same account on different devices or set up so that multiple devices receive updates
+router.post('/logout', jwtValidator, function (request, response) {
+    var jwtUser = request.user;
+    var responseData;
+    if (!jwtUser) {
+        responseData = new net.HttpMessage(false, "You need to be logged in to log out.");
+        response
+            .status(httpStatusCodes.BAD_REQUEST)
+            .json(responseData);
+    }
+    else {
+        responseData = new net.HttpMessage(true);
+        response
+            .status(httpStatusCodes.OK)
+            .json(responseData);
+    }
+});
 exports.default = router;
 //# sourceMappingURL=AuthRouter.js.map

@@ -1,7 +1,8 @@
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
 
-import * as enums from '../../../enums/user';
+import * as identity from '../../../../core/identity';
+import * as Constants from './Constants';
 
 // TODO: add registration date
 
@@ -9,10 +10,11 @@ export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
     Username: string,
     BirthDate: Date,
-    CountryId: enums.Country,
-    Roles: enums.UserRoles,
+    CountryId: identity.Country,
+    Roles: identity.UserRoles,
     Salt: string,
     Digest: string,
+    readonly RegistrationDate: Date,
     setPassword: (pwd: string) => void,
     validatePassword: (pwd: string) => boolean
 }
@@ -22,6 +24,7 @@ export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
 const userSchema = new mongoose.Schema({
     // Id: mongoose.Types.ObjectId,
     Username: {
+        // TODO: http://mongoosejs.com/docs/validation.html#the-unique-option-is-not-a-validator
         type: mongoose.Schema.Types.String,
         unique: true,
         required: true
@@ -30,10 +33,15 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Date,
         required: false
     },
+    RegistrationDate: {
+        type: mongoose.Schema.Types.Date,
+        required: true,
+        default: Date.now
+    },
     Roles: {
         type: mongoose.Schema.Types.Number,
         required: true,
-        default: enums.UserRoles.Player
+        default: identity.UserRoles.Player
     },
     CountryId: {
         type: mongoose.Schema.Types.Number,
@@ -69,7 +77,7 @@ userSchema.methods.validatePassword = function (pwd: string): boolean {
 let userModel;
 export function getModel(): mongoose.Model<IMongooseUser> {
     if (!userModel) {
-        userModel = mongoose.model('User', userSchema); //GetSchema());
+        userModel = mongoose.model(Constants.ModelsNames.User, userSchema); //GetSchema());
     }
     return userModel;
 }

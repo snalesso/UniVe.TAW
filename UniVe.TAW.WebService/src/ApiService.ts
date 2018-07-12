@@ -9,7 +9,7 @@ import UsersRouter from './routing/UsersRouter';
 import AuthRouter from './routing/AuthRouter';
 import MatchesRouter from './routing/MatchesRouter';
 import * as expressJwt from 'express-jwt';
-import * as net from '../libs/unive.taw.framework/net';
+import * as net from '../libs/unive.taw.common/net';
 
 // TODO: rename into WebService?
 export default class ApiService {

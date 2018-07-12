@@ -7,10 +7,10 @@ import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 
 import * as DTOs from '../DTOs/DTOs';
-import * as net from '../../libs/unive.taw.framework/net';
+import * as net from '../../libs/unive.taw.common/net';
 
 import * as User from '../domain/models/mongodb/mongoose/User';
-import * as user_enums from '../domain/enums/user';
+import * as user_enums from '../core/identity';
 
 const router = express.Router();
 

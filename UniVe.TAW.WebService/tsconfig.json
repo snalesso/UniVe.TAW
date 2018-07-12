@@ -6,9 +6,11 @@
     "lib": [
       "es5"
     ],
-    "sourceMap": true
+    "sourceMap": true,
+    "rootDir": "src"
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }
