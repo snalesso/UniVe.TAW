@@ -1,6 +1,22 @@
-- siluro
-- bomba AoE
-- arma potente che si attiva con una spree di 3/4 centri e fa saltare un turno
-- turni annullati, entrambi possono tirare 4 colpi in 3 secondi senza aspettare l'altro
+- attacchi potenziati
+    - siluro: becca tutte le celle di una riga/colonna in sequenza, se colpisce si ferma, salti il turno successivo
+    - bomba AoE:
+        - grande
+        - piccola
+    - napalm: riga da 3 piazzabile
+    - radar: 2x2 o 3x3, piazzabile, dura poco, non puoi colpire lo stesso turno
+- difese
+    - barriera: se il prossimo colpo dell'avversario va a segno lo annulla, l'avversario però sa che ha colpito
+    - antimissile: annulla il prossimo colpo dell'avversario
+    - spostare una barca non colpita durante la partita, e solo in celle non colpite
+- disables
+    - accecamento: l'avversario non vede più dove ha già colpito per X turni
+    - blackout: salta turno
+    - hackeraggio GPS: il prossimo attacco dell'avversario ha il 75% di sbagliare cella andando in una random di entrambi, se va in acqua di chi lancia l'avversario non lo sa
+    - nebbia: l'avversario ha numeri e celle a bordo field randomizzate
+        - punti acqua e colpiti visibili ma countdown per colpire
+        - punti acqua e colpiti NON visibili ma tempo per colpire normale
+- madness
+    - turni annullati, entrambi possono tirare 4 colpi in 3 secondi senza aspettare l'altro
+    - sasso-carta-forbice, chi perde becca un danno su una barca random già colpita ma non affondata, se non ci sono barche colpite non affondate il colpo ne becca una random
 - resa
-- possibilità di spostare una barca
