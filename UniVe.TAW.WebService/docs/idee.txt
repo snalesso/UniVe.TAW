@@ -8,11 +8,14 @@
 - difese
     - barriera: se il prossimo colpo dell'avversario va a segno lo annulla, l'avversario però sa che ha colpito
     - antimissile: annulla il prossimo colpo dell'avversario
+    - manovra difensiva: quando l'avversario spara, puoi schivare il colpo facendo in poco tempo
+        - indovinando tre domande: operazione numerica, colore e nome del colore colorato, ...
+        - toccando subito la cella colpita, tipo 0,5/0,25 secs
     - spostare una barca non colpita durante la partita, e solo in celle non colpite
 - disables
     - accecamento: l'avversario non vede più dove ha già colpito per X turni
     - blackout: salta turno
-    - hackeraggio GPS: il prossimo attacco dell'avversario ha il 75% di sbagliare cella andando in una random di entrambi, se va in acqua di chi lancia l'avversario non lo sa
+    - hackeraggio GPS: il prossimo attacco dell'avversario ha il 75% di sbagliare cella andando in una random non colpita di entrambi, se va in acqua dalla parte di chi lancia l'avversario non lo sa
     - nebbia: l'avversario ha numeri e celle a bordo field randomizzate
         - punti acqua e colpiti visibili ma countdown per colpire
         - punti acqua e colpiti NON visibili ma tempo per colpire normale
