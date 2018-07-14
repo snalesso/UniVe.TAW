@@ -49,27 +49,55 @@ export class MatchAction {
     }
 }
 
-export class MatchSettings {
+export class BattleFieldSettings {
 
-    public static readonly battleFieldMinWidth: number = 10;
-    public static readonly battleFieldMinHeight: number = 10;
-
-    private readonly _availableShips: ShipTypeAvailability[] = [];
+    public static readonly BattleFieldMinWidth: number = 10;
+    public static readonly BattleFieldMinHeight: number = 10;
 
     constructor(
-        public readonly battleFieldWidth: number = MatchSettings.battleFieldMinWidth,
-        public readonly battleFieldHeight: number = MatchSettings.battleFieldMinWidth,
-        private readonly availableShips: ShipTypeAvailability[]) {
+        battleFieldWidth: number = BattleFieldSettings.BattleFieldMinWidth,
+        battleFieldHeight: number = BattleFieldSettings.BattleFieldMinWidth, ) {
 
-        if (this.BattleFieldWidth < MatchSettings.battleFieldMinWidth
-            || this.BattleFieldHeight < MatchSettings.battleFieldMinHeight)
-            throw new Error("invalid BattleField size");
+        if (battleFieldWidth < BattleFieldSettings.BattleFieldMinWidth
+            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight)
+            throw new Error("Invalid BattleField size");
 
-        availableShips.forEach(sa => this._availableShips)
+        this.BattleFieldHeight = battleFieldHeight;
+        this.BattleFieldWidth = battleFieldWidth;
     }
 
     public readonly BattleFieldWidth: number;
     public readonly BattleFieldHeight: number;
+}
+
+export class MatchSettings {
+
+    constructor(
+        battleFieldSettings: BattleFieldSettings = new BattleFieldSettings(),
+        availableShips: ShipTypeAvailability[] = MatchSettings.getDefaultShipTypeAvailability()) {
+
+        if (battleFieldSettings == null)
+            throw new Error("Battle field settings must be specified");
+
+        this.BattleFieldSettings = battleFieldSettings;
+        this._availableShips = availableShips;
+    }
+
+    public readonly BattleFieldSettings: BattleFieldSettings;
+
+    private readonly _availableShips: ShipTypeAvailability[];
+    public getShipTypeAvailability(): ShipTypeAvailability[] {
+        return this._availableShips;
+    }
+
+    public static getDefaultShipTypeAvailability(): ShipTypeAvailability[] {
+        return [
+            new ShipTypeAvailability(ShipType.Cacciatorpediniere, 4),
+            new ShipTypeAvailability(ShipType.Sottomarino, 2),
+            new ShipTypeAvailability(ShipType.Corazzata, 2),
+            new ShipTypeAvailability(ShipType.Portaerei, 1)
+        ];
+    }
 }
 
 // export class ShipBlock {
@@ -173,10 +201,10 @@ export class MatchSettings {
 //             throw new Error("coord is outside battlefield boundaries");
 //     }
 
-//     // TODO: should check coord != undefined too???
+//     // TODO: should check coord != null too???
 //     private isValidCoord(coord: game_common.Coord): boolean {
 //         return coord
-//             && coord != undefined
+//             && coord != null
 //             && coord.X >= 0
 //             && coord.X < this.width
 //             && coord.Y >= 0

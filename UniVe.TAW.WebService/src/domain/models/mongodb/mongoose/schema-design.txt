@@ -1,0 +1,2 @@
+mongoose models interfaces:
+- readonly only on properties which are assigned at document creation time, other properties can be left r/w since their association is already restricted to server side environment which is supposed to know when (and allowed) to change their value, and anyway those properties (like arrays) can be changed even if they are readonly (e.g. <doc>.<array_prop>[0] = <value>)

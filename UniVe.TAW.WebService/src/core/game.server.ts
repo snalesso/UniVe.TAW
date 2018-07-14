@@ -5,7 +5,7 @@ export class ServerSideBattleFieldCell {
     public constructor(
         shipType: game.ShipType = game.ShipType.NoShip,
         hasReceivedFire: boolean = false,
-        receiveFireDateTime?: Date) {
+        receiveFireDateTime: Date = null) {
 
         if ((hasReceivedFire && receiveFireDateTime == null)
             || (!hasReceivedFire && receiveFireDateTime != null))
@@ -29,9 +29,6 @@ export class ServerSideBattleFieldCell {
     }
 
     public receiveFire(): boolean {
-        if (this._hasReceivedFire == true)
-            throw new Error("This cell has already been shot to!");
-
         this._receiveFireDateTime = new Date();
         this._hasReceivedFire = true;
 

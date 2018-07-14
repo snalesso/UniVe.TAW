@@ -5,6 +5,7 @@
         - piccola
     - napalm: riga da 3 piazzabile
     - radar: 2x2 o 3x3, piazzabile, dura poco, non puoi colpire lo stesso turno
+    - doppietta: 2 colpi liberi in sequenza
 - difese
     - barriera: se il prossimo colpo dell'avversario va a segno lo annulla, l'avversario però sa che ha colpito
     - antimissile: annulla il prossimo colpo dell'avversario

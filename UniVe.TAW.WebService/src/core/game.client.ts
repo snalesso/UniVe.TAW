@@ -43,13 +43,15 @@ export class BattleFieldConfigurator {
     public constructor(
         public readonly Width: number,
         public readonly Height: number,
-        readonly availableShips: game.ShipTypeAvailability[]) {
+        availableShips: game.ShipTypeAvailability[]) {
+
         if (this.Height <= 0 || this.Width <= 0)
             throw new Error("Invalid battle field size!");
-        if (this.availableShips == null || this.availableShips.length <= 0)
+        if (availableShips == null || availableShips.length <= 0)
             throw new Error("Cannot play a match without ships!");
 
-        availableShips.forEach(sa => this._avShips[sa.ShipType] = sa.Count);
+        this._availableShips = availableShips;
+        this._availableShips.forEach(sa => this._avShips[sa.ShipType] = sa.Count);
     }
 
     public canPlaceShipOfType(type: game.ShipType): boolean {
