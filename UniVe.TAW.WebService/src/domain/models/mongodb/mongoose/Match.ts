@@ -11,6 +11,7 @@ export interface IMongooseMatch extends mongoose.Document {
     StartDateTime: Date,
     EndDateTime: Date,
     InActionPlayerId: mongoose.Types.ObjectId,
+    // TODO: find other names instead of First & Second? Red & Blue? Black and White?
     FirstPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     // readonly ActionsHistory: game.MatchAction[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
@@ -25,17 +26,17 @@ export interface IMongooseMatch extends mongoose.Document {
 
 const matchSchema = new mongoose.Schema({
     Settings: {
-        required: true,
-        type: game.MatchSettings
+        type: game.MatchSettings,
+        required: true
     },
     CreationDateTime: {
-        required: true,
         type: mongoose.Schema.Types.Date,
+        required: true,
         default: Date.now
     },
     StartDateTime: {
-        required: false,
         type: mongoose.Schema.Types.Date,
+        required: false,
         validate: {
             validator: function (value: Date): boolean {
                 // TODO: check for it to work
@@ -46,8 +47,8 @@ const matchSchema = new mongoose.Schema({
         }
     },
     EndDateTime: {
-        required: false,
         type: mongoose.Schema.Types.Date,
+        required: false,
         validate: {
             validator: function (value: Date): boolean {
                 const _this = (this as IMongooseMatch);

@@ -9,13 +9,13 @@ import * as Constants from './Constants';
 
 export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
-    Username: string,
+    readonly Username: string,
+    readonly RegistrationDate: Date,
     BirthDate: Date,
     CountryId: identity.Country,
     Roles: identity.UserRoles,
     Salt: string,
     Digest: string,
-    readonly RegistrationDate: Date,
     setPassword: (pwd: string) => void,
     validatePassword: (pwd: string) => boolean
 }
