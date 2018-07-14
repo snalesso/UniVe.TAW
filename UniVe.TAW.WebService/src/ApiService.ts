@@ -2,14 +2,14 @@
 import * as bodyParser from 'body-parser';
 import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
-//import * as mongodb from 'mongodb';
 import * as httpStatusCodes from 'http-status-codes';
+import * as expressJwt from 'express-jwt';
 
 import UsersRouter from './routing/UsersRouter';
 import AuthRouter from './routing/AuthRouter';
 import MatchesRouter from './routing/MatchesRouter';
-import * as expressJwt from 'express-jwt';
-import * as net from '../libs/unive.taw.common/net';
+
+import * as net from './core/net';
 
 // TODO: rename into WebService?
 export default class ApiService {

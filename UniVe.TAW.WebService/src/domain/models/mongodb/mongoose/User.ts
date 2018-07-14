@@ -1,13 +1,13 @@
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
 
-import * as identity from '../../../../core/identity';
 import * as Constants from './Constants';
 
-// TODO: add registration date
+import * as identity from '../../../../core/identity';
+
 // TODO: trim username spaces
 
-export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
+export interface IMongooseUser extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
     readonly Username: string,
     readonly RegistrationDate: Date,
@@ -23,7 +23,6 @@ export interface IMongooseUser extends /*contracts.IUser,*/ mongoose.Document {
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
 
 const userSchema = new mongoose.Schema({
-    // Id: mongoose.Types.ObjectId,
     Username: {
         // TODO: http://mongoosejs.com/docs/validation.html#the-unique-option-is-not-a-validator
         type: mongoose.Schema.Types.String,
@@ -58,7 +57,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-//userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
+// TODO: userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
 
 userSchema.methods.setPassword = function (pwd: string): void {
     this.Salt = crypto.randomBytes(16).toString('hex');
@@ -90,11 +89,3 @@ export function create(data: any): IMongooseUser {
 
     return user;
 }
-
-// export function CreateDto(mongoUser: IMongoUser) {
-//     return new auth.UserDto(
-//         JSON.stringify(mongoUser._id),
-//         mongoUser.Username,
-//         utils.GetAge(mongoUser.BirthDate),
-//         mongoUser.CountryId);
-// }

@@ -1,6 +1,8 @@
 import * as mongoose from 'mongoose';
+
 import * as Constants from './Constants';
 import * as MatchPlayerSide from './Match.MatchPlayerSide';
+
 import * as game from '../../../../core/game';
 import * as chat from '../../../../core/chat';
 
@@ -38,7 +40,7 @@ const matchSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Date,
         required: false,
         validate: {
-            validator: function (value: Date): boolean {
+            validator: function (this: IMongooseMatch, value: Date): boolean {
                 // TODO: check for it to work
                 return this.CreationDateTime.getTime() == null
                     && value.getTime() > this.CreationDateTime.getTime();
@@ -50,12 +52,11 @@ const matchSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Date,
         required: false,
         validate: {
-            validator: function (value: Date): boolean {
-                const _this = (this as IMongooseMatch);
+            validator: function (this: IMongooseMatch, value: Date): boolean {
                 // TODO: check for it to work
-                return _this.StartDateTime.getTime() != null
-                    && _this.EndDateTime.getTime() == null
-                    && value.getTime() > _this.StartDateTime.getTime();
+                return this.StartDateTime.getTime() != null
+                    && this.EndDateTime.getTime() == null
+                    && value.getTime() > this.StartDateTime.getTime();
             },
             msg: 'Match cannot end before it starts!'
         }
@@ -69,9 +70,8 @@ const matchSchema = new mongoose.Schema({
         type: MatchPlayerSide.getSchema(),
         required: true,
         validate: {
-            validator: function (value: MatchPlayerSide.IMongooseMatchPlayerSide): boolean {
-                const _this = (this as IMongooseMatch);
-                return _this.FirstPlayerSide == null
+            validator: function (this: IMongooseMatch, value: MatchPlayerSide.IMongooseMatchPlayerSide): boolean {
+                return this.FirstPlayerSide == null
                     && value != null;
             },
             msg: ""
@@ -81,9 +81,8 @@ const matchSchema = new mongoose.Schema({
         type: MatchPlayerSide.getSchema(),
         required: true,
         validate: {
-            validator: function (value: MatchPlayerSide.IMongooseMatchPlayerSide): boolean {
-                const _this = (this as IMongooseMatch);
-                return _this.SecondPlayerSide == null
+            validator: function (this: IMongooseMatch, value: MatchPlayerSide.IMongooseMatchPlayerSide): boolean {
+                return this.SecondPlayerSide == null
                     && value != null;
             }
         }
@@ -114,57 +113,57 @@ const matchSchema = new mongoose.Schema({
     // }
 });
 matchSchema.methods.getOwnerMatchPlayerSide = function (
+    this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId): MatchPlayerSide.IMongooseMatchPlayerSide {
 
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const _this = (this as IMongooseMatch);
-    const playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = (_this.FirstPlayerSide.PlayerId == playerId) ? _this.FirstPlayerSide : _this.SecondPlayerSide;
+    const playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId == playerId) ? this.FirstPlayerSide : this.SecondPlayerSide;
     if (playersSide.PlayerId != playerId)
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return playersSide;
 };
 matchSchema.methods.getEnemyMatchPlayerSide = function (
+    this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId): MatchPlayerSide.IMongooseMatchPlayerSide {
 
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const _this = (this as IMongooseMatch);
-    const enemySide: MatchPlayerSide.IMongooseMatchPlayerSide = (_this.FirstPlayerSide.PlayerId == playerId) ? _this.SecondPlayerSide : _this.FirstPlayerSide;
-    if (_this.SecondPlayerSide.PlayerId != playerId)
+    const enemySide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId == playerId) ? this.SecondPlayerSide : this.FirstPlayerSide;
+    if (this.SecondPlayerSide.PlayerId != playerId)
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return enemySide;
 };
 matchSchema.methods.configFleet = function (
+    this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId,
     fleetConfig: game.ShipPlacement[]): void {
 
-    const _this = (this as IMongooseMatch);
-    const sideToConfig = _this.getOwnerMatchPlayerSide(playerId);
+    const sideToConfig = this.getOwnerMatchPlayerSide(playerId);
     // TODO: check settings compliance
     if (fleetConfig == null || fleetConfig.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
-    sideToConfig.configFleet(_this.Settings.BattleFieldSettings, fleetConfig);
+    sideToConfig.configFleet(this.Settings.BattleFieldSettings, fleetConfig);
 
-    if (_this.FirstPlayerSide.FleetConfig != null
-        && _this.SecondPlayerSide.FleetConfig != null) {
+    if (this.FirstPlayerSide.FleetConfig != null
+        && this.SecondPlayerSide.FleetConfig != null) {
         // TODO: set random starting player, then StartDateTime
-        _this.StartDateTime = new Date();
+        this.StartDateTime = new Date();
     }
 };
 matchSchema.methods.executeAction = function (
+    this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId,
     actionCode: game.MatchActionCode,
     coord: game.Coord): void {
 
     // TODO: check the player is in this match
-    const _this = (this as IMongooseMatch);
 
     switch (actionCode) {
         case game.MatchActionCode.Attack:
-            const targetSide = _this.getEnemyMatchPlayerSide(playerId);
+            const targetSide = this.getEnemyMatchPlayerSide(playerId);
             targetSide.receiveFire(coord);
             break;
 

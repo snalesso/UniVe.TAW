@@ -1,14 +1,18 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
-import * as Match from '../domain/models/mongodb/mongoose/Match';
-import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
-import * as DTOs from '../DTOs/DTOs';
 import * as httpStatusCodes from 'http-status-codes';
-import * as net from '../../libs/unive.taw.common/net';
 import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 import 'colors';
+
+import * as net from '../core/net';
+import * as utils from '../core/utils';
+
+import * as Match from '../domain/models/mongodb/mongoose/Match';
+import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
+
+import * as DTOs from '../DTOs/DTOs';
 
 const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
@@ -19,7 +23,7 @@ router.use(bodyParser.json());
 
 const getUserPendingMatches = (userId: mongoose.Types.ObjectId): Promise<PendingMatch.IMongoosePendingMatch> => {
 
-    const criteria = {} as PendingMatch.IMongoosePendingMatch;
+    const criteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
     criteria.PlayerId = new mongoose.Types.ObjectId(userId);
 
     return PendingMatch
@@ -43,7 +47,7 @@ router.post(
             const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
 
-            const pendingMatchCriteria = {} as PendingMatch.IMongoosePendingMatch;
+            const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
             pendingMatchCriteria.PlayerId = jwtUserObjectId;
 
             return PendingMatch
@@ -61,11 +65,17 @@ router.post(
                             .json(responseData);
                     }
                     else {
+
                         // ensure the user isn't already playing
-                        const matchCriteria1 = {} as Match.IMongooseMatch;
-                        matchCriteria1.FirstPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
-                        const matchCriteria2 = {} as Match.IMongooseMatch;
-                        matchCriteria2.SecondPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
+
+                        const matchCriteria1 = {} as utils.Mutable<Match.IMongooseMatch>;
+                        (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                        (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatchCriteria.PlayerId;
+
+                        const matchCriteria2 = {} as utils.Mutable<Match.IMongooseMatch>;
+                        (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                        (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatchCriteria.PlayerId;
+
                         Match.getModel()
                             .findOne({ $or: [matchCriteria1, matchCriteria2] })
                             .then((existingMatch) => {
@@ -173,9 +183,11 @@ router.post(
                             .json(responseData);
 
                     } else {
-                        const newMatchSkeleton = {} as Match.IMongooseMatch;
-                        newMatchSkeleton.FirstPlayerSide.PlayerId = pendingMatch.PlayerId;
-                        newMatchSkeleton.SecondPlayerSide.PlayerId = jwtUserObjectId;
+                        const newMatchSkeleton = {} as utils.Mutable<Match.IMongooseMatch>;
+                        (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                        (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatch.PlayerId;
+                        (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                        (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = jwtUserObjectId;
 
                         Match
                             .create(newMatchSkeleton)

@@ -8,10 +8,12 @@ import * as jwt from 'jsonwebtoken';
 import * as expressJwt from 'express-jwt';
 import * as mongodb from 'mongodb';
 
-import * as User from '../domain/models/mongodb/mongoose/User';
-import * as DTOs from '../DTOs/DTOs';
+import * as net from '../core/net';
+import * as utils from '../core/utils';
 
-import * as net from '../../libs/unive.taw.common/net';
+import * as User from '../domain/models/mongodb/mongoose/User';
+
+import * as DTOs from '../DTOs/DTOs';
 
 const router = express.Router();
 
@@ -26,7 +28,7 @@ passport.use(new passportHTTP.BasicStrategy(
     (username, password, done) => {
         console.log("Passport validating credentials ... ".yellow);
 
-        const criteria = {} as User.IMongooseUser;
+        const criteria = {} as utils.Mutable<User.IMongooseUser>;
         criteria.Username = username;
         User.getModel()
             .findOne(criteria, (error, user: User.IMongooseUser) => {

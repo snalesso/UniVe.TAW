@@ -1,5 +1,7 @@
 import * as mongoose from 'mongoose';
+
 import * as Constants from './Constants';
+
 import * as game from '../../../../core/game';
 import * as game_server from '../../../../core/game.server';
 import * as game_client from '../../../../core/game.client';
@@ -8,8 +10,8 @@ import * as game_client from '../../../../core/game.client';
 
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
-    FleetConfig: game.ShipPlacement[],
-    BattleFieldCells: game_server.ServerSideBattleFieldCell[][],
+    FleetConfig: ReadonlyArray<game.ShipPlacement>,
+    BattleFieldCells: ReadonlyArray<ReadonlyArray<game_server.ServerSideBattleFieldCell>>,
     configFleet: (battleFieldSettings: game.BattleFieldSettings, fleetConfig: game.ShipPlacement[]) => void,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
@@ -26,7 +28,7 @@ const matchPlayerSideSchema = new mongoose.Schema(
         FleetConfig: {
             type: [game.ShipPlacement],
             validate: {
-                validator: function (value: game.ShipPlacement[]) {
+                validator: function (this: IMongooseMatchPlayerSide, value: game.ShipPlacement[]) {
                     return this.FleetConfig == null // fleetconfig cannot be changed once set
                         && value != null // fleet config cannot be null
                         && value.length > 0; // fleet config cannot be emprty
@@ -36,7 +38,7 @@ const matchPlayerSideSchema = new mongoose.Schema(
         BattleFieldCells: {
             type: [[game_server.ServerSideBattleFieldCell]],
             validate: {
-                validator: function (value: game_server.ServerSideBattleFieldCell[][]) {
+                validator: function (this: IMongooseMatchPlayerSide, value: game_server.ServerSideBattleFieldCell[][]) {
                     return this.FleetConfig != null // fleetconfig must have been set
                         && value != null // fleet config cannot be null
                         && value.length > 0; // fleet config cannot be emprty
@@ -47,20 +49,20 @@ const matchPlayerSideSchema = new mongoose.Schema(
         id: false
     });
 matchPlayerSideSchema.methods.configFleet = function (
+    this: IMongooseMatchPlayerSide,
     battleFieldSettings: game.BattleFieldSettings,
     fleetConfig: game.ShipPlacement[]): void {
 
     // TODO: validate fleet config
 
-    const _this = (this as IMongooseMatchPlayerSide);
-    _this.FleetConfig = fleetConfig;
-    _this.BattleFieldCells = [];
+    this.FleetConfig = fleetConfig;
+    const bfCells = [];
 
     // create empty field
     for (let x = 0; x < battleFieldSettings.BattleFieldWidth; x++) {
-        _this.BattleFieldCells[x] = [];
+        bfCells[x] = [];
         for (let y = 0; y < battleFieldSettings.BattleFieldHeight; y++) {
-            _this.BattleFieldCells[x][y] = new game_server.ServerSideBattleFieldCell();
+            bfCells[x][y] = new game_server.ServerSideBattleFieldCell();
         }
     }
 
@@ -68,24 +70,25 @@ matchPlayerSideSchema.methods.configFleet = function (
     fleetConfig.forEach(sp => {
         for (let i = 0; i < sp.Type; i++) {
             if (sp.Orientation == game.ShipOrientation.Horizontal)
-                _this.BattleFieldCells[sp.Coord.X + i][sp.Coord.Y] = new game_server.ServerSideBattleFieldCell(sp.Type);
+                bfCells[sp.Coord.X + i][sp.Coord.Y] = new game_server.ServerSideBattleFieldCell(sp.Type);
             else
-                _this.BattleFieldCells[sp.Coord.X][sp.Coord.Y + i] = new game_server.ServerSideBattleFieldCell(sp.Type);
+                bfCells[sp.Coord.X][sp.Coord.Y + i] = new game_server.ServerSideBattleFieldCell(sp.Type);
         }
     });
+
+    this.BattleFieldCells = bfCells;
 };
-matchPlayerSideSchema.methods.receiveFire = function (coord: game.Coord): void {
+matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: game.Coord): boolean {
 
-    const _this = (this as IMongooseMatchPlayerSide);
-    const cellStatus = _this.BattleFieldCells[coord.X][coord.Y];
+    const cellStatus = this.BattleFieldCells[coord.X][coord.Y];
 
+    // this check is here to allow blinded player to fire twice on the same cell, alternative might be to check if the player is blind before calling cell.receiveFire() to prevent cell from throwing an exception
     if (cellStatus.HasReceivedFire)
         throw new Error("This cell has already been shot to!");
 
-    this._receiveFireDateTime = new Date();
-    this._hasReceivedFire = true;
+    cellStatus.receiveFire();
 
-    return this.HasReceivedFire;
+    return cellStatus.HasReceivedFire;
 };
 
 export function getSchema() {

@@ -3,7 +3,7 @@ import * as Constants from './Constants';
 
 export interface IMongoosePendingMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
-    PlayerId: mongoose.Types.ObjectId
+    readonly PlayerId: mongoose.Types.ObjectId
 }
 
 const pendingMatchSchema = new mongoose.Schema({

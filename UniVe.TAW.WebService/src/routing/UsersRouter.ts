@@ -2,15 +2,16 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as httpStatusCodes from 'http-status-codes';
-
 import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 
-import * as DTOs from '../DTOs/DTOs';
-import * as net from '../../libs/unive.taw.common/net';
+import * as net from '../core/net';
+import * as identity from '../core/identity';
+import * as utils from '../core/utils';
 
 import * as User from '../domain/models/mongodb/mongoose/User';
-import * as user_enums from '../core/identity';
+
+import * as DTOs from '../DTOs/DTOs';
 
 const router = express.Router();
 
@@ -30,11 +31,11 @@ router.post(
             response.status(httpStatusCodes.FORBIDDEN);
         } else {
             //let feawfw = signupReq as User.IMongoUser;
-            let newUserSkel = {} as User.IMongooseUser;
+            let newUserSkel = {} as utils.Mutable<User.IMongooseUser>;
             newUserSkel.Username = signupReq.Username;
             newUserSkel.CountryId = signupReq.CountryId;
             newUserSkel.BirthDate = signupReq.BirthDate;
-            newUserSkel.Roles = user_enums.UserRoles.Player;
+            newUserSkel.Roles = identity.UserRoles.Player;
 
             let newUser = User.create(newUserSkel);
             newUser.setPassword(signupReq.Password);
@@ -49,7 +50,7 @@ router.post(
                 .catch((error: mongodb.MongoError) => {
                     console.log("user creation failed: " + JSON.stringify(error));
 
-                    const aeuCriteria = {} as User.IMongooseUser;
+                    const aeuCriteria = {} as utils.Mutable<User.IMongooseUser>;
                     aeuCriteria.Username = newUser.Username;
                     User.getModel()
                         .findOne(aeuCriteria)

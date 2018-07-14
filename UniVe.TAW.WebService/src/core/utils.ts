@@ -18,3 +18,7 @@ export function GetAge(birthDate: Date) {
     }
     return age;
 }
+
+export type Mutable<T> = {
+    -readonly [P in keyof T]: T[P];
+};
