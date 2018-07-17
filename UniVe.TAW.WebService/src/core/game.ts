@@ -1,11 +1,16 @@
-export class Coord {
+export interface ICoord {
+    readonly X: number;
+    readonly Y: number;
+}
+
+export class Coord implements ICoord {
 
     public constructor(
         public readonly X: number,
         public readonly Y: number) { }
 }
 
-export declare enum ShipType {
+export enum ShipType {
     NoShip = 0,
     Cacciatorpediniere = 2,
     Sottomarino = 3,
@@ -16,6 +21,12 @@ export declare enum ShipType {
 export enum ShipOrientation {
     Horizontal,
     Vertical
+}
+
+export interface IShipPlacement {
+    Type: ShipType;
+    Coord: Coord;
+    Orientation: ShipOrientation;
 }
 
 export class ShipPlacement {

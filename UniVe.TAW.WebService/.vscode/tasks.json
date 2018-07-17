@@ -9,7 +9,11 @@
             "tsconfig": "tsconfig.json",
             "problemMatcher": [
                 "$tsc"
-            ]
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "identifier": "export",
@@ -19,11 +23,7 @@
                 "export"
             ],
             "type": "shell",
-            "dependsOn": "transpile",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "dependsOn": "transpile"
         }
     ]
 }

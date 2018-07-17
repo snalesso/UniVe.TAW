@@ -4,33 +4,25 @@ export class ServerSideBattleFieldCell {
 
     public constructor(
         shipType: game.ShipType = game.ShipType.NoShip,
-        hasReceivedFire: boolean = false,
-        receiveFireDateTime: Date = null) {
-
-        if ((hasReceivedFire && receiveFireDateTime == null)
-            || (!hasReceivedFire && receiveFireDateTime != null))
-            throw new Error("Mismatch between having been shot and shooting date!");
+        fireReceivedDateTime: Date = null) {
 
         this.ShipType = shipType;
-        this._hasReceivedFire = hasReceivedFire;
-        this._receiveFireDateTime = receiveFireDateTime;
+        this._fireReceivedDateTime = fireReceivedDateTime;
     }
 
     public readonly ShipType: game.ShipType;
 
-    private _hasReceivedFire: boolean;
     public get HasReceivedFire(): boolean {
-        return this._hasReceivedFire;
+        return this._fireReceivedDateTime != null;
     }
 
-    private _receiveFireDateTime: Date;
-    public get ReceiveFireDateTime(): Date {
-        return this._receiveFireDateTime;
+    private _fireReceivedDateTime: Date;
+    public get FireReceivedDateTime(): Date {
+        return this._fireReceivedDateTime;
     }
 
     public receiveFire(): boolean {
-        this._receiveFireDateTime = new Date();
-        this._hasReceivedFire = true;
+        this._fireReceivedDateTime = new Date();
 
         return this.HasReceivedFire;
     }

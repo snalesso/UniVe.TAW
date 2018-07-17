@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var httpStatusCodes = require("http-status-codes");
+var expressJwt = require("express-jwt");
+require("colors");
+var net = require("../core/net");
 var Match = require("../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../domain/models/mongodb/mongoose/PendingMatch");
 var DTOs = require("../DTOs/DTOs");
-var httpStatusCodes = require("http-status-codes");
-var net = require("../../libs/unive.taw.common/net");
-var expressJwt = require("express-jwt");
-require("colors");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -46,9 +46,11 @@ router.post("/create", jwtValidator, function (request, response) {
             else {
                 // ensure the user isn't already playing
                 var matchCriteria1 = {};
-                matchCriteria1.FirstPlayerId = pendingMatchCriteria_1.PlayerId;
+                matchCriteria1.FirstPlayerSide = {};
+                matchCriteria1.FirstPlayerSide.PlayerId = pendingMatchCriteria_1.PlayerId;
                 var matchCriteria2 = {};
-                matchCriteria2.SecondPlayerId = pendingMatchCriteria_1.PlayerId;
+                matchCriteria2.SecondPlayerSide = {};
+                matchCriteria2.SecondPlayerSide.PlayerId = pendingMatchCriteria_1.PlayerId;
                 Match.getModel()
                     .findOne({ $or: [matchCriteria1, matchCriteria2] })
                     .then(function (existingMatch) {
@@ -80,7 +82,7 @@ router.post("/create", jwtValidator, function (request, response) {
                         });
                     }
                 })
-                    .catch();
+                    .catch(); // TODO: handle
             }
         })
             .catch(function (error) {
@@ -135,8 +137,10 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
             }
             else {
                 var newMatchSkeleton = {};
-                newMatchSkeleton.FirstPlayerId = pendingMatch.PlayerId;
-                newMatchSkeleton.SecondPlayerId = jwtUserObjectId;
+                newMatchSkeleton.FirstPlayerSide = {};
+                newMatchSkeleton.FirstPlayerSide.PlayerId = pendingMatch.PlayerId;
+                newMatchSkeleton.SecondPlayerSide = {};
+                newMatchSkeleton.SecondPlayerSide.PlayerId = jwtUserObjectId;
                 Match
                     .create(newMatchSkeleton)
                     .save()
@@ -146,7 +150,7 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
                         .findByIdAndRemove(pendingMatch._id)
                         .then(function (deletedPendingMatch) {
                         console.log("Pending match deleted".green);
-                        responseData = new net.HttpMessage(new DTOs.MatchDto(createdMatch.id, createdMatch.FirstPlayerId.toHexString(), createdMatch.SecondPlayerId.toHexString(), createdMatch.CreationDateTime));
+                        responseData = new net.HttpMessage(new DTOs.MatchDto(createdMatch.id, createdMatch.FirstPlayerSide.PlayerId.toHexString(), createdMatch.SecondPlayerSide.PlayerId.toHexString(), createdMatch.CreationDateTime));
                         response
                             .status(httpStatusCodes.CREATED)
                             .json(responseData);
@@ -183,7 +187,7 @@ router.get("/:" + matchIdKey, function (request, response) {
     Match.getModel()
         .findById(matchId)
         .then(function (match) {
-        var matchDto = new DTOs.MatchDto(match.id, match.FirstPlayerId.toHexString(), match.SecondPlayerId.toHexString(), match.CreationDateTime);
+        var matchDto = new DTOs.MatchDto(match.id, match.FirstPlayerSide.PlayerId.toHexString(), match.SecondPlayerSide.PlayerId.toHexString(), match.CreationDateTime);
         responseData = new net.HttpMessage(matchDto);
         response
             .status(httpStatusCodes.OK)

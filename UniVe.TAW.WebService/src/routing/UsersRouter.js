@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bodyParser = require("body-parser");
 var express = require("express");
 var httpStatusCodes = require("http-status-codes");
-var DTOs = require("../DTOs/DTOs");
-var net = require("../../libs/unive.taw.common/net");
+var net = require("../core/net");
+var identity = require("../core/identity");
 var User = require("../domain/models/mongodb/mongoose/User");
-var user_enums = require("../domain/enums/user");
+var DTOs = require("../DTOs/DTOs");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -23,7 +23,7 @@ router.post('/signup', function (request, response, next) {
         newUserSkel.Username = signupReq.Username;
         newUserSkel.CountryId = signupReq.CountryId;
         newUserSkel.BirthDate = signupReq.BirthDate;
-        newUserSkel.Roles = user_enums.UserRoles.Player;
+        newUserSkel.Roles = identity.UserRoles.Player;
         var newUser_1 = User.create(newUserSkel);
         newUser_1.setPassword(signupReq.Password);
         newUser_1.save()

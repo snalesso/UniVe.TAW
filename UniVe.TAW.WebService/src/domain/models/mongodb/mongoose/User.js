@@ -2,11 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var crypto = require("crypto");
-var enums = require("../../../enums/user");
+var Constants = require("./Constants");
+var identity = require("../../../../core/identity");
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
 var userSchema = new mongoose.Schema({
-    // Id: mongoose.Types.ObjectId,
     Username: {
+        // TODO: http://mongoosejs.com/docs/validation.html#the-unique-option-is-not-a-validator
         type: mongoose.Schema.Types.String,
         unique: true,
         required: true
@@ -15,10 +16,15 @@ var userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.Date,
         required: false
     },
+    RegistrationDate: {
+        type: mongoose.Schema.Types.Date,
+        required: true,
+        default: Date.now
+    },
     Roles: {
         type: mongoose.Schema.Types.Number,
         required: true,
-        default: enums.UserRoles.Player
+        default: identity.UserRoles.Player
     },
     CountryId: {
         type: mongoose.Schema.Types.Number,
@@ -33,7 +39,7 @@ var userSchema = new mongoose.Schema({
         required: true
     }
 });
-//userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
+// TODO: userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
 userSchema.methods.setPassword = function (pwd) {
     this.Salt = crypto.randomBytes(16).toString('hex');
     var hmac = crypto.createHmac('sha512', this.Salt);
@@ -50,7 +56,7 @@ userSchema.methods.validatePassword = function (pwd) {
 var userModel;
 function getModel() {
     if (!userModel) {
-        userModel = mongoose.model('User', userSchema); //GetSchema());
+        userModel = mongoose.model(Constants.ModelsNames.User, userSchema); //GetSchema());
     }
     return userModel;
 }
@@ -62,11 +68,4 @@ function create(data) {
     return user;
 }
 exports.create = create;
-// export function CreateDto(mongoUser: IMongoUser) {
-//     return new auth.UserDto(
-//         JSON.stringify(mongoUser._id),
-//         mongoUser.Username,
-//         utils.GetAge(mongoUser.BirthDate),
-//         mongoUser.CountryId);
-// }
 //# sourceMappingURL=User.js.map

@@ -12,7 +12,7 @@ var copyTs = true;
 var copyDTs = false;
 var copyJs = false;
 var exportSourcePaths = [
-    "src/DTOs"
+    "./src/DTOs"
 ];
 var exportDestinationPaths = [
     ,

@@ -3,12 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
-//import * as mongodb from 'mongodb';
 var httpStatusCodes = require("http-status-codes");
 var UsersRouter_1 = require("./routing/UsersRouter");
 var AuthRouter_1 = require("./routing/AuthRouter");
 var MatchesRouter_1 = require("./routing/MatchesRouter");
-var net = require("../libs/unive.taw.common/net");
+var net = require("./core/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
     function ApiService(port) {

@@ -1,6 +1,10 @@
 import * as mongoose from 'mongoose';
 
 import * as Constants from './Constants';
+import * as Coord from './Coord';
+import * as ShipPlacement from './ShipPlacement';
+import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
+import * as BattleFieldSettings from './BattleFieldSettings';
 
 import * as game from '../../../../core/game';
 import * as game_server from '../../../../core/game.server';
@@ -10,12 +14,13 @@ import * as game_client from '../../../../core/game.client';
 
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
-    FleetConfig: ReadonlyArray<game.ShipPlacement>,
-    BattleFieldCells: ReadonlyArray<ReadonlyArray<game_server.ServerSideBattleFieldCell>>,
-    configFleet: (battleFieldSettings: game.BattleFieldSettings, fleetConfig: game.ShipPlacement[]) => void,
+    FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
+    BattleFieldCells: ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
+    // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
+    configFleet: (battleFieldSettings: BattleFieldSettings.IMongooseBattleFieldSettings, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
-    receiveFire: (coord: game.Coord) => boolean // returns true if something has been hit, false if water, exception if it was already hit
+    receiveFire: (coord: Coord.IMongooseCoord) => boolean // returns true if something has been hit, false if water, exception if it was already hit
 }
 
 const matchPlayerSideSchema = new mongoose.Schema(
@@ -26,9 +31,9 @@ const matchPlayerSideSchema = new mongoose.Schema(
             required: true
         },
         FleetConfig: {
-            type: [game.ShipPlacement],
+            type: [ShipPlacement.getSchema()],
             validate: {
-                validator: function (this: IMongooseMatchPlayerSide, value: game.ShipPlacement[]) {
+                validator: function validator(this: IMongooseMatchPlayerSide, value: ShipPlacement.IMongooseShipPlacement[]) {
                     return this.FleetConfig == null // fleetconfig cannot be changed once set
                         && value != null // fleet config cannot be null
                         && value.length > 0; // fleet config cannot be emprty
@@ -36,9 +41,9 @@ const matchPlayerSideSchema = new mongoose.Schema(
             }
         },
         BattleFieldCells: {
-            type: [[game_server.ServerSideBattleFieldCell]],
+            type: [[ServerSideBattleFieldCell.getSchema()]],
             validate: {
-                validator: function (this: IMongooseMatchPlayerSide, value: game_server.ServerSideBattleFieldCell[][]) {
+                validator: function (this: IMongooseMatchPlayerSide, value: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][]) {
                     return this.FleetConfig != null // fleetconfig must have been set
                         && value != null // fleet config cannot be null
                         && value.length > 0; // fleet config cannot be emprty
@@ -50,8 +55,8 @@ const matchPlayerSideSchema = new mongoose.Schema(
     });
 matchPlayerSideSchema.methods.configFleet = function (
     this: IMongooseMatchPlayerSide,
-    battleFieldSettings: game.BattleFieldSettings,
-    fleetConfig: game.ShipPlacement[]): void {
+    battleFieldSettings: BattleFieldSettings.IMongooseBattleFieldSettings,
+    fleetConfig: ShipPlacement.IMongooseShipPlacement[]): void {
 
     // TODO: validate fleet config
 
@@ -78,7 +83,7 @@ matchPlayerSideSchema.methods.configFleet = function (
 
     this.BattleFieldCells = bfCells;
 };
-matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: game.Coord): boolean {
+matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: Coord.IMongooseCoord): boolean {
 
     const cellStatus = this.BattleFieldCells[coord.X][coord.Y];
 

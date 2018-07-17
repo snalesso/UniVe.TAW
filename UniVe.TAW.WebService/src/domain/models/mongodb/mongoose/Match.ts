@@ -1,14 +1,19 @@
 import * as mongoose from 'mongoose';
 
 import * as Constants from './Constants';
-import * as MatchPlayerSide from './Match.MatchPlayerSide';
+import * as MatchPlayerSide from './MatchPlayerSide';
+import * as ShipPlacement from './ShipPlacement';
+import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
+import * as BattleFieldSettings from './BattleFieldSettings';
+import * as MatchSettings from './MatchSettings';
+import * as Coord from './Coord';
 
 import * as game from '../../../../core/game';
 import * as chat from '../../../../core/chat';
 
 export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
-    readonly Settings: game.MatchSettings,
+    readonly Settings: MatchSettings.IMongooseMatchSettings,
     readonly CreationDateTime: Date,
     StartDateTime: Date,
     EndDateTime: Date,
@@ -18,7 +23,7 @@ export interface IMongooseMatch extends mongoose.Document {
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     // readonly ActionsHistory: game.MatchAction[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
-    configFleet: (playerId: mongoose.Types.ObjectId, fleetConfig: game.ShipPlacement[]) => void,
+    configFleet: (playerId: mongoose.Types.ObjectId, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
     executeAction: (playerId: mongoose.Types.ObjectId, actionCode: game.MatchActionCode) => void,
     //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
     getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,
@@ -28,7 +33,7 @@ export interface IMongooseMatch extends mongoose.Document {
 
 const matchSchema = new mongoose.Schema({
     Settings: {
-        type: game.MatchSettings,
+        type: MatchSettings.getSchema(),
         required: true
     },
     CreationDateTime: {
@@ -74,7 +79,7 @@ const matchSchema = new mongoose.Schema({
                 return this.FirstPlayerSide == null
                     && value != null;
             },
-            msg: ""
+            msg: "" // TODO: add error message (anche sulle altre colonne)
         }
     },
     SecondPlayerSide: {
@@ -139,13 +144,13 @@ matchSchema.methods.getEnemyMatchPlayerSide = function (
 matchSchema.methods.configFleet = function (
     this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId,
-    fleetConfig: game.ShipPlacement[]): void {
+    fleetConfig: ShipPlacement.IMongooseShipPlacement[]): void {
 
     const sideToConfig = this.getOwnerMatchPlayerSide(playerId);
     // TODO: check settings compliance
     if (fleetConfig == null || fleetConfig.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
-    sideToConfig.configFleet(this.Settings.BattleFieldSettings, fleetConfig);
+    sideToConfig.configFleet(this.Settings.BattleFieldSettings as BattleFieldSettings.IMongooseBattleFieldSettings, fleetConfig);
 
     if (this.FirstPlayerSide.FleetConfig != null
         && this.SecondPlayerSide.FleetConfig != null) {
@@ -157,7 +162,7 @@ matchSchema.methods.executeAction = function (
     this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId,
     actionCode: game.MatchActionCode,
-    coord: game.Coord): void {
+    coord: Coord.IMongooseCoord): void {
 
     // TODO: check the player is in this match
 

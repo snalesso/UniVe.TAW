@@ -1,15 +1,18 @@
 "use strict";
-//namespace unive.taw.common.net {
 Object.defineProperty(exports, "__esModule", { value: true });
 var HttpMessage = /** @class */ (function () {
-    function HttpMessage(content, 
-    //public readonly error?: Object,
-    errorMessage) {
-        this.content = content;
-        this.errorMessage = errorMessage;
+    function HttpMessage(Content, ErrorMessage) {
+        this.Content = Content;
+        this.ErrorMessage = ErrorMessage;
     }
+    Object.defineProperty(HttpMessage.prototype, "HasError", {
+        get: function () {
+            return this.ErrorMessage != null;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return HttpMessage;
 }());
 exports.HttpMessage = HttpMessage;
-//}
 //# sourceMappingURL=net.js.map

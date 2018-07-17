@@ -29,7 +29,7 @@ const getUserPendingMatches = (userId: mongoose.Types.ObjectId): Promise<Pending
     return PendingMatch
         .getModel()
         .findOne(criteria);
-}
+};
 
 router.post(
     "/create",
@@ -45,7 +45,6 @@ router.post(
 
             const jwtUser = (request.user as DTOs.IUserJWTData);
             const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
-
 
             const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
             pendingMatchCriteria.PlayerId = jwtUserObjectId;
@@ -111,7 +110,7 @@ router.post(
                                         });
                                 }
                             })
-                            .catch();
+                            .catch(); // TODO: handle
                     }
                 })
                 .catch((error) => {
