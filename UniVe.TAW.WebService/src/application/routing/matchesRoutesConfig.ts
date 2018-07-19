@@ -128,21 +128,22 @@ router.get(
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
-        let responseData: net.HttpMessage<DTOs.PendingMatchDto[]> = null;
+        let responseData: net.HttpMessage<DTOs.IPendingMatchDto[]> = null;
 
         PendingMatch.getModel()
             .find()
             .then((matches) => {
-                let matchDtos = matches.map((m) => new DTOs.PendingMatchDto(
-                    m.id,
-                    m.PlayerId.toHexString()));
-                responseData = new net.HttpMessage<DTOs.PendingMatchDto[]>(matchDtos);
+                let matchDtos = matches.map((m) => ({
+                    Id: m._id.toHexString(),
+                    PlayerId: m.PlayerId.toHexString()
+                } as DTOs.IPendingMatchDto));
+                responseData = new net.HttpMessage<DTOs.IPendingMatchDto[]>(matchDtos);
                 response
                     .status(httpStatusCodes.OK)
                     .json(matchDtos);
             })
             .catch((error: mongodb.MongoError) => {
-                responseData = new net.HttpMessage<DTOs.PendingMatchDto[]>(null, error.message);
+                responseData = new net.HttpMessage<DTOs.IPendingMatchDto[]>(null, error.message);
                 response
                     .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(responseData);
@@ -155,12 +156,12 @@ router.post(
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
-        let responseData: net.HttpMessage<DTOs.MatchDto> = null;
+        let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
 
         const pendingMatchId = request.params[pendingMatchIdKey];
 
         if (!pendingMatchId) {
-            responseData = new net.HttpMessage<DTOs.MatchDto>(null, "Unable to find requested match");
+            responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "Unable to find requested match");
             response
                 .status(httpStatusCodes.BAD_REQUEST)
                 .json(responseData);
@@ -177,7 +178,7 @@ router.post(
 
                     // ensure the pending match is not joined by the same player who created it
                     if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
-                        responseData = new net.HttpMessage<DTOs.MatchDto>(null, "You cannot join your own match! -.-\"");
+                        responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "You cannot join your own match! -.-\"");
                         response.status(httpStatusCodes.FORBIDDEN)
                             .json(responseData);
 
@@ -201,12 +202,14 @@ router.post(
 
                                         console.log(chalk.green("Pending match deleted"));
 
-                                        responseData = new net.HttpMessage<DTOs.MatchDto>(
-                                            new DTOs.MatchDto(
-                                                createdMatch.id,
-                                                createdMatch.FirstPlayerSide.PlayerId.toHexString(),
-                                                createdMatch.SecondPlayerSide.PlayerId.toHexString(),
-                                                createdMatch.CreationDateTime));
+                                        responseData = new net.HttpMessage<DTOs.IMatchDto>(
+                                            {
+                                                Id: createdMatch.id,
+                                                FirstPlayerId: createdMatch.FirstPlayerSide.PlayerId.toHexString(),
+                                                SecondPlayerId: createdMatch.SecondPlayerSide.PlayerId.toHexString(),
+                                                CreationDateTime: createdMatch.CreationDateTime
+                                            } as DTOs.IMatchDto);
+
                                         response
                                             .status(httpStatusCodes.CREATED)
                                             .json(responseData);
@@ -215,7 +218,7 @@ router.post(
 
                                         console.log(chalk.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
 
-                                        responseData = new net.HttpMessage<DTOs.MatchDto>(
+                                        responseData = new net.HttpMessage<DTOs.IMatchDto>(
                                             null,
                                             "Unable to delete pendingMatch after creating the real match. Reason: " + error.message);
                                         response
@@ -224,7 +227,7 @@ router.post(
                                     });
                             })
                             .catch((error: mongodb.MongoError) => {
-                                responseData = new net.HttpMessage<DTOs.MatchDto>(null, error.message);
+                                responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
                                 response
                                     .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                                     .json(responseData);
@@ -233,7 +236,7 @@ router.post(
                 })
                 .catch((error: mongodb.MongoError) => {
                     console.log(chalk.red("Could not find requested pending match"));
-                    responseData = new net.HttpMessage<DTOs.MatchDto>(
+                    responseData = new net.HttpMessage<DTOs.IMatchDto>(
                         null,
                         "Unable to find requested pending match. Reason: " + error.message);
                     response
@@ -248,25 +251,26 @@ router.get(
     "/:" + matchIdKey,
     (request: express.Request, response: express.Response) => {
 
-        let responseData: net.HttpMessage<DTOs.MatchDto> = null;
+        let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
 
         const matchId = request.params[matchIdKey];
 
         Match.getModel()
             .findById(matchId)
             .then((match) => {
-                const matchDto = new DTOs.MatchDto(
-                    match.id,
-                    match.FirstPlayerSide.PlayerId.toHexString(),
-                    match.SecondPlayerSide.PlayerId.toHexString(),
-                    match.CreationDateTime);
-                responseData = new net.HttpMessage<DTOs.MatchDto>(matchDto);
+                const matchDto = {
+                    Id: match.id,
+                    FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
+                    SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
+                    CreationDateTime: match.CreationDateTime
+                } as DTOs.IMatchDto;
+                responseData = new net.HttpMessage<DTOs.IMatchDto>(matchDto);
                 response
                     .status(httpStatusCodes.OK)
                     .json(matchDto);
             })
             .catch((error: mongodb.MongoError) => {
-                responseData = new net.HttpMessage<DTOs.MatchDto>(null, error.message);
+                responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
                 response
                     .status(httpStatusCodes.INTERNAL_SERVER_ERROR) // TODO: INTERNAL_SERVER_ERROR or NOT_FOUND?
                     .json(responseData);

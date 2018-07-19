@@ -6,7 +6,6 @@ var httpStatusCodes = require("http-status-codes");
 var net = require("../../infrastructure/net");
 var identity = require("../../infrastructure/identity");
 var User = require("../../domain/models/mongodb/mongoose/User");
-var DTOs = require("../../application/DTOs");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -68,7 +67,12 @@ router.get("/:" + userIdKey, function (request, response, next) {
     User.getModel()
         .findById(userId)
         .then(function (mongoUser) {
-        var userDto = new DTOs.UserDto(mongoUser.id, mongoUser.Username, -1, mongoUser.CountryId);
+        var userDto = {
+            Id: mongoUser.id,
+            Username: mongoUser.Username,
+            Age: -1,
+            CountryId: mongoUser.CountryId
+        };
         responseData = new net.HttpMessage(userDto);
         response
             .status(httpStatusCodes.OK)

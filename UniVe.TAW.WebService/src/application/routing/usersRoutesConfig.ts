@@ -24,7 +24,7 @@ router.post(
 
         let responseData: net.HttpMessage<boolean>;
 
-        const signupReq = request.body as DTOs.SignupRequestDto;
+        const signupReq = request.body as DTOs.ISignupRequestDto;
 
         // TODO: test all branches
         if (!signupReq) {
@@ -83,23 +83,24 @@ router.get(
     (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
         const userId = request.params[userIdKey];
-        let responseData: net.HttpMessage<DTOs.UserDto> = null;
+        let responseData: net.HttpMessage<DTOs.IUserDto> = null;
 
         User.getModel()
             .findById(userId)
             .then((mongoUser) => {
-                let userDto: DTOs.UserDto = new DTOs.UserDto(
-                    mongoUser.id,
-                    mongoUser.Username,
-                    -1,
-                    mongoUser.CountryId);
-                responseData = new net.HttpMessage<DTOs.UserDto>(userDto);
+                let userDto: DTOs.IUserDto = {
+                    Id: mongoUser.id,
+                    Username: mongoUser.Username,
+                    Age: - 1,
+                    CountryId: mongoUser.CountryId
+                };
+                responseData = new net.HttpMessage<DTOs.IUserDto>(userDto);
                 response
                     .status(httpStatusCodes.OK)
                     .json(responseData);
             })
             .catch((error: mongodb.MongoError) => {
-                responseData = new net.HttpMessage<DTOs.UserDto>(null, error.message);
+                responseData = new net.HttpMessage<DTOs.IUserDto>(null, error.message);
                 response
                     .status(httpStatusCodes.OK)
                     .json(responseData);

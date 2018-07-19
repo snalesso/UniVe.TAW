@@ -8,7 +8,6 @@ var expressJwt = require("express-jwt");
 var net = require("../../infrastructure/net");
 var Match = require("../../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../../domain/models/mongodb/mongoose/PendingMatch");
-var DTOs = require("../../application/DTOs");
 var chalk_1 = require("chalk");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
@@ -99,7 +98,10 @@ router.get("/pending", jwtValidator, function (request, response) {
     PendingMatch.getModel()
         .find()
         .then(function (matches) {
-        var matchDtos = matches.map(function (m) { return new DTOs.PendingMatchDto(m.id, m.PlayerId.toHexString()); });
+        var matchDtos = matches.map(function (m) { return ({
+            Id: m._id.toHexString(),
+            PlayerId: m.PlayerId.toHexString()
+        }); });
         responseData = new net.HttpMessage(matchDtos);
         response
             .status(httpStatusCodes.OK)
@@ -150,7 +152,12 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
                         .findByIdAndRemove(pendingMatch._id)
                         .then(function (deletedPendingMatch) {
                         console.log(chalk_1.default.green("Pending match deleted"));
-                        responseData = new net.HttpMessage(new DTOs.MatchDto(createdMatch.id, createdMatch.FirstPlayerSide.PlayerId.toHexString(), createdMatch.SecondPlayerSide.PlayerId.toHexString(), createdMatch.CreationDateTime));
+                        responseData = new net.HttpMessage({
+                            Id: createdMatch.id,
+                            FirstPlayerId: createdMatch.FirstPlayerSide.PlayerId.toHexString(),
+                            SecondPlayerId: createdMatch.SecondPlayerSide.PlayerId.toHexString(),
+                            CreationDateTime: createdMatch.CreationDateTime
+                        });
                         response
                             .status(httpStatusCodes.CREATED)
                             .json(responseData);
@@ -187,7 +194,12 @@ router.get("/:" + matchIdKey, function (request, response) {
     Match.getModel()
         .findById(matchId)
         .then(function (match) {
-        var matchDto = new DTOs.MatchDto(match.id, match.FirstPlayerSide.PlayerId.toHexString(), match.SecondPlayerSide.PlayerId.toHexString(), match.CreationDateTime);
+        var matchDto = {
+            Id: match.id,
+            FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
+            SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
+            CreationDateTime: match.CreationDateTime
+        };
         responseData = new net.HttpMessage(matchDto);
         response
             .status(httpStatusCodes.OK)

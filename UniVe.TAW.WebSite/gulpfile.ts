@@ -1,30 +1,26 @@
 import * as gulp from 'gulp';
-import * as gulpTs from 'gulp-typescript';
+import gulpPrint from 'gulp-print';
 import * as path from 'path';
 const del = require('del');
-// import * as fs from 'fs';
-const fs = require('fs');
-//import 'colors';
 import chalk from 'chalk';
-import gulpPrint from 'gulp-print';
 
-const packageJson = JSON.parse(fs.readFileSync('./package.json'));
-const tsProject = gulpTs.createProject('tsconfig.json');
-
-const copyTs = true;
-const copyDTs = false;
-const copyJs = false;
 
 const importDestPath = "./src/assets/imported";
 const imports: { bundleName: string, filePaths: string[] }[] = [
     {
-        bundleName: "unive.taw.webservice",
+        bundleName: path.join("unive.taw.webservice", "infrastructure"),
         filePaths: [
-            "../UniVe.TAW.WebService/src/core/net.ts",
-            "../UniVe.TAW.WebService/src/core/identity.ts",
-            "../UniVe.TAW.WebService/src/core/game.ts",
-            "../UniVe.TAW.WebService/src/core/game.client.ts",
-            "../UniVe.TAW.WebService/src/core/chat.ts"
+            "../UniVe.TAW.WebService/src/infrastructure/net.ts",
+            "../UniVe.TAW.WebService/src/infrastructure/identity.ts",
+            "../UniVe.TAW.WebService/src/infrastructure/game.ts",
+            "../UniVe.TAW.WebService/src/infrastructure/game.client.ts",
+            "../UniVe.TAW.WebService/src/infrastructure/chat.ts"
+        ]
+    },
+    {
+        bundleName: path.join("unive.taw.webservice", "application"),
+        filePaths: [
+            "../UniVe.TAW.WebService/src/application/DTOs.ts"
         ]
     }
 ];
@@ -43,23 +39,6 @@ gulp.task("import", ["clean-imports"], () => {
             .pipe(gulpPrint(filePathToImport => chalk.yellow("Importing ") + filePathToImport + " ..."))
             .pipe(gulp.dest(sourceFile => path.join(importDestPath, imp.bundleName)));
     });
-
-    //console.log(chalk.green("DONE") + " importing " + imp.bundleName + " ...");
 });
 
 gulp.task("test", ["import"]);
-
-// gulp.task('import', function () {
-
-//     let missionName = "Copy of " + packageJson.name;
-
-//     gulp.src(imports)
-//         .pipe(gulpPrint(filePathToImport => chalk.yellow("Copying ") + filePathToImport + " to ..."))
-//         .pipe(gulp.dest(sourceFile => {
-//             console.log(JSON.stringify(sourceFile));
-//             let p = path.join(importDestPath, sourceFile.base, sourceFile.basename);
-//             process.stdout.write(p + " ...");
-//             return p;
-//         }))
-//         .pipe(gulpPrint(path => chalk.green(" DONE")));
-// });

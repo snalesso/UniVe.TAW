@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import * as $ from 'jquery';
 
-import * as identity from '../../assets/imported/unive.taw.webservice/identity';
+import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
 
 @Component({
   selector: 'app-signup',
@@ -12,7 +12,7 @@ import * as identity from '../../assets/imported/unive.taw.webservice/identity';
 })
 export class SignupComponent implements OnInit {
 
-  public readonly signupRequest = new auth.SignupRequestDto();
+  public readonly signupRequest = new DTOs.SignupRequestDto();
 
   constructor(private readonly authService: AuthService, private readonly router: Router) {
     let countries = Object
