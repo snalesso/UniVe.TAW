@@ -6,13 +6,13 @@ import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 import 'colors';
 
-import * as net from '../core/net';
-import * as utils from '../core/utils';
+import * as net from '../../infrastructure/net';
+import * as utils from '../../infrastructure/utils';
 
-import * as Match from '../domain/models/mongodb/mongoose/Match';
-import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
+import * as Match from '../../domain/models/mongodb/mongoose/Match';
+import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
-import * as DTOs from '../DTOs/DTOs';
+import * as DTOs from '../../application/DTOs';
 
 const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 

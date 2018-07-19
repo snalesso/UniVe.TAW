@@ -9,10 +9,11 @@
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}\\serve",
-            "preLaunchTask": "tsc: build - tsconfig.json",
             "outFiles": [
                 "${workspaceFolder}/dist/out-tsc/**/*.js"
-            ]
+            ],
+            "preLaunchTask": "transpile",
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

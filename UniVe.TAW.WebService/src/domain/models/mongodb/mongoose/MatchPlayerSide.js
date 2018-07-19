@@ -4,8 +4,8 @@ var mongoose = require("mongoose");
 var Constants = require("./Constants");
 var ShipPlacement = require("./ShipPlacement");
 var ServerSideBattleFieldCell = require("./ServerSideBattleFieldCell");
-var game = require("../../../../core/game");
-var game_server = require("../../../../core/game.server");
+var game = require("../../../../infrastructure/game");
+var game_server = require("../../../../infrastructure/game.server");
 var matchPlayerSideSchema = new mongoose.Schema({
     PlayerId: {
         type: mongoose.Schema.Types.ObjectId,

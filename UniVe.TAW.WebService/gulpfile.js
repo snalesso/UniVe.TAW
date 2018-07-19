@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var gulp = require("gulp");
 var gulpTs = require("gulp-typescript");
 var path = require("path");
+// import * as fs from 'fs';
 var fs = require('fs');
 require("colors");
 var gulpPrint = require('gulp-print').default;
@@ -15,6 +16,7 @@ var exportSourcePaths = [
     "./src/DTOs"
 ];
 var exportDestinationPaths = [
+    // D:\Dev\Repos\GitHub\snalesso\UniVe.TAW\UniVe.TAW.WebSite\src\assets\scripts
     ,
     '../UniVe.TAW.WebSite/src/assets/scripts'
 ]

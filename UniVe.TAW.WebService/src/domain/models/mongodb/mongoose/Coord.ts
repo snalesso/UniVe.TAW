@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import * as game from '../../../../core/game';
+import * as game from '../../../../infrastructure/game';
 
 export type IMongooseCoord = game.Coord & mongoose.Document;
 

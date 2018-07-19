@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
-var game = require("../../../../core/game");
+var game = require("../../../../infrastructure/game");
 // TODO: ensure cant be NoShip & positive count
 var shipTypeAvailabilitySchema = new mongoose.Schema({
     ShipType: {

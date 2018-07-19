@@ -8,12 +8,12 @@ import * as jwt from 'jsonwebtoken';
 import * as expressJwt from 'express-jwt';
 import * as mongodb from 'mongodb';
 
-import * as net from '../core/net';
-import * as utils from '../core/utils';
+import * as net from '../../infrastructure/net';
+import * as utils from '../../infrastructure/utils';
 
-import * as User from '../domain/models/mongodb/mongoose/User';
+import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../DTOs/DTOs';
+import * as DTOs from '../../application/DTOs';
 
 const router = express.Router();
 

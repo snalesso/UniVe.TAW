@@ -5,11 +5,11 @@ import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as expressJwt from 'express-jwt';
 
-import UsersRouter from './routing/UsersRouter';
-import AuthRouter from './routing/AuthRouter';
-import MatchesRouter from './routing/MatchesRouter';
+import UsersRouter from './routing/usersRoutesConfig';
+import AuthRouter from './routing/authRoutesConfig';
+import MatchesRouter from './routing/matchesRoutesConfig';
 
-import * as net from './core/net';
+import * as net from '../infrastructure/net';
 
 // TODO: rename into WebService?
 export default class ApiService {
@@ -48,7 +48,7 @@ export default class ApiService {
         });
 
         mongoose
-            .connect(this._dbUrl)
+            .connect(this._dbUrl, { useNewUrlParser: true })
             .then(
                 () => {
                     console.log(("mongoose connected to " + this._dbUrl).green);

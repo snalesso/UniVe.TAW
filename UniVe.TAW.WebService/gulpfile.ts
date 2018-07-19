@@ -1,6 +1,7 @@
 import * as gulp from 'gulp';
 import * as gulpTs from 'gulp-typescript';
 import * as path from 'path';
+// import * as fs from 'fs';
 const fs = require('fs');
 import 'colors';
 const gulpPrint = require('gulp-print').default;
@@ -17,6 +18,7 @@ const exportSourcePaths = [
 ];
 
 const exportDestinationPaths = [
+    // D:\Dev\Repos\GitHub\snalesso\UniVe.TAW\UniVe.TAW.WebSite\src\assets\scripts
     , '../UniVe.TAW.WebSite/src/assets/scripts'
 ]
     .map(dirPath => path.join(dirPath, packageJson.name));

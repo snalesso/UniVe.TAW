@@ -3,8 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import * as $ from 'jquery';
 
-import * as auth from '../../assets/scripts/unive.taw.framework/auth';
-import * as mtest from '../../assets/scripts/unive.taw.framework/test';
+import * as identity from '../../assets/imported/unive.taw.webservice/identity';
 
 @Component({
   selector: 'app-signup',

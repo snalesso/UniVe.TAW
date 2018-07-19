@@ -4,10 +4,10 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
-var UsersRouter_1 = require("./routing/UsersRouter");
-var AuthRouter_1 = require("./routing/AuthRouter");
-var MatchesRouter_1 = require("./routing/MatchesRouter");
-var net = require("./core/net");
+var usersRoutesConfig_1 = require("./routing/usersRoutesConfig");
+var authRoutesConfig_1 = require("./routing/authRoutesConfig");
+var matchesRoutesConfig_1 = require("./routing/matchesRoutesConfig");
+var net = require("../infrastructure/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
     function ApiService(port) {
@@ -38,7 +38,7 @@ var ApiService = /** @class */ (function () {
             });
         });
         mongoose
-            .connect(this._dbUrl)
+            .connect(this._dbUrl, { useNewUrlParser: true })
             .then(function () {
             console.log(("mongoose connected to " + _this._dbUrl).green);
             _this.ConfigRoutes();
@@ -80,9 +80,9 @@ var ApiService = /** @class */ (function () {
     };
     ApiService.prototype.ConfigRoutes = function () {
         console.log("Configuring routes ...");
-        this._expressApp.use('/users', UsersRouter_1.default);
-        this._expressApp.use('/auth', AuthRouter_1.default);
-        this._expressApp.use('/matches', MatchesRouter_1.default);
+        this._expressApp.use('/users', usersRoutesConfig_1.default);
+        this._expressApp.use('/auth', authRoutesConfig_1.default);
+        this._expressApp.use('/matches', matchesRoutesConfig_1.default);
     };
     return ApiService;
 }());

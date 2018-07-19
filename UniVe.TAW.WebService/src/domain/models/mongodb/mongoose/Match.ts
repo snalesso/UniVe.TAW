@@ -8,8 +8,8 @@ import * as BattleFieldSettings from './BattleFieldSettings';
 import * as MatchSettings from './MatchSettings';
 import * as Coord from './Coord';
 
-import * as game from '../../../../core/game';
-import * as chat from '../../../../core/chat';
+import * as game from '../../../../infrastructure/game';
+import * as chat from '../../../../infrastructure/chat';
 
 export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,

@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
-import * as game from '../../../../core/game';
-import * as game_server from '../../../../core/game.server';
-import * as game_client from '../../../../core/game.client';
+import * as game from '../../../../infrastructure/game';
+import * as game_server from '../../../../infrastructure/game.server';
+import * as game_client from '../../../../infrastructure/game.client';
 
 export type IMongooseServerSideBattleFieldCell = game_server.ServerSideBattleFieldCell & mongoose.Document;
 

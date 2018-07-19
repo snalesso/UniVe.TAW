@@ -3,7 +3,7 @@ import * as crypto from 'crypto';
 
 import * as Constants from './Constants';
 
-import * as identity from '../../../../core/identity';
+import * as identity from '../../../../infrastructure/identity';
 
 // TODO: trim username spaces
 

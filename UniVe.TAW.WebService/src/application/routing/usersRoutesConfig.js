@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bodyParser = require("body-parser");
 var express = require("express");
 var httpStatusCodes = require("http-status-codes");
-var net = require("../core/net");
-var identity = require("../core/identity");
-var User = require("../domain/models/mongodb/mongoose/User");
-var DTOs = require("../DTOs/DTOs");
+var net = require("../../infrastructure/net");
+var identity = require("../../infrastructure/identity");
+var User = require("../../domain/models/mongodb/mongoose/User");
+var DTOs = require("../../application/DTOs");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -108,4 +108,4 @@ router.delete("/:" + userIdKey, function (request, response, next) {
     });
 });
 exports.default = router;
-//# sourceMappingURL=UsersRouter.js.map
+//# sourceMappingURL=usersRoutesConfig.js.map

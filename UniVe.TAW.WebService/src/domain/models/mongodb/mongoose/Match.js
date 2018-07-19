@@ -4,7 +4,7 @@ var mongoose = require("mongoose");
 var Constants = require("./Constants");
 var MatchPlayerSide = require("./MatchPlayerSide");
 var MatchSettings = require("./MatchSettings");
-var game = require("../../../../core/game");
+var game = require("../../../../infrastructure/game");
 var matchSchema = new mongoose.Schema({
     Settings: {
         type: MatchSettings.getSchema(),

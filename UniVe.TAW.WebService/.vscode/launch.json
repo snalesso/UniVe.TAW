@@ -12,9 +12,9 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "transpile",
             "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
         }
     ]
 }

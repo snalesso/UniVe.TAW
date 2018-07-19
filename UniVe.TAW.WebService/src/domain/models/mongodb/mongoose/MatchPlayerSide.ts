@@ -6,9 +6,9 @@ import * as ShipPlacement from './ShipPlacement';
 import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
 import * as BattleFieldSettings from './BattleFieldSettings';
 
-import * as game from '../../../../core/game';
-import * as game_server from '../../../../core/game.server';
-import * as game_client from '../../../../core/game.client';
+import * as game from '../../../../infrastructure/game';
+import * as game_server from '../../../../infrastructure/game.server';
+import * as game_client from '../../../../infrastructure/game.client';
 
 // TODO: split validators into many single validators each with its own error message
 

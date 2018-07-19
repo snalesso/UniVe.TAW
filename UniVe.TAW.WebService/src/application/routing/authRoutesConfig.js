@@ -8,8 +8,8 @@ var passport = require("passport");
 var passportHTTP = require("passport-http");
 var jwt = require("jsonwebtoken");
 var expressJwt = require("express-jwt");
-var net = require("../core/net");
-var User = require("../domain/models/mongodb/mongoose/User");
+var net = require("../../infrastructure/net");
+var User = require("../../domain/models/mongodb/mongoose/User");
 var router = express.Router();
 // middlewares
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
@@ -80,4 +80,4 @@ router.post('/logout', jwtValidator, function (request, response) {
     }
 });
 exports.default = router;
-//# sourceMappingURL=AuthRouter.js.map
+//# sourceMappingURL=authRoutesConfig.js.map

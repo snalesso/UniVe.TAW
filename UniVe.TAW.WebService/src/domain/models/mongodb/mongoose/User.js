@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var crypto = require("crypto");
 var Constants = require("./Constants");
-var identity = require("../../../../core/identity");
+var identity = require("../../../../infrastructure/identity");
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
 var userSchema = new mongoose.Schema({
     Username: {

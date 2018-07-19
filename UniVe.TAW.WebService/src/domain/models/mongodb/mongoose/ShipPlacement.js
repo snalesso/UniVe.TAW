@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var Coord = require("./Coord");
-var game = require("../../../../core/game");
+var game = require("../../../../infrastructure/game");
 var shipPlacementSchema = new mongoose.Schema({
     Type: {
         required: true,

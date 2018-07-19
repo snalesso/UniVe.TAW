@@ -6,10 +6,10 @@ var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
 var expressJwt = require("express-jwt");
 require("colors");
-var net = require("../core/net");
-var Match = require("../domain/models/mongodb/mongoose/Match");
-var PendingMatch = require("../domain/models/mongodb/mongoose/PendingMatch");
-var DTOs = require("../DTOs/DTOs");
+var net = require("../../infrastructure/net");
+var Match = require("../../domain/models/mongodb/mongoose/Match");
+var PendingMatch = require("../../domain/models/mongodb/mongoose/PendingMatch");
+var DTOs = require("../../application/DTOs");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -203,4 +203,4 @@ router.get("/:" + matchIdKey, function (request, response) {
 router.post("/:" + matchIdKey, function () {
 });
 exports.default = router;
-//# sourceMappingURL=MatchesRouter.js.map
+//# sourceMappingURL=matchesRoutesConfig.js.map

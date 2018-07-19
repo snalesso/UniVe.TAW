@@ -5,13 +5,13 @@ import * as httpStatusCodes from 'http-status-codes';
 import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 
-import * as net from '../core/net';
-import * as identity from '../core/identity';
-import * as utils from '../core/utils';
+import * as net from '../../infrastructure/net';
+import * as identity from '../../infrastructure/identity';
+import * as utils from '../../infrastructure/utils';
 
-import * as User from '../domain/models/mongodb/mongoose/User';
+import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../DTOs/DTOs';
+import * as DTOs from '../../application/DTOs';
 
 const router = express.Router();
 

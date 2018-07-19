@@ -33,6 +33,7 @@
     "@angular/compiler-cli": "^5.2.0",
     "@angular/language-service": "^5.2.0",
     "@types/bootstrap": "^4.1.0",
+    "@types/gulp": "^3.8.36",
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
     "@types/jquery": "^3.3.1",
