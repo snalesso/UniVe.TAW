@@ -4,6 +4,7 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
+var chalk_1 = require("chalk");
 var usersRoutesConfig_1 = require("./routing/usersRoutesConfig");
 var authRoutesConfig_1 = require("./routing/authRoutesConfig");
 var matchesRoutesConfig_1 = require("./routing/matchesRoutesConfig");
@@ -40,12 +41,12 @@ var ApiService = /** @class */ (function () {
         mongoose
             .connect(this._dbUrl, { useNewUrlParser: true })
             .then(function () {
-            console.log(("mongoose connected to " + _this._dbUrl).green);
+            console.log(chalk_1.default.green("mongoose connected to " + _this._dbUrl));
             _this.ConfigRoutes();
             _this.ConfigMiddlewares();
-            _this._expressApp.listen(_this.Port, function () { return console.log(("ApiServer listening on http://localhost:" + _this.Port).green); });
+            _this._expressApp.listen(_this.Port, function () { return console.log(chalk_1.default.green("ApiServer listening on http://localhost:" + _this.Port)); });
         }, function (error) {
-            console.log("mongoose connection failed! Reason: ".red + error.message);
+            console.log(chalk_1.default.red("mongoose connection failed! Reason: ") + error.message);
         });
     };
     ApiService.prototype.ConfigMiddlewares = function () {
@@ -63,14 +64,14 @@ var ApiService = /** @class */ (function () {
         });
         // handles express-jwt invalid tokens
         this._expressApp.use(function (error, request, response, next) {
-            console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
+            console.log(chalk_1.default.red("UnauthorizedError (JWT): ") + JSON.stringify(error.message));
             response
                 .status(httpStatusCodes.UNAUTHORIZED)
                 .json(new net.HttpMessage(null, error.message));
         });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {
-            console.log("Request error: ".red + JSON.stringify(err));
+            console.log(chalk_1.default.red("Request error: ") + JSON.stringify(err));
             res.status(err.statusCode || 500).json(err);
         });
         // handle request that point to invalid endpoints

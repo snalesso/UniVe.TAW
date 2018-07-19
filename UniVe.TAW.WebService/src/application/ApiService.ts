@@ -4,6 +4,7 @@ import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as expressJwt from 'express-jwt';
+import chalk from 'chalk';
 
 import UsersRouter from './routing/usersRoutesConfig';
 import AuthRouter from './routing/authRoutesConfig';
@@ -51,16 +52,16 @@ export default class ApiService {
             .connect(this._dbUrl, { useNewUrlParser: true })
             .then(
                 () => {
-                    console.log(("mongoose connected to " + this._dbUrl).green);
+                    console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();
                     this._expressApp.listen(
                         this.Port,
-                        () => console.log(("ApiServer listening on http://localhost:" + this.Port).green));
+                        () => console.log(chalk.green("ApiServer listening on http://localhost:" + this.Port)));
                 },
                 (error: mongodb.MongoError) => {
-                    console.log("mongoose connection failed! Reason: ".red + error.message);
+                    console.log(chalk.red("mongoose connection failed! Reason: ") + error.message);
                 });
     }
 
@@ -80,14 +81,14 @@ export default class ApiService {
         });
         // handles express-jwt invalid tokens
         this._expressApp.use((error: expressJwt.UnauthorizedError, request: express.Request, response: express.Response, next: express.NextFunction) => {
-            console.log("UnauthorizedError (JWT): ".red + JSON.stringify(error.message));
+            console.log(chalk.red("UnauthorizedError (JWT): ") + JSON.stringify(error.message));
             response
                 .status(httpStatusCodes.UNAUTHORIZED)
                 .json(new net.HttpMessage<string>(null, error.message));
         });
         // handles unhandled errors
         this._expressApp.use(function (err, req, res, next) {
-            console.log("Request error: ".red + JSON.stringify(err));
+            console.log(chalk.red("Request error: ") + JSON.stringify(err));
             res.status(err.statusCode || 500).json(err);
 
         });

@@ -14,6 +14,7 @@ import * as utils from '../../infrastructure/utils';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
 import * as DTOs from '../../application/DTOs';
+import chalk from 'chalk';
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.use(bodyParser.json());
 
 passport.use(new passportHTTP.BasicStrategy(
     (username, password, done) => {
-        console.log("Passport validating credentials ... ".yellow);
+        console.log(chalk.yellow("Passport validating credentials ... "));
 
         const criteria = {} as utils.Mutable<User.IMongooseUser>;
         criteria.Username = username;
@@ -60,12 +61,12 @@ router.post(
         let responseData: net.HttpMessage<string>;
 
         if (!user) {
-            console.log("Login failed!".red);
+            console.log(chalk.red("Login failed!"));
             statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
             responseData = new net.HttpMessage<string>(null, "Invalid credentials");
         }
         else {
-            console.log("Login successful for ".green + user.Username + " (id: " + user.id + ")");
+            console.log(chalk.green("Login successful for ") + user.Username + " (id: " + user.id + ")");
             statusCode = httpStatusCodes.OK;
             let jwtPayload: DTOs.IUserJWTData = {
                 Id: user.id,

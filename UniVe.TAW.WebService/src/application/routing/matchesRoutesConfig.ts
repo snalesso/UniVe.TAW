@@ -4,7 +4,6 @@ import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
-import 'colors';
 
 import * as net from '../../infrastructure/net';
 import * as utils from '../../infrastructure/utils';
@@ -13,6 +12,7 @@ import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as DTOs from '../../application/DTOs';
+import chalk from 'chalk';
 
 const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
@@ -114,7 +114,7 @@ router.post(
                     }
                 })
                 .catch((error) => {
-                    console.log("+++ Why are we here?".red);
+                    console.log(chalk.red("+++ Why are we here?"));
                     responseData = new net.HttpMessage<string>(null, "Could not verify pending matches");
                     response
                         .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -170,7 +170,7 @@ router.post(
                 .findById(pendingMatchId)
                 .then((pendingMatch) => {
 
-                    console.log("Pending match identified".green);
+                    console.log(chalk.green("Pending match identified"));
 
                     const jwtUser = (request.user as DTOs.IUserJWTData);
                     const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
@@ -193,13 +193,13 @@ router.post(
                             .save()
                             .then((createdMatch) => {
 
-                                console.log("New match created".green);
+                                console.log(chalk.green("New match created"));
 
                                 PendingMatch.getModel()
                                     .findByIdAndRemove(pendingMatch._id)
                                     .then((deletedPendingMatch) => {
 
-                                        console.log("Pending match deleted".green);
+                                        console.log(chalk.green("Pending match deleted"));
 
                                         responseData = new net.HttpMessage<DTOs.MatchDto>(
                                             new DTOs.MatchDto(
@@ -213,7 +213,7 @@ router.post(
                                     })
                                     .catch((error: mongodb.MongoError) => {
 
-                                        console.log("Shit happening: pending match found, new match created, pending match not deleted D:".red);
+                                        console.log(chalk.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
 
                                         responseData = new net.HttpMessage<DTOs.MatchDto>(
                                             null,
@@ -232,7 +232,7 @@ router.post(
                     }
                 })
                 .catch((error: mongodb.MongoError) => {
-                    console.log("Could not find requested pending match".red);
+                    console.log(chalk.red("Could not find requested pending match"));
                     responseData = new net.HttpMessage<DTOs.MatchDto>(
                         null,
                         "Unable to find requested pending match. Reason: " + error.message);

@@ -2,8 +2,9 @@ import * as gulp from 'gulp';
 import * as gulpTs from 'gulp-typescript';
 import * as path from 'path';
 // import * as fs from 'fs';
+import chalk from 'chalk';
+
 const fs = require('fs');
-import 'colors';
 const gulpPrint = require('gulp-print').default;
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json'));
@@ -29,13 +30,13 @@ gulp.task('export', function () {
 
     exportDestinationPaths.forEach(dfp => {
         gulp.src(exportSourcePaths)
-            .pipe(gulpPrint(path => "Copying ".yellow + path + " to ..."))
+            .pipe(gulpPrint(path => chalk.yellow("Copying ") + path + " to ..."))
             .pipe(gulp.dest(sourceFile => {
                 console.log(JSON.stringify(sourceFile));
                 let p = path.join(dfp, sourceFile.base, sourceFile.basename);
                 process.stdout.write(p + " ...");
                 return p;
             }))
-            .pipe(gulpPrint(path => " DONE".green));
+            .pipe(gulpPrint(path => chalk.green(" DONE")));
     });
 });

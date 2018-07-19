@@ -10,13 +10,14 @@ var jwt = require("jsonwebtoken");
 var expressJwt = require("express-jwt");
 var net = require("../../infrastructure/net");
 var User = require("../../domain/models/mongodb/mongoose/User");
+var chalk_1 = require("chalk");
 var router = express.Router();
 // middlewares
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
-    console.log("Passport validating credentials ... ".yellow);
+    console.log(chalk_1.default.yellow("Passport validating credentials ... "));
     var criteria = {};
     criteria.Username = username;
     User.getModel()
@@ -41,12 +42,12 @@ router.post('/login', passport.authenticate('basic', { session: false }), functi
     var errMsg;
     var responseData;
     if (!user) {
-        console.log("Login failed!".red);
+        console.log(chalk_1.default.red("Login failed!"));
         statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
         responseData = new net.HttpMessage(null, "Invalid credentials");
     }
     else {
-        console.log("Login successful for ".green + user.Username + " (id: " + user.id + ")");
+        console.log(chalk_1.default.green("Login successful for ") + user.Username + " (id: " + user.id + ")");
         statusCode = httpStatusCodes.OK;
         var jwtPayload = {
             Id: user.id,

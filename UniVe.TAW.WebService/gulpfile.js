@@ -4,8 +4,8 @@ var gulp = require("gulp");
 var gulpTs = require("gulp-typescript");
 var path = require("path");
 // import * as fs from 'fs';
+var chalk_1 = require("chalk");
 var fs = require('fs');
-require("colors");
 var gulpPrint = require('gulp-print').default;
 var packageJson = JSON.parse(fs.readFileSync('./package.json'));
 var tsProject = gulpTs.createProject('tsconfig.json');
@@ -25,14 +25,14 @@ gulp.task('export', function () {
     var missionName = "Copy of " + packageJson.name;
     exportDestinationPaths.forEach(function (dfp) {
         gulp.src(exportSourcePaths)
-            .pipe(gulpPrint(function (path) { return "Copying ".yellow + path + " to ..."; }))
+            .pipe(gulpPrint(function (path) { return chalk_1.default.yellow("Copying ") + path + " to ..."; }))
             .pipe(gulp.dest(function (sourceFile) {
             console.log(JSON.stringify(sourceFile));
             var p = path.join(dfp, sourceFile.base, sourceFile.basename);
             process.stdout.write(p + " ...");
             return p;
         }))
-            .pipe(gulpPrint(function (path) { return " DONE".green; }));
+            .pipe(gulpPrint(function (path) { return chalk_1.default.green(" DONE"); }));
     });
 });
 //# sourceMappingURL=gulpfile.js.map

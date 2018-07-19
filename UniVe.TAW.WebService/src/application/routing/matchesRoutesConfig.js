@@ -5,11 +5,11 @@ var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
 var expressJwt = require("express-jwt");
-require("colors");
 var net = require("../../infrastructure/net");
 var Match = require("../../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../../domain/models/mongodb/mongoose/PendingMatch");
 var DTOs = require("../../application/DTOs");
+var chalk_1 = require("chalk");
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -86,7 +86,7 @@ router.post("/create", jwtValidator, function (request, response) {
             }
         })
             .catch(function (error) {
-            console.log("+++ Why are we here?".red);
+            console.log(chalk_1.default.red("+++ Why are we here?"));
             responseData_1 = new net.HttpMessage(null, "Could not verify pending matches");
             response
                 .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -126,7 +126,7 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
         PendingMatch.getModel()
             .findById(pendingMatchId)
             .then(function (pendingMatch) {
-            console.log("Pending match identified".green);
+            console.log(chalk_1.default.green("Pending match identified"));
             var jwtUser = request.user;
             var jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
             // ensure the pending match is not joined by the same player who created it
@@ -145,18 +145,18 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
                     .create(newMatchSkeleton)
                     .save()
                     .then(function (createdMatch) {
-                    console.log("New match created".green);
+                    console.log(chalk_1.default.green("New match created"));
                     PendingMatch.getModel()
                         .findByIdAndRemove(pendingMatch._id)
                         .then(function (deletedPendingMatch) {
-                        console.log("Pending match deleted".green);
+                        console.log(chalk_1.default.green("Pending match deleted"));
                         responseData = new net.HttpMessage(new DTOs.MatchDto(createdMatch.id, createdMatch.FirstPlayerSide.PlayerId.toHexString(), createdMatch.SecondPlayerSide.PlayerId.toHexString(), createdMatch.CreationDateTime));
                         response
                             .status(httpStatusCodes.CREATED)
                             .json(responseData);
                     })
                         .catch(function (error) {
-                        console.log("Shit happening: pending match found, new match created, pending match not deleted D:".red);
+                        console.log(chalk_1.default.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
                         responseData = new net.HttpMessage(null, "Unable to delete pendingMatch after creating the real match. Reason: " + error.message);
                         response
                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
@@ -172,7 +172,7 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
             }
         })
             .catch(function (error) {
-            console.log("Could not find requested pending match".red);
+            console.log(chalk_1.default.red("Could not find requested pending match"));
             responseData = new net.HttpMessage(null, "Unable to find requested pending match. Reason: " + error.message);
             response
                 .status(httpStatusCodes.NOT_FOUND)
