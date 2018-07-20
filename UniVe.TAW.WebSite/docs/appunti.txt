@@ -1,0 +1,3 @@
+DEBUG
+
+- bisogna fare ng serve primadi F5, non si può concatenatenare tramite script perchè il launch.json aspetta il termina del task, ma poichè ng serve non termina, il launcher va in timeout

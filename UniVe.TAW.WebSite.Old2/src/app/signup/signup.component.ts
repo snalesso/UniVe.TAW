@@ -4,6 +4,7 @@ import { AuthService } from '../auth.service';
 import * as $ from 'jquery';
 
 import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
+import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 
 @Component({
   selector: 'app-signup',
@@ -12,12 +13,12 @@ import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DT
 })
 export class SignupComponent implements OnInit {
 
-  public readonly signupRequest = new DTOs.SignupRequestDto();
+  public readonly signupRequest = {} as DTOs.ISignupRequestDto;
 
   constructor(private readonly authService: AuthService, private readonly router: Router) {
     let countries = Object
-      .keys(auth.Country)
-      .map(countryName => ({ id: auth.Country[countryName], name: countryName }));
+      .keys(identity.Country)
+      .map(countryName => ({ id: identity.Country[countryName], name: countryName }));
   }
 
   public sendSignupRequest() {

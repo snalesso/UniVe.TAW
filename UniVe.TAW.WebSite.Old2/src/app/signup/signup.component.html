@@ -9,6 +9,16 @@
 
 
     <div class="form-group">
+      <label for="signup-form-username">Username</label>
+      <input type="text" #username="ngModel" required name="username" [(ngModel)]="signupRequest.username" class="form-control"
+        id="signup-form-username" placeholder="Enter username">
+    </div>
+
+    <div [hidden]="username.valid || username.pristine" class="alert alert-danger">
+      Username is required
+    </div>
+
+    <div class="form-group">
       <label for="signup-form-email">Email address</label>
       <input type="email" #mail="ngModel" name="mail" [(ngModel)]="signupRequest.mail" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" class="form-control"
         required id="signup-form-email" aria-describedby="signup-form-email-help" placeholder="Enter email">
@@ -17,16 +27,6 @@
 
     <div [hidden]="mail.valid || mail.pristine" class="alert alert-danger">
       Mail is not valid
-    </div>
-
-    <div class="form-group">
-      <label for="signup-form-username">Username</label>
-      <input type="text" #username="ngModel" required name="username" [(ngModel)]="signupRequest.username" class="form-control"
-        id="signup-form-username" placeholder="Enter username">
-    </div>
-
-    <div [hidden]="username.valid || username.pristine" class="alert alert-danger">
-      Username is required
     </div>
 
     <div class="form-group">

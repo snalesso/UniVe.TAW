@@ -14,8 +14,8 @@ export interface IMongooseUser extends mongoose.Document {
     BirthDate: Date,
     CountryId: identity.Country,
     Roles: identity.UserRoles,
-    Salt: string,
-    Digest: string,
+    Salt: string, // TODO: make readonly?
+    Digest: string, // TODO: make readonly?
     setPassword: (pwd: string) => void,
     validatePassword: (pwd: string) => boolean
 }

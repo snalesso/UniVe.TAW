@@ -5,15 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Launch Chrome",
+            "type": "chrome",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}\\serve",
-            "outFiles": [
-                "${workspaceFolder}/dist/out-tsc/**/*.js"
-            ],
-            "preLaunchTask": "transpile",
-            "internalConsoleOptions": "openOnSessionStart"
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

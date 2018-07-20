@@ -4,27 +4,23 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "identifier": "transpile",
-            "label": "Transpiles typescript files",
-            "type": "typescript",
-            "tsconfig": "tsconfig.json",
-            "problemMatcher": [
-                "$tsc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
             "identifier": "import",
             "label": "Imports dependencies from other workspaces",
+            "type": "shell",
             "command": "gulp",
             "args": [
                 "import"
-            ],
+            ]
+        },
+        {
+            "identifier": "import & ng serve",
+            "label": "import & ng serve",
             "type": "shell",
-            "dependsOn": "transpile"
+            "command": "ng",
+            "args": [
+                "serve"
+            ],
+            "dependsOn": "import"
         }
     ]
 }

@@ -1,0 +1,30 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "identifier": "transpile",
+            "label": "Transpiles typescript files",
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "identifier": "import",
+            "label": "Imports dependencies from other workspaces",
+            "command": "gulp",
+            "args": [
+                "import"
+            ],
+            "type": "shell",
+            "dependsOn": "transpile"
+        }
+    ]
+}
