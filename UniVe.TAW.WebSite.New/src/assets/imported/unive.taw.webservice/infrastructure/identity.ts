@@ -1,13 +1,13 @@
 // FLAGS
 export enum UserRoles {
     Player = 1 << 0,
-    Moderator = 1 << 1,
+    Moderator = 1 << 1, // TODO: can ban, bans are automatically incremental
 
     Admin = Player | Moderator // ~(~0 << 2) // all
 }
 
 export enum Country {
-    Unknown = 0,
+    Undefined = 0,
     Afghanistan,
     Albania,
     Algeria,

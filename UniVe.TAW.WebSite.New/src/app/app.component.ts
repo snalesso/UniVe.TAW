@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-root',
@@ -7,9 +6,5 @@ import { AuthService } from './auth.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  Title = 'UniVe.TAW.WebSite';
-
-  constructor(private as: AuthService) {
-  }
-
+  title = 'UniVe.TAW.WebSite';
 }
