@@ -11,10 +11,10 @@ exports.Coord = Coord;
 var ShipType;
 (function (ShipType) {
     ShipType[ShipType["NoShip"] = 0] = "NoShip";
-    ShipType[ShipType["Cacciatorpediniere"] = 2] = "Cacciatorpediniere";
-    ShipType[ShipType["Sottomarino"] = 3] = "Sottomarino";
-    ShipType[ShipType["Corazzata"] = 4] = "Corazzata";
-    ShipType[ShipType["Portaerei"] = 5] = "Portaerei";
+    ShipType[ShipType["Destroyer"] = 2] = "Destroyer";
+    ShipType[ShipType["Submarine"] = 3] = "Submarine";
+    ShipType[ShipType["Battleship"] = 4] = "Battleship";
+    ShipType[ShipType["Carrier"] = 5] = "Carrier"; // Portaerei
 })(ShipType = exports.ShipType || (exports.ShipType = {}));
 var ShipOrientation;
 (function (ShipOrientation) {
@@ -59,13 +59,17 @@ var BattleFieldSettings = /** @class */ (function () {
         if (battleFieldWidth === void 0) { battleFieldWidth = BattleFieldSettings.BattleFieldMinWidth; }
         if (battleFieldHeight === void 0) { battleFieldHeight = BattleFieldSettings.BattleFieldMinWidth; }
         if (battleFieldWidth < BattleFieldSettings.BattleFieldMinWidth
-            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight)
+            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
+            || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
+            || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
             throw new Error("Invalid BattleField size");
         this.BattleFieldHeight = battleFieldHeight;
         this.BattleFieldWidth = battleFieldWidth;
     }
     BattleFieldSettings.BattleFieldMinWidth = 10;
     BattleFieldSettings.BattleFieldMinHeight = 10;
+    BattleFieldSettings.BattleFieldMaxWidth = 26;
+    BattleFieldSettings.BattleFieldMaxHeight = 26;
     return BattleFieldSettings;
 }());
 exports.BattleFieldSettings = BattleFieldSettings;
@@ -82,10 +86,10 @@ var MatchSettings = /** @class */ (function () {
     }
     MatchSettings.getDefaultShipTypeAvailability = function () {
         return [
-            new ShipTypeAvailability(ShipType.Cacciatorpediniere, 4),
-            new ShipTypeAvailability(ShipType.Sottomarino, 2),
-            new ShipTypeAvailability(ShipType.Corazzata, 2),
-            new ShipTypeAvailability(ShipType.Portaerei, 1)
+            new ShipTypeAvailability(ShipType.Destroyer, 4),
+            new ShipTypeAvailability(ShipType.Submarine, 2),
+            new ShipTypeAvailability(ShipType.Battleship, 2),
+            new ShipTypeAvailability(ShipType.Carrier, 1)
         ];
     };
     return MatchSettings;

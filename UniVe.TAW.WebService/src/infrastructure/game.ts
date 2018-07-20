@@ -107,10 +107,10 @@ export class MatchSettings {
 
     public static getDefaultShipTypeAvailability(): ShipTypeAvailability[] {
         return [
-            new ShipTypeAvailability(ShipType.Cacciatorpediniere, 4),
-            new ShipTypeAvailability(ShipType.Sottomarino, 2),
-            new ShipTypeAvailability(ShipType.Corazzata, 2),
-            new ShipTypeAvailability(ShipType.Portaerei, 1)
+            new ShipTypeAvailability(ShipType.Destroyer, 4),
+            new ShipTypeAvailability(ShipType.Submarine, 2),
+            new ShipTypeAvailability(ShipType.Battleship, 2),
+            new ShipTypeAvailability(ShipType.Carrier, 1)
         ];
     }
 }

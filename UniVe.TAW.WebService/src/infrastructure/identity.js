@@ -9,7 +9,7 @@ var UserRoles;
 })(UserRoles = exports.UserRoles || (exports.UserRoles = {}));
 var Country;
 (function (Country) {
-    Country[Country["Unknown"] = 0] = "Unknown";
+    Country[Country["Undefined"] = 0] = "Undefined";
     Country[Country["Afghanistan"] = 1] = "Afghanistan";
     Country[Country["Albania"] = 2] = "Albania";
     Country[Country["Algeria"] = 3] = "Algeria";
