@@ -6,6 +6,7 @@ import * as $ from 'jquery';
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import { isNumber } from 'util';
+import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-signup',
@@ -15,8 +16,9 @@ import { isNumber } from 'util';
 export class SignupComponent implements OnInit {
 
   public readonly Countries: { id: identity.Country, name: string }[];
-  public readonly SignupRequest = {} as DTOs.ISignupRequestDto;
+  public readonly SignupRequest = { Username: "Daedalus", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy } as DTOs.ISignupRequestDto;
   public RepeatedPassword: string;
+  public ResponseError: string;
 
   public get canSendSignupRequest(): boolean {
     return this.SignupRequest.Username != null
@@ -31,10 +33,18 @@ export class SignupComponent implements OnInit {
   }
 
   public sendSignupRequest() {
-    alert("Ciao!");
+    this.authService.signup(this.SignupRequest)
+      .subscribe(response => {
+        if (response.HasError) {
+          this.ResponseError = response.ErrorMessage;
+        } else {
+          this.router.navigate([ViewsRoutingKeys.Login]);
+        }
+      });
   }
 
   ngOnInit() {
+    // TODO: if already logged in re-route to avaiable matches
   }
 
 }

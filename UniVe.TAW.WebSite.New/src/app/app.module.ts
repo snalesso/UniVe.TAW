@@ -10,6 +10,7 @@ import { AppComponent } from './app.component';
 import { SignupComponent } from './views/identity/signup/signup.component';
 import { LoginComponent } from './views/identity/login/login.component';
 import { HeaderComponent } from './ui/header/header.component';
+import { AvailableMatchesComponent } from './views/game/available-matches/available-matches.component';
 
 // services
 //import { AuthService } from './auth.service';
@@ -22,6 +23,7 @@ import { HeaderComponent } from './ui/header/header.component';
     SignupComponent,
     LoginComponent,
     HeaderComponent,
+    AvailableMatchesComponent,
   ],
   imports: [
     BrowserModule,

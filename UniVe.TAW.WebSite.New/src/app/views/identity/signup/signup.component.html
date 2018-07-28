@@ -54,10 +54,18 @@
       </select>
     </div>
 
-    <div *ngIf="errmessage" class="alert alert-danger" role="alert">
-      Login error: {{errmessage}}
+    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">
+      Login error: {{ResponseError}}
     </div>
 
     <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendSignupRequest" (click)="sendSignupRequest();">Sign up</button>
   </form>
+
+  <hr>
+
+  <div>
+    <p>Already have an account?
+      <a routerLink="/login">Login here!</a>
+    </p>
+  </div>
 </div>

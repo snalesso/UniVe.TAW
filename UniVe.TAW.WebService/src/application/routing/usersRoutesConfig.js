@@ -9,6 +9,15 @@ var User = require("../../domain/models/mongodb/mongoose/User");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+router.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(httpStatusCodes.OK).json({});
+    }
+    next();
+});
 router.post('/signup', function (request, response, next) {
     var responseData;
     var signupReq = request.body;
@@ -19,7 +28,7 @@ router.post('/signup', function (request, response, next) {
     else {
         //let feawfw = signupReq as User.IMongoUser;
         var newUserSkel = {};
-        newUserSkel.Username = signupReq.Username;
+        newUserSkel.Username = signupReq.Username.trim();
         newUserSkel.CountryId = signupReq.CountryId;
         newUserSkel.BirthDate = signupReq.BirthDate;
         newUserSkel.Roles = identity.UserRoles.Player;

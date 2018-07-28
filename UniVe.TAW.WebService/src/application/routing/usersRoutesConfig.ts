@@ -17,6 +17,15 @@ const router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+router.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(httpStatusCodes.OK).json({});
+    }
+    next();
+});
 
 router.post(
     '/signup',
@@ -32,7 +41,7 @@ router.post(
         } else {
             //let feawfw = signupReq as User.IMongoUser;
             let newUserSkel = {} as utils.Mutable<User.IMongooseUser>;
-            newUserSkel.Username = signupReq.Username;
+            newUserSkel.Username = signupReq.Username.trim();
             newUserSkel.CountryId = signupReq.CountryId;
             newUserSkel.BirthDate = signupReq.BirthDate;
             newUserSkel.Roles = identity.UserRoles.Player;

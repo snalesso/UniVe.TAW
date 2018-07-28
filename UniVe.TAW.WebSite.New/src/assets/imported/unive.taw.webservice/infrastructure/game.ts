@@ -12,10 +12,10 @@ export class Coord implements ICoord {
 
 export enum ShipType {
     NoShip = 0,
-    Cacciatorpediniere = 2,
-    Sottomarino = 3,
-    Corazzata = 4,
-    Portaerei = 5
+    Destroyer = 2, // Cacciatorpediniere
+    Submarine = 3,  // Sottomarino
+    Battleship = 4, // Corazzata
+    Carrier = 5  // Portaerei
 }
 
 export enum ShipOrientation {
@@ -65,12 +65,17 @@ export class BattleFieldSettings {
     public static readonly BattleFieldMinWidth: number = 10;
     public static readonly BattleFieldMinHeight: number = 10;
 
+    public static readonly BattleFieldMaxWidth: number = 26;
+    public static readonly BattleFieldMaxHeight: number = 26;
+
     constructor(
         battleFieldWidth: number = BattleFieldSettings.BattleFieldMinWidth,
-        battleFieldHeight: number = BattleFieldSettings.BattleFieldMinWidth, ) {
+        battleFieldHeight: number = BattleFieldSettings.BattleFieldMinWidth) {
 
         if (battleFieldWidth < BattleFieldSettings.BattleFieldMinWidth
-            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight)
+            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
+            || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
+            || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
             throw new Error("Invalid BattleField size");
 
         this.BattleFieldHeight = battleFieldHeight;
@@ -102,10 +107,10 @@ export class MatchSettings {
 
     public static getDefaultShipTypeAvailability(): ShipTypeAvailability[] {
         return [
-            new ShipTypeAvailability(ShipType.Cacciatorpediniere, 4),
-            new ShipTypeAvailability(ShipType.Sottomarino, 2),
-            new ShipTypeAvailability(ShipType.Corazzata, 2),
-            new ShipTypeAvailability(ShipType.Portaerei, 1)
+            new ShipTypeAvailability(ShipType.Destroyer, 4),
+            new ShipTypeAvailability(ShipType.Submarine, 2),
+            new ShipTypeAvailability(ShipType.Battleship, 2),
+            new ShipTypeAvailability(ShipType.Carrier, 1)
         ];
     }
 }

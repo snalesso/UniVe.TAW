@@ -4,11 +4,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { SignupComponent } from './views/identity/signup/signup.component';
 import { LoginComponent } from './views/identity/login/login.component';
+import ViewsRoutingKeys from './views/ViewsRoutingKeys';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/signup', pathMatch: 'full' },
-  { path: 'signup', component: SignupComponent },
-  { path: 'login', component: LoginComponent },
+  { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
+  { path: ViewsRoutingKeys.Signup, component: SignupComponent },
+  { path: ViewsRoutingKeys.Login, component: LoginComponent },
 ];
 
 @NgModule({

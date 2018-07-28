@@ -16,6 +16,15 @@ var router = express.Router();
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+router.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(httpStatusCodes.OK).json({});
+    }
+    next();
+});
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
     console.log(chalk_1.default.yellow("Passport validating credentials ... "));
     var criteria = {};
@@ -43,7 +52,7 @@ router.post('/login', passport.authenticate('basic', { session: false }), functi
     var responseData;
     if (!user) {
         console.log(chalk_1.default.red("Login failed!"));
-        statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
+        statusCode = httpStatusCodes.UNAUTHORIZED;
         responseData = new net.HttpMessage(null, "Invalid credentials");
     }
     else {

@@ -208,7 +208,7 @@ router.get("/:" + matchIdKey, function (request, response) {
         .catch(function (error) {
         responseData = new net.HttpMessage(null, error.message);
         response
-            .status(httpStatusCodes.INTERNAL_SERVER_ERROR) // TODO: INTERNAL_SERVER_ERROR or NOT_FOUND?
+            .status(httpStatusCodes.NOT_FOUND)
             .json(responseData);
     });
 });

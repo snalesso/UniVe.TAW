@@ -272,7 +272,7 @@ router.get(
             .catch((error: mongodb.MongoError) => {
                 responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
                 response
-                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR) // TODO: INTERNAL_SERVER_ERROR or NOT_FOUND?
+                    .status(httpStatusCodes.NOT_FOUND)
                     .json(responseData);
             });
     });
