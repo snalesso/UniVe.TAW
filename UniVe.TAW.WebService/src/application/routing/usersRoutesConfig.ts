@@ -7,11 +7,12 @@ import * as mongoose from 'mongoose';
 
 import * as net from '../../infrastructure/net';
 import * as identity from '../../infrastructure/identity';
-import * as utils from '../../infrastructure/utils';
+import * as utils from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../../application/DTOs';
+import * as DTOs from '../DTOs';
+import * as moment from 'moment'
 
 const router = express.Router();
 
@@ -100,7 +101,7 @@ router.get(
                 let userDto: DTOs.IUserDto = {
                     Id: mongoUser.id,
                     Username: mongoUser.Username,
-                    Age: - 1,
+                    Age: moment().diff(mongoUser.BirthDate, "years", false),
                     CountryId: mongoUser.CountryId
                 };
                 responseData = new net.HttpMessage<DTOs.IUserDto>(userDto);

@@ -83,7 +83,7 @@ var ApiService = /** @class */ (function () {
         console.log("Configuring routes ...");
         this._expressApp.use('/users', usersRoutesConfig_1.default);
         this._expressApp.use('/auth', authRoutesConfig_1.default);
-        this._expressApp.use('/matches', matchesRoutesConfig_1.default);
+        this._expressApp.use('/matches', matchesRoutesConfig_1.default); // TODO: rename to /game?
     };
     return ApiService;
 }());

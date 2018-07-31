@@ -1,13 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import * as $ from 'jquery';
+import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
-import { isNumber } from 'util';
-import { SubjectSubscriber } from 'rxjs/internal/Subject';
 import Constants from '../../../services/constants';
+import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-login',
@@ -35,6 +33,7 @@ export class LoginComponent implements OnInit {
         }
         else {
           localStorage.setItem(Constants.AccessTokenKey, response.Content);
+          this.router.navigate([ViewsRoutingKeys.JoinableMatches])
         }
       });
   }

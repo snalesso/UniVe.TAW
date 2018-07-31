@@ -1,24 +1,17 @@
-// export function NameOfFunction(fn: Function): string {
-//     let ret = fn.toString();
-//     ret = ret.substr('function '.length);
-//     ret = ret.substr(0, ret.indexOf('('));
-//     return ret;
-// }
+// export type MutableHelper<T, TNames extends string> = { [P in TNames]: (T & { [name: string]: never })[P] };
+// export type Mutable<T> = MutableHelper<T, Extract<keyof T, string>>;
 
-// export function GetPropertyName(propertyFunction: Function) {
-//     return /\.([^\.;]+);?\s*\}$/.exec(propertyFunction.toString())[1];
-// }
+/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+export function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
-// export function GetAge(birthDate: Date) {
-//     var today = new Date();
-//     var age = today.getFullYear() - birthDate.getFullYear();
-//     var m = today.getMonth() - birthDate.getMonth();
-//     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-//         age--;
-//     }
-//     return age;
-// }
-
-export type Mutable<T> = {
-    -readonly [P in keyof T]: T[P];
-};
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+export function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}

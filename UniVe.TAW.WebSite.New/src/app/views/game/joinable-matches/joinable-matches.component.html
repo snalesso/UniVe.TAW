@@ -1,0 +1,13 @@
+<div class="container">
+
+  <button class="btn btn-primary btn-lg btn-block" (click)="createNewMatch();">Create new match!</button>
+
+  <hr>
+
+  <h3>Joinable matches</h3>
+
+  <ul class="list-group">
+    <a (click)="joinMatch(jm.Id);" *ngFor="let jm of JoinableMatches" class="list-group-item">{{jm.Creator.Username}}</a>
+  </ul>
+
+</div>

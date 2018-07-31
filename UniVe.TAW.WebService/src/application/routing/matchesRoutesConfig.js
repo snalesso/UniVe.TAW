@@ -9,6 +9,7 @@ var net = require("../../infrastructure/net");
 var Match = require("../../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../../domain/models/mongodb/mongoose/PendingMatch");
 var chalk_1 = require("chalk");
+// TODO: rename to gameRoutesConfig?
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -93,14 +94,14 @@ router.post("/create", jwtValidator, function (request, response) {
         });
     }
 });
-router.get("/pending", jwtValidator, function (request, response) {
+router.get("/joinables", jwtValidator, function (request, response) {
     var responseData = null;
     PendingMatch.getModel()
         .find()
+        .populate("PlayerId")
         .then(function (matches) {
         var matchDtos = matches.map(function (m) { return ({
             Id: m._id.toHexString(),
-            PlayerId: m.PlayerId.toHexString()
         }); });
         responseData = new net.HttpMessage(matchDtos);
         response

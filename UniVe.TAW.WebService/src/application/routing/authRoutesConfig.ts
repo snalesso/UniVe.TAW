@@ -9,11 +9,11 @@ import * as expressJwt from 'express-jwt';
 import * as mongodb from 'mongodb';
 
 import * as net from '../../infrastructure/net';
-import * as utils from '../../infrastructure/utils';
+import * as utils from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../../application/DTOs';
+import * as DTOs from '../DTOs';
 import chalk from 'chalk';
 
 const router = express.Router();

@@ -7,7 +7,7 @@ var HttpMessage = /** @class */ (function () {
     }
     Object.defineProperty(HttpMessage.prototype, "HasError", {
         get: function () {
-            return this.ErrorMessage != null;
+            return this.ErrorMessage != null; // TODO: should return true/false, sometimes returns undefined, check
         },
         enumerable: true,
         configurable: true

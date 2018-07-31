@@ -103,6 +103,6 @@ export default class ApiService {
 
         this._expressApp.use('/users', UsersRouter);
         this._expressApp.use('/auth', AuthRouter);
-        this._expressApp.use('/matches', MatchesRouter);
+        this._expressApp.use('/matches', MatchesRouter); // TODO: rename to /game?
     }
 }

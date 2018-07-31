@@ -4,14 +4,14 @@ export interface ISignupRequestDto {
     Username: string;
     Password: string;
     BirthDate: Date;
-    CountryId: enums.Country
+    CountryId: enums.Country;
 }
 
 export interface IUserDto {
     Id: string;
     Username: string;
     Age: number;
-    CountryId: enums.Country
+    CountryId: enums.Country;
 }
 
 export interface ILoginCredentials {
@@ -33,6 +33,7 @@ export interface IUserJWTData {
 export interface IPendingMatchDto {
     Id: string;
     PlayerId: string;
+    //CreationDateTime: Date;
 }
 
 export interface IMatchDto {
@@ -40,4 +41,9 @@ export interface IMatchDto {
     FirstPlayerId: string;
     SecondPlayerId: string;
     CreationDateTime: Date;
+}
+
+export interface IJoinableMatchDto {
+    Id: string;
+    Creator: IUserDto;
 }

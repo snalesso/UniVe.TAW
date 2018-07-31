@@ -6,13 +6,15 @@ import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 
 import * as net from '../../infrastructure/net';
-import * as utils from '../../infrastructure/utils';
+import * as utils from '../../infrastructure/utils-2.8';
 
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
-import * as DTOs from '../../application/DTOs';
+import * as DTOs from '../DTOs';
 import chalk from 'chalk';
+
+// TODO: rename to gameRoutesConfig?
 
 const jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
@@ -124,26 +126,27 @@ router.post(
     });
 
 router.get(
-    "/pending",
+    "/joinables",
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
-        let responseData: net.HttpMessage<DTOs.IPendingMatchDto[]> = null;
+        let responseData: net.HttpMessage<DTOs.IJoinableMatchDto[]> = null;
 
         PendingMatch.getModel()
             .find()
+            .populate("PlayerId")
             .then((matches) => {
                 let matchDtos = matches.map((m) => ({
                     Id: m._id.toHexString(),
-                    PlayerId: m.PlayerId.toHexString()
-                } as DTOs.IPendingMatchDto));
-                responseData = new net.HttpMessage<DTOs.IPendingMatchDto[]>(matchDtos);
+                    //Creator: m.PlayerId.toHexString()
+                } as DTOs.IJoinableMatchDto));
+                responseData = new net.HttpMessage(matchDtos);
                 response
                     .status(httpStatusCodes.OK)
                     .json(matchDtos);
             })
             .catch((error: mongodb.MongoError) => {
-                responseData = new net.HttpMessage<DTOs.IPendingMatchDto[]>(null, error.message);
+                responseData = new net.HttpMessage(null, error.message);
                 response
                     .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                     .json(responseData);

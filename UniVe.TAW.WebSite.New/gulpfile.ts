@@ -14,7 +14,8 @@ const imports: { bundleName: string, filePaths: string[] }[] = [
             "../UniVe.TAW.WebService/src/infrastructure/identity.ts",
             "../UniVe.TAW.WebService/src/infrastructure/game.ts",
             "../UniVe.TAW.WebService/src/infrastructure/game.client.ts",
-            "../UniVe.TAW.WebService/src/infrastructure/chat.ts"
+            "../UniVe.TAW.WebService/src/infrastructure/chat.ts",
+            "../UniVe.TAW.WebService/src/infrastructure/utils.ts"
         ]
     },
     {

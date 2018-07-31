@@ -6,6 +6,7 @@ var httpStatusCodes = require("http-status-codes");
 var net = require("../../infrastructure/net");
 var identity = require("../../infrastructure/identity");
 var User = require("../../domain/models/mongodb/mongoose/User");
+var moment = require("moment");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
@@ -79,7 +80,7 @@ router.get("/:" + userIdKey, function (request, response, next) {
         var userDto = {
             Id: mongoUser.id,
             Username: mongoUser.Username,
-            Age: -1,
+            Age: moment().diff(mongoUser.BirthDate, "years", false),
             CountryId: mongoUser.CountryId
         };
         responseData = new net.HttpMessage(userDto);
