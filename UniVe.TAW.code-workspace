@@ -13,7 +13,7 @@
 			"path": "UniVe.TAW.WebService"
 		},
 		{
-			"path": "UniVe.TAW.WebSite.New"
+			"path": "UniVe.TAW.WebSite"
 		}
 	],
 	"settings": {}
