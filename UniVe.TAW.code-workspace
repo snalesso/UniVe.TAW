@@ -1,16 +1,19 @@
 {
 	"folders": [
 		{
-			"path": "UniVe.TAW.WebService"
+			"path": ".vscode"
 		},
 		{
-			"path": "UniVe.TAW.WebSite"
-		},
-		{
-			"path": "UniVe.TAW.Framework"
+			"path": "UniVe.TAW.Course"
 		},
 		{
 			"path": "UniVe.TAW.Mobile"
+		},
+		{
+			"path": "UniVe.TAW.WebService"
+		},
+		{
+			"path": "UniVe.TAW.WebSite.New"
 		}
 	],
 	"settings": {}
