@@ -1,6 +1,6 @@
 "use strict";
 // export type MutableHelper<T, TNames extends string> = { [P in TNames]: (T & { [name: string]: never })[P] };
-// export type Mutable<T> = MutableHelper<T, keyof T>;
+// export type Mutable<T> = MutableHelper<T, Extract<keyof T, string>>;
 Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Returns a random number between min (inclusive) and max (exclusive)

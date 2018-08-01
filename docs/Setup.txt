@@ -1,0 +1,4 @@
+- installare visual studio code
+- installare node.js
+- installare mongodb - community server:	https://www.mongodb.com/download-center?jmp=nav#community
+- aggiungere la path della cartella che contiene mongod.exe (es. C:\Program Files\MongoDB\Server\4.0\bin\mongod.exe) alla variabile di ambiente "Path" (utente o sistema)
