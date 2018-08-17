@@ -6,14 +6,25 @@ var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
 var expressJwt = require("express-jwt");
 var net = require("../../infrastructure/net");
+var game = require("../../infrastructure/game");
 var Match = require("../../domain/models/mongodb/mongoose/Match");
 var PendingMatch = require("../../domain/models/mongodb/mongoose/PendingMatch");
+var RoutingParamKeys_1 = require("./RoutingParamKeys");
 var chalk_1 = require("chalk");
 // TODO: rename to gameRoutesConfig?
 var jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+router.use(function (req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(httpStatusCodes.OK).json({});
+    }
+    next();
+});
 var getUserPendingMatches = function (userId) {
     var criteria = {};
     criteria.PlayerId = new mongoose.Types.ObjectId(userId);
@@ -115,10 +126,9 @@ router.get("/joinables", jwtValidator, function (request, response) {
             .json(responseData);
     });
 });
-var pendingMatchIdKey = "pendingMatchId";
-router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, response) {
+router.post("/join/:" + RoutingParamKeys_1.default.PendingMatchId, jwtValidator, function (request, response) {
     var responseData = null;
-    var pendingMatchId = request.params[pendingMatchIdKey];
+    var pendingMatchId = request.params[RoutingParamKeys_1.default.PendingMatchId];
     if (!pendingMatchId) {
         responseData = new net.HttpMessage(null, "Unable to find requested match");
         response
@@ -188,23 +198,32 @@ router.post("/join/:" + pendingMatchIdKey, jwtValidator, function (request, resp
         });
     }
 });
-var matchIdKey = "matchId";
-router.get("/:" + matchIdKey, function (request, response) {
+// TODO: complete, check everything workd as expected 
+router.get("/newMatchSettings", function (request, response) {
+    var defaultNewMatchSettings = new game.MatchSettings();
+    var responseData = new net.HttpMessage(defaultNewMatchSettings);
+    response
+        .status(httpStatusCodes.OK)
+        .send(responseData);
+});
+router.get("/:" + RoutingParamKeys_1.default.MatchId, function (request, response) {
     var responseData = null;
-    var matchId = request.params[matchIdKey];
+    var matchId = request.params[RoutingParamKeys_1.default.MatchId];
     Match.getModel()
         .findById(matchId)
+        .populate("")
         .then(function (match) {
-        var matchDto = {
+        var matchInfoDto = {
             Id: match.id,
             FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
             SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
-            CreationDateTime: match.CreationDateTime
+            CreationDateTime: match.CreationDateTime,
+            Settings: match.Settings
         };
-        responseData = new net.HttpMessage(matchDto);
+        responseData = new net.HttpMessage(matchInfoDto);
         response
             .status(httpStatusCodes.OK)
-            .json(matchDto);
+            .json(matchInfoDto);
     })
         .catch(function (error) {
         responseData = new net.HttpMessage(null, error.message);
@@ -213,7 +232,7 @@ router.get("/:" + matchIdKey, function (request, response) {
             .json(responseData);
     });
 });
-router.post("/:" + matchIdKey, function () {
+router.post("/:" + RoutingParamKeys_1.default.MatchId, function () {
 });
 exports.default = router;
 //# sourceMappingURL=matchesRoutesConfig.js.map

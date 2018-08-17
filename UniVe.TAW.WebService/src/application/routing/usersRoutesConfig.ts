@@ -12,6 +12,7 @@ import * as utils from '../../infrastructure/utils-2.8';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
 import * as DTOs from '../DTOs';
+import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 
 const router = express.Router();
@@ -87,12 +88,11 @@ router.post(
         }
     });
 
-const userIdKey = "userId";
 router.get(
-    "/:" + userIdKey,
+    "/:" + RoutingParamKeys.UserId,
     (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-        const userId = request.params[userIdKey];
+        const userId = request.params[RoutingParamKeys.UserId];
         let responseData: net.HttpMessage<DTOs.IUserDto> = null;
 
         User.getModel()
@@ -119,10 +119,10 @@ router.get(
 
 // TODO: add authentication and allow delete only to same user
 router.delete(
-    "/:" + userIdKey,
+    "/:" + RoutingParamKeys.UserId,
     (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-        const userId = request.params[userIdKey];
+        const userId = request.params[RoutingParamKeys.UserId];
         let responseData: net.HttpMessage<boolean> = null;
 
         User.getModel()

@@ -15,6 +15,8 @@ import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 })
 export class SignupComponent implements OnInit {
 
+  // TODO: make default BirthDate from code to UI binding work. Idea: https://stackoverflow.com/a/49690089/1790497
+
   public readonly Countries: { id: identity.Country, name: string }[];
   public readonly SignupRequest = { Username: "Daedalus", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy } as DTOs.ISignupRequestDto;
   public RepeatedPassword: string;
@@ -33,6 +35,7 @@ export class SignupComponent implements OnInit {
   }
 
   public sendSignupRequest() {
+    // TODO: handle no response when server is down
     this.authService.signup(this.SignupRequest)
       .subscribe(response => {
         if (response.HasError) {

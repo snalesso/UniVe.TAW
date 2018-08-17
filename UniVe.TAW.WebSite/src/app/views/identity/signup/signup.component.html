@@ -50,7 +50,7 @@
     <div class="form-group">
       <!-- <input type="" #country="ngModel" placeholder="Country"> -->
       <select class="form-control" id="signup-form-countryId" name="country">
-        <option *ngFor="let country of Countries; index as i; first as isFirst" [selected]="isFirst" [value]="country.id">{{country.name}}</option>
+        <option *ngFor="let country of Countries; index as i;" [attr.selected]="i == SignupRequest.CountryId ? true : null" [value]="country.id">{{country.name}}</option>
       </select>
     </div>
 
@@ -58,7 +58,7 @@
       Login error: {{ResponseError}}
     </div>
 
-    <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendSignupRequest" (click)="sendSignupRequest();">Sign up</button>
+    <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendSignupRequest" (click)="sendSignupRequest()">Sign up</button>
   </form>
 
   <hr>

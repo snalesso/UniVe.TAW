@@ -14,6 +14,7 @@ import * as utils from '../../infrastructure/utils-2.8';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
 import * as DTOs from '../DTOs';
+import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
 
 const router = express.Router();

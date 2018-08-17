@@ -4,7 +4,7 @@
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
  */
-export function getRandomArbitrary(min, max) {
+export function getRandomArbitrary(min, max): number {
     return Math.random() * (max - min) + min;
 }
 
@@ -12,6 +12,10 @@ export function getRandomArbitrary(min, max) {
  * Returns a random integer between min (inclusive) and max (inclusive)
  * Using Math.round() will give you a non-uniform distribution!
  */
-export function getRandomInt(min, max) {
+export function getRandomInt(min, max): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function getRandomBoolean(): boolean {
+    return Math.random() % 2 == 0;
 }

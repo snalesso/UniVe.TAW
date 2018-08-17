@@ -1,4 +1,5 @@
 import * as enums from "../infrastructure/identity";
+import * as game from "../infrastructure/game";
 
 export interface ISignupRequestDto {
     Username: string;
@@ -41,9 +42,22 @@ export interface IMatchDto {
     FirstPlayerId: string;
     SecondPlayerId: string;
     CreationDateTime: Date;
+    Settings: game.MatchSettings;
 }
 
 export interface IJoinableMatchDto {
     Id: string;
     Creator: IUserDto;
 }
+
+//export type IBattleFieldSettingsDto = Partial<game.BattleFieldSettings>;
+
+export interface IMatchSettingsDto {
+    BattleFieldSettings: game.BattleFieldSettings; // IBattleFieldSettingsDto;
+    ShipTypeAvailability: game.ShipTypeAvailability[]; // Partial<game.ShipTypeAvailability>[];
+    MinShipDistance: number;
+}
+
+// export interface IMatchInfoDto extends IMatchDto {
+//     Settings: IMatchSettingsDto;
+// }

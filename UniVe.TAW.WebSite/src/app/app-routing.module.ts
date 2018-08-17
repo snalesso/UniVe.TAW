@@ -5,13 +5,17 @@ import { AppComponent } from './app.component';
 import { SignupComponent } from './views/identity/signup/signup.component';
 import { LoginComponent } from './views/identity/login/login.component';
 import { JoinableMatchesComponent } from './views/game/joinable-matches/joinable-matches.component';
+import { FleetConfiguratorComponent } from './views/game/match/fleet-configurator/fleet-configurator.component';
 import ViewsRoutingKeys from './views/ViewsRoutingKeys';
+import RoutingHelper from './RoutingHelper';
+import RoutingParamKeys from '../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
   { path: ViewsRoutingKeys.Signup, component: SignupComponent },
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
-  { path: ViewsRoutingKeys.JoinableMatches, component: JoinableMatchesComponent },
+  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.JoinableMatches]/*, [RoutingParamKeys.MatchId]*/), component: JoinableMatchesComponent },
+  { path: ViewsRoutingKeys.FleetConfigurator, component: FleetConfiguratorComponent },
 ];
 
 @NgModule({

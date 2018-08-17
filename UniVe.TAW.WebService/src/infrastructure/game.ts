@@ -114,3 +114,49 @@ export class MatchSettings {
         ];
     }
 }
+
+export class FleetValidator {
+
+    public static getCoordsDistance(coord1: Coord, coord2: Coord): Coord {
+        return new Coord(Math.abs(coord1.X - coord2.X), Math.abs(coord1.Y - coord2.Y));
+    }
+
+    public static getShipPlacementCoords(shipPlacement: ShipPlacement): Coord[] {
+        const shipCoords: Coord[] = [];
+
+        for (let i = 0; i < shipPlacement.Type; i++) {
+            if (shipPlacement.Orientation == ShipOrientation.Vertical)
+                shipCoords.push(new Coord(shipPlacement.Coord.X + i, shipPlacement.Coord.Y));
+            else
+                shipCoords.push(new Coord(shipPlacement.Coord.X, shipPlacement.Coord.Y + i));
+        }
+
+        return shipCoords;
+    }
+
+    public static validateShipPlacement(
+        shipPlacement: ShipPlacement,
+        fleetConfig: ShipPlacement[]): boolean {
+
+        const newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);
+        const occupiedCoords = [].concat.apply([], fleetConfig.map(sp => this.getShipPlacementCoords(sp)));
+
+        // -- beginning of test code: destroys all the cells inside the main dummy matrix of random shit
+        const test = [].concat(new Array([], [43, 8, 32]));
+        test.forEach(c => console.log(c));
+        // -- end of test code
+
+        return newShipPlacementCoords.every(coord =>
+            occupiedCoords.every(oc => {
+                const dist = this.getCoordsDistance(coord, oc);
+                return dist.X > 1 || dist.Y > 1;
+            }));
+    }
+
+    public static validateFleetConfig(
+        battlefieldWidth: number,
+        battlefieldHeight: number,
+        fleetConfig: ShipPlacement[]): boolean {
+        throw new Error("Not implemented");
+    }
+}

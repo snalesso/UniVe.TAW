@@ -6,12 +6,14 @@ import * as mongodb from 'mongodb';
 import * as expressJwt from 'express-jwt';
 
 import * as net from '../../infrastructure/net';
+import * as game from '../../infrastructure/game';
 import * as utils from '../../infrastructure/utils-2.8';
 
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as DTOs from '../DTOs';
+import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
 
 // TODO: rename to gameRoutesConfig?
@@ -22,6 +24,15 @@ const router: express.Router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
+router.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        return res.status(httpStatusCodes.OK).json({});
+    }
+    next();
+});
 
 const getUserPendingMatches = (userId: mongoose.Types.ObjectId): Promise<PendingMatch.IMongoosePendingMatch> => {
 
@@ -153,15 +164,14 @@ router.get(
             });
     });
 
-const pendingMatchIdKey = "pendingMatchId";
 router.post(
-    "/join/:" + pendingMatchIdKey,
+    "/join/:" + RoutingParamKeys.PendingMatchId,
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
         let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
 
-        const pendingMatchId = request.params[pendingMatchIdKey];
+        const pendingMatchId = request.params[RoutingParamKeys.PendingMatchId];
 
         if (!pendingMatchId) {
             responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "Unable to find requested match");
@@ -249,28 +259,44 @@ router.post(
         }
     });
 
-const matchIdKey = "matchId";
+// TODO: complete, check everything workd as expected 
 router.get(
-    "/:" + matchIdKey,
+    "/newMatchSettings",
+    (request: express.Request, response: express.Response) => {
+
+        let defaultNewMatchSettings = new game.MatchSettings();
+        let responseData = new net.HttpMessage(defaultNewMatchSettings);
+
+        response
+            .status(httpStatusCodes.OK)
+            .send(responseData);
+    }
+);
+
+router.get(
+    "/:" + RoutingParamKeys.MatchId,
     (request: express.Request, response: express.Response) => {
 
         let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
 
-        const matchId = request.params[matchIdKey];
+        const matchId = request.params[RoutingParamKeys.MatchId];
 
         Match.getModel()
             .findById(matchId)
+            .populate("")
             .then((match) => {
-                const matchDto = {
+
+                const matchInfoDto = {
                     Id: match.id,
                     FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
                     SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
-                    CreationDateTime: match.CreationDateTime
-                } as DTOs.IMatchDto;
-                responseData = new net.HttpMessage<DTOs.IMatchDto>(matchDto);
+                    CreationDateTime: match.CreationDateTime,
+                    Settings: match.Settings
+                };
+                responseData = new net.HttpMessage<DTOs.IMatchDto>(matchInfoDto);
                 response
                     .status(httpStatusCodes.OK)
-                    .json(matchDto);
+                    .json(matchInfoDto);
             })
             .catch((error: mongodb.MongoError) => {
                 responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
@@ -281,7 +307,7 @@ router.get(
     });
 
 router.post(
-    "/:" + matchIdKey,
+    "/:" + RoutingParamKeys.MatchId,
     () => {
     });
 

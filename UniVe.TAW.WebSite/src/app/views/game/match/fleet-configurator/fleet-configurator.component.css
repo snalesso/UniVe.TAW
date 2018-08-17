@@ -1,0 +1,20 @@
+.bf-grid {
+    border: 1px solid black;
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+    /* margin: 0 0 20px 0; */
+    max-width: 350px;
+}
+
+.bf-grid-cell {
+    border: 1px solid black;
+    /* height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 20px 0; */
+ }
+
+ /* .bf-grid-cell{     
+    padding-bottom: 10%;
+ } */

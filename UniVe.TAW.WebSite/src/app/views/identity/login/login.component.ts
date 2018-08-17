@@ -22,10 +22,13 @@ export class LoginComponent implements OnInit {
       && this.LoginRequest.Password != null;
   }
 
-  constructor(private readonly authService: AuthService, private readonly router: Router) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router) {
   }
 
   public sendLoginRequest() {
+    // TODO: handle no response when server is down
     this.authService.login(this.LoginRequest)
       .subscribe(response => {
         if (response.HasError) {
@@ -33,7 +36,7 @@ export class LoginComponent implements OnInit {
         }
         else {
           localStorage.setItem(Constants.AccessTokenKey, response.Content);
-          this.router.navigate([ViewsRoutingKeys.JoinableMatches])
+          this.router.navigate([ViewsRoutingKeys.JoinableMatches]);
         }
       });
   }

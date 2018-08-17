@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { GameService } from '../../../services/game.service';
+import { DummyGameService } from '../../../services/dummy-game.service';
 import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
@@ -24,35 +26,33 @@ export class JoinableMatchesComponent implements OnInit {
   public JoinableMatches: DTOs.IJoinableMatchDto[];
   //public Xfew: Mutable<DTOs.IUserDto>;
 
-  constructor() {
-    this.JoinableMatches = this.getFakeJoinableMatches(10);
+  constructor(
+    private readonly gameService: GameService,
+    //private readonly gameService: DummyGameService
+    private readonly router: Router
+  ) {
   }
 
   public joinMatch(matchId: string) {
     console.log("Clicked match with id " + matchId);
   }
 
-  private getFakeJoinableMatches(count: number): DTOs.IJoinableMatchDto[] {
-    let fakeMatches: DTOs.IJoinableMatchDto[] = [];
-    const countriesCount = Object.keys(identity.Country).filter(countryName => !isNaN(identity.Country[countryName])).length;
-
-    for (let i = 1; i <= count; i++) {
-      let rci =
-        fakeMatches.push({
-          Id: "MatchId #" + i,
-          Creator: {
-            Id: "Match creator id #" + i,
-            Username: "Creator of match #" + i,
-            CountryId: utils.getRandomInt(0, countriesCount),
-            Age: utils.getRandomInt(3, 100)
-          }
-        });
-    }
-
-    return fakeMatches;
+  public createNewMatch() {
+    this.router.navigate([ViewsRoutingKeys.FleetConfigurator]);
   }
 
   ngOnInit() {
+    this.gameService
+      .getJoinableMatches(localStorage.getItem(Constants.AccessTokenKey))
+      .subscribe(
+        response => {
+          if (response.HasError) {
+            console.log(response.ErrorMessage);
+          } else {
+            this.JoinableMatches = response.Content;
+          }
+        },
+        error => console.log(error));
   }
 
 }

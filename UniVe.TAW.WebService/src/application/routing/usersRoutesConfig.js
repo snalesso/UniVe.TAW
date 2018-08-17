@@ -6,6 +6,7 @@ var httpStatusCodes = require("http-status-codes");
 var net = require("../../infrastructure/net");
 var identity = require("../../infrastructure/identity");
 var User = require("../../domain/models/mongodb/mongoose/User");
+var RoutingParamKeys_1 = require("./RoutingParamKeys");
 var moment = require("moment");
 var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -70,9 +71,8 @@ router.post('/signup', function (request, response, next) {
         });
     }
 });
-var userIdKey = "userId";
-router.get("/:" + userIdKey, function (request, response, next) {
-    var userId = request.params[userIdKey];
+router.get("/:" + RoutingParamKeys_1.default.UserId, function (request, response, next) {
+    var userId = request.params[RoutingParamKeys_1.default.UserId];
     var responseData = null;
     User.getModel()
         .findById(userId)
@@ -96,8 +96,8 @@ router.get("/:" + userIdKey, function (request, response, next) {
     });
 });
 // TODO: add authentication and allow delete only to same user
-router.delete("/:" + userIdKey, function (request, response, next) {
-    var userId = request.params[userIdKey];
+router.delete("/:" + RoutingParamKeys_1.default.UserId, function (request, response, next) {
+    var userId = request.params[RoutingParamKeys_1.default.UserId];
     var responseData = null;
     User.getModel()
         .findByIdAndRemove(userId, function (error, deletedUser) {
