@@ -17,5 +17,5 @@ export function getRandomInt(min, max): number {
 }
 
 export function getRandomBoolean(): boolean {
-    return Math.random() % 2 == 0;
+    return Math.random() >= 0.5;
 }

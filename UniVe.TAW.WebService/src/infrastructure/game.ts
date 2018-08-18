@@ -29,6 +29,7 @@ export interface IShipPlacement {
     Orientation: ShipOrientation;
 }
 
+/** 0 based coord */
 export class ShipPlacement {
     constructor(
         public readonly Type: ShipType,
@@ -125,7 +126,7 @@ export class FleetValidator {
         const shipCoords: Coord[] = [];
 
         for (let i = 0; i < shipPlacement.Type; i++) {
-            if (shipPlacement.Orientation == ShipOrientation.Vertical)
+            if (shipPlacement.Orientation == ShipOrientation.Horizontal)
                 shipCoords.push(new Coord(shipPlacement.Coord.X + i, shipPlacement.Coord.Y));
             else
                 shipCoords.push(new Coord(shipPlacement.Coord.X, shipPlacement.Coord.Y + i));
@@ -136,21 +137,25 @@ export class FleetValidator {
 
     public static validateShipPlacement(
         shipPlacement: ShipPlacement,
-        fleetConfig: ShipPlacement[]): boolean {
+        fleetConfig: ShipPlacement[],
+        battleFieldSettings: BattleFieldSettings): boolean {
+
+        const noTrespassing = shipPlacement.Orientation == ShipOrientation.Vertical
+            ? (shipPlacement.Coord.Y + shipPlacement.Type - 1) < battleFieldSettings.BattleFieldHeight
+            : (shipPlacement.Coord.X + shipPlacement.Type - 1) < battleFieldSettings.BattleFieldWidth;
+
+        if (!noTrespassing)
+            return false;
 
         const newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);
         const occupiedCoords = [].concat.apply([], fleetConfig.map(sp => this.getShipPlacementCoords(sp)));
-
-        // -- beginning of test code: destroys all the cells inside the main dummy matrix of random shit
-        const test = [].concat(new Array([], [43, 8, 32]));
-        test.forEach(c => console.log(c));
-        // -- end of test code
-
-        return newShipPlacementCoords.every(coord =>
+        const noCollisions = newShipPlacementCoords.every(coord =>
             occupiedCoords.every(oc => {
                 const dist = this.getCoordsDistance(coord, oc);
                 return dist.X > 1 || dist.Y > 1;
             }));
+
+        return noCollisions;
     }
 
     public static validateFleetConfig(
