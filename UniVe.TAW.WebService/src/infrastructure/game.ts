@@ -92,7 +92,7 @@ export class MatchSettings {
     constructor(
         battleFieldSettings: BattleFieldSettings = new BattleFieldSettings(),
         availableShips: ShipTypeAvailability[] = MatchSettings.getDefaultShipTypeAvailability(),
-        minShipDistance: number = 1) {
+        minShipDistance: number = 2) {
 
         if (battleFieldSettings == null)
             throw new Error("Battle field settings must be specified");
@@ -137,22 +137,22 @@ export class FleetValidator {
 
     public static validateShipPlacement(
         shipPlacement: ShipPlacement,
-        fleetConfig: ShipPlacement[],
-        battleFieldSettings: BattleFieldSettings): boolean {
+        placedShips: ShipPlacement[],
+        matchSettings: MatchSettings): boolean {
 
-        const noTrespassing = shipPlacement.Orientation == ShipOrientation.Vertical
-            ? (shipPlacement.Coord.Y + shipPlacement.Type - 1) < battleFieldSettings.BattleFieldHeight
-            : (shipPlacement.Coord.X + shipPlacement.Type - 1) < battleFieldSettings.BattleFieldWidth;
+        const noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
+            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldWidth
+            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldHeight;
 
         if (!noTrespassing)
             return false;
 
         const newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);
-        const occupiedCoords = [].concat.apply([], fleetConfig.map(sp => this.getShipPlacementCoords(sp)));
+        const occupiedCoords: Coord[] = [].concat.apply([], placedShips.map(sp => this.getShipPlacementCoords(sp))); // flattens matrix to array
         const noCollisions = newShipPlacementCoords.every(coord =>
             occupiedCoords.every(oc => {
                 const dist = this.getCoordsDistance(coord, oc);
-                return dist.X > 1 || dist.Y > 1;
+                return dist.X >= matchSettings.MinShipsDistance || dist.Y >= matchSettings.MinShipsDistance;
             }));
 
         return noCollisions;
