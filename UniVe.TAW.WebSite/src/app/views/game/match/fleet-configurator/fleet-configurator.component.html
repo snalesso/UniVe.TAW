@@ -5,8 +5,8 @@
   </div>
 
   <div class="row justify-content-center">
-    <!-- 
-    <div class="col-lg-3 justify-content-center">
+
+    <!-- <div class="col-lg-3 justify-content-center">
       <p *ngFor="let sl of ShipsLog">{{sl}}</p>
       <p>{{RandomCoordsCreated}}</p>
     </div> -->
@@ -28,7 +28,7 @@
 
       <div class="row mt-2 justify-content-center">
         <!-- <div class="col-lg-12"> -->
-        <button type="button" class="btn btn-primary mr-2" (click)="randomizeFleet()">Randomize!</button>
+        <button type="button" class="btn btn-primary mr-2" [disabled]="!CanRandomize" (click)="randomizeFleet()">Randomize!</button>
         <button type="button" class="btn btn-success" (click)="submitConfig()">Play!</button>
         <!-- </div> -->
       </div>
