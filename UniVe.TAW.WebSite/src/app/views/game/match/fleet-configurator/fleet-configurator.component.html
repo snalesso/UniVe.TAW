@@ -4,35 +4,37 @@
     <h1>Choose your lineup!</h1>
   </div>
 
-  <!-- <div class="ships-bag">
-  <div class="placeableShip">Thing 1</div>
-  <div class="placeableShip" style="top:110px">Thing 2</div>
-</div> -->
-
   <div class="row justify-content-center">
-    <!-- <div class="col-lg-12"> -->
-    <table id="bf-grid" class="bf-grid">
-      <!-- <thead>
-        <tr>
-          <th attr.colspan="{{BattleFieldWidth}}">
-            <p>W: {{BattleFieldWidth}} x H: {{BattleFieldHeight}}</p>
-          </th>
-        </tr>
-      </thead> -->
-      <tbody>
-        <tr *ngFor="let row of BattleFieldDummyRows">
-          <td class="bf-grid-cell dropzone" [style.padding-bottom]="CellHeightPercent + '%'" *ngFor="let col of BattleFieldDummyCols"></td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- </div> -->
-  </div>
+    <!-- 
+    <div class="col-lg-3 justify-content-center">
+      <p *ngFor="let sl of ShipsLog">{{sl}}</p>
+      <p>{{RandomCoordsCreated}}</p>
+    </div> -->
 
-  <div class="row mt-2 justify-content-center">
-    <!-- <div class="col-lg-12"> -->
-    <button type="button" class="btn btn-outline-primary margin-right-10" (click)="randomizeFleet()">Randomize!</button>
-    <button type="button" class="btn btn-outline-success" (click)="submitConfig()">Play!</button>
-    <!-- </div> -->
+    <div class="col-lg-9 justify-content-center">
+
+      <div class="row justify-content-center">
+        <table id="bf-grid" class="bf-grid">
+          <tbody>
+            <tr *ngFor="let row of BattleFieldGridDummyRows">
+              <td class="bf-grid-cell dropzone" [attr.data-x]="col" [attr.data-y]="row" [style.padding-bottom]="BattleFieldGridCellHeightPercent + '%'"
+                *ngFor="let col of BattleFieldGridDummyCols">
+                <!-- ({{col}},{{row}}) -->
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row mt-2 justify-content-center">
+        <!-- <div class="col-lg-12"> -->
+        <button type="button" class="btn btn-primary mr-2" (click)="randomizeFleet()">Randomize!</button>
+        <button type="button" class="btn btn-success" (click)="submitConfig()">Play!</button>
+        <!-- </div> -->
+      </div>
+
+    </div>
+
   </div>
 
 </div>

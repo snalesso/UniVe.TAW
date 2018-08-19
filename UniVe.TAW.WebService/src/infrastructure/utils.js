@@ -18,7 +18,7 @@ function getRandomInt(min, max) {
 }
 exports.getRandomInt = getRandomInt;
 function getRandomBoolean() {
-    return Math.random() % 2 == 0;
+    return Math.random() >= 0.5;
 }
 exports.getRandomBoolean = getRandomBoolean;
 //# sourceMappingURL=utils.js.map

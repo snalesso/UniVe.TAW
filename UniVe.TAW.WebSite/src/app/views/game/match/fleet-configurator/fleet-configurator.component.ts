@@ -17,6 +17,10 @@ import * as $ from 'jquery';
 })
 export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterContentInit {
 
+  private _showCoords: boolean = false;
+  public get ShowCoords(): boolean { return this._showCoords; }
+  public set ShowCoords(value: boolean) { this._showCoords = value; }
+
   private readonly _matchId: string;
   //private _placeableShipTypes: game.ShipType[] = [];
   //private _shipPlacements: game.ShipPlacement[] = [];
@@ -27,43 +31,51 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
   public get Settings(): game.MatchSettings {
     return this._settings;
   }
-  public get BattleFieldWidth(): number {
-    return this._settings.BattleFieldSettings.BattleFieldWidth;
+  public get BattleFieldGridWidth(): number {
+    return this._settings.BattleFieldSettings.BattleFieldWidth + (this.ShowCoords ? 1 : 0);
   }
-  public get BattleFieldHeight(): number {
-    return this._settings.BattleFieldSettings.BattleFieldHeight;
+  public get BattleFieldGridHeight(): number {
+    return this._settings.BattleFieldSettings.BattleFieldHeight + (this.ShowCoords ? 1 : 0);
   }
   private _dummyCols: number[] = [];
-  public get BattleFieldDummyCols(): number[] {
+  public get BattleFieldGridDummyCols(): number[] {
     return this._dummyCols;
   }
   private _dummyRows: number[] = [];
-  public get BattleFieldDummyRows(): number[] {
+  public get BattleFieldGridDummyRows(): number[] {
     return this._dummyRows;
   }
-  // public get CellWidthPercent() {
-  //   return 100 / this.BattleFieldWidth;
-  // }
-  private _cellHeightPercent: number;
-  public get CellHeightPercent() {
-    return this._cellHeightPercent;
+  private _bfchp: number;
+  public get BattleFieldGridCellHeightPercent() {
+    return this._bfchp;
   }
 
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly gameService: GameService) {
-    const sp = new game.ShipPlacement(game.ShipType.Carrier, new game.Coord(6, 3), game.ShipOrientation.Vertical);
-    const x = game.FleetValidator.getShipPlacementCoords(sp);
+    // const sp = new game.ShipPlacement(game.ShipType.Carrier, new game.Coord(6, 3), game.ShipOrientation.Vertical);
+    // const x = game.FleetValidator.getShipPlacementCoords(sp);
+
+    // const
+    //   c1 = new game.Coord(5, 5),
+    //   c2 = new game.Coord(4, 5),
+    //   c3 = new game.Coord(4, 4),
+    //   c4 = new game.Coord(5, 4);
+
+    // console.log(game.FleetValidator.getCoordsDistance(c1, c2));
+    // console.log(game.FleetValidator.getCoordsDistance(c1, c3));
+    // console.log(game.FleetValidator.getCoordsDistance(c1, c4));
+    // console.log(game.FleetValidator.getCoordsDistance(c4, c3));
   }
 
-  private resetField(): void {
-    this._dummyCols = Array.apply(null, { length: this.BattleFieldWidth }).map(Number.call, Number);
-    this._dummyRows = Array.apply(null, { length: this.BattleFieldHeight }).map(Number.call, Number);
-    this._cellHeightPercent = 100 / this.BattleFieldWidth;
+  private updateGridSettings(): void {
+    this._dummyCols = Array.apply(null, { length: this.BattleFieldGridWidth }).map(Number.call, Number);
+    this._dummyRows = Array.apply(null, { length: this.BattleFieldGridHeight }).map(Number.call, Number);
+    this._bfchp = 100 / this.BattleFieldGridWidth;
   }
 
-  private resetFleetConfig() {
+  private cleanFleetConfig() {
 
     this._shipsMappings.forEach(sm => {
       // TODO: this can be simply moved instead regen
@@ -75,10 +87,27 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
     this.ShipsLog = [];
   }
 
-  public randomizeFleet() {
-    this.resetFleetConfig();
+  public RandomCoordsCreated: number = 0;
 
-    let placed: game.ShipPlacement[] = [];
+  public randomizeFleet() {
+    this.cleanFleetConfig();
+    //this.rebuildBattleFieldGrid();
+
+    // const cells: game_client.ClientSideBattleFieldCell_Owner[][] = [];
+    // for (let x = 0; x < this._settings.BattleFieldSettings.BattleFieldWidth; x++) {
+    //   cells[x] = [];
+    //   for (let y = 0; y < this._settings.BattleFieldSettings.BattleFieldHeight; y++) {
+    //     cells[x][y] = new game_client.ClientSideBattleFieldCell_Owner(game.ShipType.NoShip);
+    //   }
+    // }
+    const availableCoords: boolean[][] = [];
+    for (let x = 0; x < this._settings.BattleFieldSettings.BattleFieldWidth; x++) {
+      availableCoords[x] = [];
+      for (let y = 0; y < this._settings.BattleFieldSettings.BattleFieldHeight; y++) {
+        availableCoords[x][y] = true;
+      }
+    }
+
     let isValidPlacement: boolean = false;
     let placeableShipTypes: game.ShipType[] = [];
     let shipTypeToPlace: game.ShipType;
@@ -95,18 +124,26 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
     });
     placeableShipTypes = placeableShipTypes.sort(); // sort from smallest to largest, so pop() will extract the largest
 
+    this.RandomCoordsCreated = 0;
+
     while ((shipTypeToPlace = placeableShipTypes.pop()) != null) {
 
       isValidPlacement = false;
 
       while (!isValidPlacement) {
         rOrient = utils.getRandomBoolean() ? game.ShipOrientation.Vertical : game.ShipOrientation.Horizontal;
-        rx = utils.getRandomInt(0, this._settings.BattleFieldSettings.BattleFieldWidth - (rOrient == game.ShipOrientation.Horizontal ? shipTypeToPlace : 1));
-        ry = utils.getRandomInt(0, this._settings.BattleFieldSettings.BattleFieldHeight - (rOrient == game.ShipOrientation.Vertical ? shipTypeToPlace : 1));
+        do {
+          rx = utils.getRandomInt(0, this._settings.BattleFieldSettings.BattleFieldWidth - (rOrient == game.ShipOrientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this._settings.BattleFieldSettings.BattleFieldHeight - (rOrient == game.ShipOrientation.Vertical ? shipTypeToPlace : 1));
+          this.RandomCoordsCreated++;
+        } while (!(availableCoords[rx][ry]));
+
         rCoord = new game.Coord(rx, ry);
+        availableCoords[rx][ry] = false;
+
         rPlacement = new game.ShipPlacement(shipTypeToPlace, rCoord, rOrient);
 
-        isValidPlacement = game.FleetValidator.validateShipPlacement(rPlacement, placed, this._settings.BattleFieldSettings);
+        isValidPlacement = game.FleetValidator.validateShipPlacement(rPlacement, this._shipsMappings.map(sm => sm.shipPlacement), this._settings);
       }
 
       this._shipsMappings.push({ shipPlacement: rPlacement, uiShip: null /*document.createElement("div")*/ });
@@ -134,11 +171,11 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
   }
 
   ngOnInit(): void {
-    console.log("ngOnInit");
+    // console.log("ngOnInit");
 
-    $(document).ready(() => {
-      console.log("DOM ready");
-    });
+    // $(document).ready(() => {
+    //   console.log("DOM ready");
+    // });
 
     // this.gameService
     //   .getNewMatchSettings(localStorage.getItem(Constants.AccessTokenKey))
@@ -156,17 +193,18 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
     //   });
 
     this._settings = new game.MatchSettings(); // fakes to test
+    this.updateGridSettings();
   }
 
   ngAfterViewInit(): void {
-    console.log("ngAfterViewInit");
-  }
-  ngAfterContentInit(): void {
-    console.log("ngAfterContentInit");
+    // console.log("ngAfterViewInit");
+    // console.log(document.readyState);
 
-    this.resetField();
     this.randomizeFleet();
     // this.configureInteractJs();
+  }
+  ngAfterContentInit(): void {
+    //console.log("ngAfterContentInit");
   }
 
   // private startPos: any = null;

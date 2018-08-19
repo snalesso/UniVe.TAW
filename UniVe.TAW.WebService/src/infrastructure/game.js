@@ -21,6 +21,7 @@ var ShipOrientation;
     ShipOrientation[ShipOrientation["Horizontal"] = 0] = "Horizontal";
     ShipOrientation[ShipOrientation["Vertical"] = 1] = "Vertical";
 })(ShipOrientation = exports.ShipOrientation || (exports.ShipOrientation = {}));
+/** 0 based coord */
 var ShipPlacement = /** @class */ (function () {
     function ShipPlacement(Type, Coord, Orientation) {
         this.Type = Type;
@@ -104,27 +105,29 @@ var FleetValidator = /** @class */ (function () {
     FleetValidator.getShipPlacementCoords = function (shipPlacement) {
         var shipCoords = [];
         for (var i = 0; i < shipPlacement.Type; i++) {
-            if (shipPlacement.Orientation == ShipOrientation.Vertical)
+            if (shipPlacement.Orientation == ShipOrientation.Horizontal)
                 shipCoords.push(new Coord(shipPlacement.Coord.X + i, shipPlacement.Coord.Y));
             else
                 shipCoords.push(new Coord(shipPlacement.Coord.X, shipPlacement.Coord.Y + i));
         }
         return shipCoords;
     };
-    FleetValidator.validateShipPlacement = function (shipPlacement, fleetConfig) {
+    FleetValidator.validateShipPlacement = function (shipPlacement, fleetConfig, matchSettings) {
         var _this = this;
+        var noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
+            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldWidth
+            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldHeight;
+        if (!noTrespassing)
+            return false;
         var newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);
         var occupiedCoords = [].concat.apply([], fleetConfig.map(function (sp) { return _this.getShipPlacementCoords(sp); }));
-        // -- beginning of test code: destroys all the cells inside the main dummy matrix of random shit
-        var test = [].concat(new Array([], [43, 8, 32]));
-        test.forEach(function (c) { return console.log(c); });
-        // -- end of test code
-        return newShipPlacementCoords.every(function (coord) {
+        var noCollisions = newShipPlacementCoords.every(function (coord) {
             return occupiedCoords.every(function (oc) {
                 var dist = _this.getCoordsDistance(coord, oc);
-                return dist.X > 1 || dist.Y > 1;
+                return dist.X > matchSettings.MinShipsDistance || dist.Y > matchSettings.MinShipsDistance;
             });
         });
+        return noCollisions;
     };
     FleetValidator.validateFleetConfig = function (battlefieldWidth, battlefieldHeight, fleetConfig) {
         throw new Error("Not implemented");
