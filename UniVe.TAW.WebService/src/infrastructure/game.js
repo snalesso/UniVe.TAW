@@ -1,6 +1,10 @@
 "use strict";
+// export interface ICoord {
+//     readonly X: number;
+//     readonly Y: number;
+// }
 Object.defineProperty(exports, "__esModule", { value: true });
-var Coord = /** @class */ (function () {
+var Coord /*implements ICoord*/ = /** @class */ (function () {
     function Coord(X, Y) {
         this.X = X;
         this.Y = Y;
@@ -21,6 +25,11 @@ var ShipOrientation;
     ShipOrientation[ShipOrientation["Horizontal"] = 0] = "Horizontal";
     ShipOrientation[ShipOrientation["Vertical"] = 1] = "Vertical";
 })(ShipOrientation = exports.ShipOrientation || (exports.ShipOrientation = {}));
+// export interface IShipPlacement {
+//     Type: ShipType;
+//     Coord: Coord;
+//     Orientation: ShipOrientation;
+// }
 /** 0 based coord */
 var ShipPlacement = /** @class */ (function () {
     function ShipPlacement(Type, Coord, Orientation) {
@@ -31,7 +40,11 @@ var ShipPlacement = /** @class */ (function () {
     return ShipPlacement;
 }());
 exports.ShipPlacement = ShipPlacement;
-var ShipTypeAvailability = /** @class */ (function () {
+// export interface IShipTypeAvailability {
+//     readonly ShipType: ShipType,
+//     readonly Count: number
+// }
+var ShipTypeAvailability /*implements IShipTypeAvailability*/ = /** @class */ (function () {
     function ShipTypeAvailability(ShipType, Count) {
         this.ShipType = ShipType;
         this.Count = Count;
@@ -55,6 +68,7 @@ var MatchAction = /** @class */ (function () {
     return MatchAction;
 }());
 exports.MatchAction = MatchAction;
+// TODO: aggregate with match settings
 var BattleFieldSettings = /** @class */ (function () {
     function BattleFieldSettings(battleFieldWidth, battleFieldHeight) {
         if (battleFieldWidth === void 0) { battleFieldWidth = BattleFieldSettings.BattleFieldMinWidth; }
@@ -63,7 +77,7 @@ var BattleFieldSettings = /** @class */ (function () {
             || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
             || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
             || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
-            throw new Error("Invalid BattleField size");
+            throw new Error("Invalid battlefield size");
         this.BattleFieldHeight = battleFieldHeight;
         this.BattleFieldWidth = battleFieldWidth;
     }
@@ -78,9 +92,9 @@ var MatchSettings = /** @class */ (function () {
     function MatchSettings(battleFieldSettings, availableShips, minShipDistance) {
         if (battleFieldSettings === void 0) { battleFieldSettings = new BattleFieldSettings(); }
         if (availableShips === void 0) { availableShips = MatchSettings.getDefaultShipTypeAvailability(); }
-        if (minShipDistance === void 0) { minShipDistance = 1; }
+        if (minShipDistance === void 0) { minShipDistance = 2; }
         if (battleFieldSettings == null)
-            throw new Error("Battle field settings must be specified");
+            throw new Error("Invalid battlefield settings");
         this.BattleFieldSettings = battleFieldSettings;
         this.AvailableShips = availableShips;
         this.MinShipsDistance = minShipDistance;
@@ -112,7 +126,7 @@ var FleetValidator = /** @class */ (function () {
         }
         return shipCoords;
     };
-    FleetValidator.validateShipPlacement = function (shipPlacement, fleetConfig, matchSettings) {
+    FleetValidator.isValidShipPlacement = function (shipPlacement, placedShips, matchSettings) {
         var _this = this;
         var noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
             ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldWidth
@@ -120,16 +134,16 @@ var FleetValidator = /** @class */ (function () {
         if (!noTrespassing)
             return false;
         var newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);
-        var occupiedCoords = [].concat.apply([], fleetConfig.map(function (sp) { return _this.getShipPlacementCoords(sp); }));
+        var occupiedCoords = [].concat.apply([], placedShips.map(function (sp) { return _this.getShipPlacementCoords(sp); })); // flattens matrix to array
         var noCollisions = newShipPlacementCoords.every(function (coord) {
             return occupiedCoords.every(function (oc) {
                 var dist = _this.getCoordsDistance(coord, oc);
-                return dist.X > matchSettings.MinShipsDistance || dist.Y > matchSettings.MinShipsDistance;
+                return dist.X >= matchSettings.MinShipsDistance || dist.Y >= matchSettings.MinShipsDistance;
             });
         });
         return noCollisions;
     };
-    FleetValidator.validateFleetConfig = function (battlefieldWidth, battlefieldHeight, fleetConfig) {
+    FleetValidator.isValidFleetConfig = function (fleetConfig, matchSettings) {
         throw new Error("Not implemented");
     };
     return FleetValidator;

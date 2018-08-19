@@ -16,9 +16,9 @@
       <div class="row justify-content-center">
         <table id="bf-grid" class="bf-grid">
           <tbody>
-            <tr *ngFor="let row of BattleFieldGridDummyRows">
-              <td class="bf-grid-cell dropzone" [attr.data-x]="col" [attr.data-y]="row" [style.padding-bottom]="BattleFieldGridCellHeightPercent + '%'"
-                *ngFor="let col of BattleFieldGridDummyCols">
+            <tr *ngFor="let row of GridCells">
+              <td class="bf-grid-cell" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="cell.ShipType > 0 ? 'ship' : ''"
+                [style.padding-bottom]="100/Settings.BattleFieldSettings.BattleFieldWidth + '%'" *ngFor="let cell of row">
                 <!-- ({{col}},{{row}}) -->
               </td>
             </tr>

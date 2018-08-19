@@ -1,13 +1,23 @@
-<p>
-  enemy-field works!
-</p>
+<div class="container-fluid">
 
-<div class="container">
-  <table id="bf-grid" class="bf-grid" style="border: 1px solid black; border-collapse: collapse; margin: 0 0 20px 0; height: 100%; width: 100%;">
-    <tbody>
-      <!-- <tr *ngFor="let row of BattleFieldDummyRows">
-        <td class="bf-grid-cell dropzone" (click)="fire($event);" *ngFor="let col of BattleFieldDummyCols">A</td>
-      </tr> -->
-    </tbody>
-  </table>
+  <div class="row justify-content-center">
+    <h1>Fire!</h1>
+  </div>
+
+  <div class="row justify-content-center">
+
+    <div class="row justify-content-center">
+      <table id="bf-grid" class="bf-grid">
+        <tbody>
+          <tr *ngFor="let row of GridCells">
+            <td class="bf-grid-cell" (click)="fire(cell.Coord)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="'cell-status-' + cell.Status"
+              [style.padding-bottom]="100/Settings.BattleFieldSettings.BattleFieldWidth + '%'" *ngFor="let cell of row">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
 </div>

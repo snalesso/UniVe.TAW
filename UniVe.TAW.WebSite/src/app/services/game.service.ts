@@ -31,7 +31,7 @@ export class GameService {
     return this.http.get<net.HttpMessage<DTOs.IJoinableMatchDto[]>>(endPoint, options);
   }
 
-  public getNewMatchSettings(accessToken: string): Observable<net.HttpMessage<game.MatchSettings>> {
+  public getNewMatchSettings(accessToken: string): Observable<net.HttpMessage<DTOs.IMatchSettingsDto>> {
     const endPoint = Constants.ServerAddress + "/matches/newMatchSettings";
     const options = {
       headers: new ng_http.HttpHeaders({
@@ -40,7 +40,7 @@ export class GameService {
       })
     };
 
-    return this.http.get<net.HttpMessage<game.MatchSettings>>(endPoint, options);
+    return this.http.get<net.HttpMessage<DTOs.IMatchSettingsDto>>(endPoint, options);
   }
 
   public getMatchInfo(accessToken: string, matchId: string): Observable<net.HttpMessage<DTOs.IMatchDto>> {
@@ -54,5 +54,41 @@ export class GameService {
 
     return this.http.get<net.HttpMessage<DTOs.IMatchDto>>(endPoint, options);
   }
+
+  public createMatch(accessToken: string, fleetConfig: game.ShipPlacement[]): Observable<net.HttpMessage<string>> {
+    const endPoint = Constants.ServerAddress + "/matches/create";
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      })
+    };
+
+    return this.http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
+  }
+
+  public joinMatch(accessToken: string, matchId: string, fleetConfig: game.ShipPlacement[]): Observable<net.HttpMessage<DTOs.IMatchDto>> {
+    const endPoint = Constants.ServerAddress + "/matches/join" + matchId;
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      })
+    };
+
+    return this.http.post<net.HttpMessage<DTOs.IMatchDto>>(endPoint, fleetConfig, options);
+  }
+
+  // public getSta(accessToken: string): Observable<net.HttpMessage<game.ShipTypeAvailability>> {
+  //   const endPoint = Constants.ServerAddress + "/matches/sta";
+  //   const options = {
+  //     headers: new ng_http.HttpHeaders({
+  //       'Content-Type': 'application/json',
+  //       'Authorization': 'Bearer ' + accessToken
+  //     })
+  //   };
+
+  //   return this.http.get<net.HttpMessage<DTOs.IShipTypeAvailabilityDto>>(endPoint, options);
+  // }
 
 }

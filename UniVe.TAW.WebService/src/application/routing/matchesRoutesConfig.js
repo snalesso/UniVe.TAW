@@ -199,14 +199,34 @@ router.post("/join/:" + RoutingParamKeys_1.default.PendingMatchId, jwtValidator,
     }
 });
 // TODO: complete, check everything workd as expected 
-router.get("/newMatchSettings", function (request, response) {
-    var defaultNewMatchSettings = new game.MatchSettings();
-    var responseData = new net.HttpMessage(defaultNewMatchSettings);
+router.get("/newMatchSettings", jwtValidator, function (request, response) {
+    var dnms = new game.MatchSettings();
+    var responseData = new net.HttpMessage({
+        MinShipDistance: dnms.MinShipsDistance,
+        ShipTypeAvailability: dnms.AvailableShips.map(function (as) {
+            return {
+                Count: as.Count,
+                ShipType: as.ShipType
+            };
+        }),
+        BattleFieldSettings: {
+            BattleFieldWidth: dnms.BattleFieldSettings.BattleFieldWidth,
+            BattleFieldHeight: dnms.BattleFieldSettings.BattleFieldHeight,
+        }
+    });
     response
+        //.type("application/json")
         .status(httpStatusCodes.OK)
         .send(responseData);
 });
-router.get("/:" + RoutingParamKeys_1.default.MatchId, function (request, response) {
+router.get("/sta", jwtValidator, function (request, response) {
+    var sta = new game.ShipTypeAvailability(game.ShipType.Battleship, 3);
+    response
+        //.type("application/json")
+        .status(httpStatusCodes.OK)
+        .send(new net.HttpMessage({ ShipType: sta.ShipType, Count: sta.Count }));
+});
+router.get("/:" + RoutingParamKeys_1.default.MatchId, jwtValidator, function (request, response) {
     var responseData = null;
     var matchId = request.params[RoutingParamKeys_1.default.MatchId];
     Match.getModel()
@@ -232,7 +252,7 @@ router.get("/:" + RoutingParamKeys_1.default.MatchId, function (request, respons
             .json(responseData);
     });
 });
-router.post("/:" + RoutingParamKeys_1.default.MatchId, function () {
+router.post("/:" + RoutingParamKeys_1.default.MatchId, jwtValidator, function () {
 });
 exports.default = router;
 //# sourceMappingURL=matchesRoutesConfig.js.map

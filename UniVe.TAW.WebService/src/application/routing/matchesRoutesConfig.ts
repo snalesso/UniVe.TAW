@@ -15,6 +15,7 @@ import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch
 import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
+import { request } from 'http';
 
 // TODO: rename to gameRoutesConfig?
 
@@ -262,19 +263,48 @@ router.post(
 // TODO: complete, check everything workd as expected 
 router.get(
     "/newMatchSettings",
+    jwtValidator,
     (request: express.Request, response: express.Response) => {
 
-        let defaultNewMatchSettings = new game.MatchSettings();
-        let responseData = new net.HttpMessage(defaultNewMatchSettings);
+        const dnms = new game.MatchSettings();
+        const responseData = new net.HttpMessage({
+            MinShipDistance: dnms.MinShipsDistance,
+            ShipTypeAvailability: dnms.AvailableShips.map(as => {
+                return {
+                    Count: as.Count,
+                    ShipType: as.ShipType
+                } as DTOs.IShipTypeAvailabilityDto;
+            }),
+            BattleFieldSettings: {
+                BattleFieldWidth: dnms.BattleFieldSettings.BattleFieldWidth,
+                BattleFieldHeight: dnms.BattleFieldSettings.BattleFieldHeight,
+
+            } as DTOs.IBattleFieldSettingsDto
+        } as DTOs.IMatchSettingsDto);
 
         response
+            //.type("application/json")
             .status(httpStatusCodes.OK)
             .send(responseData);
     }
 );
 
+// router.get(
+//     "/sta",
+//     jwtValidator,
+//     (request: express.Request, response: express.Response) => {
+
+//         const sta = new game.ShipTypeAvailability(game.ShipType.Battleship, 3);
+
+//         response
+//             //.type("application/json")
+//             .status(httpStatusCodes.OK)
+//             .send(new net.HttpMessage({ ShipType: sta.ShipType, Count: sta.Count } as DTOs.IShipTypeAvailabilityDto));
+//     });
+
 router.get(
     "/:" + RoutingParamKeys.MatchId,
+    jwtValidator,
     (request: express.Request, response: express.Response) => {
 
         let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
@@ -286,7 +316,7 @@ router.get(
             .populate("")
             .then((match) => {
 
-                const matchInfoDto = {
+                const matchInfoDto: DTOs.IMatchDto = {
                     Id: match.id,
                     FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
                     SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
@@ -308,6 +338,7 @@ router.get(
 
 router.post(
     "/:" + RoutingParamKeys.MatchId,
+    jwtValidator,
     () => {
     });
 

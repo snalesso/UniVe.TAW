@@ -11,6 +11,7 @@ import * as utils from '../../../../assets/imported/unive.taw.webservice/infrast
 import Constants from '../../../services/constants';
 import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 import { Country } from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
+import * as game from '../../../../assets/imported/unive.taw.webservice/infrastructure/game';
 
 // export type Mutable<T> = {
 //   -readonly [P in keyof T]: T[P];
@@ -25,6 +26,8 @@ export class JoinableMatchesComponent implements OnInit {
 
   public JoinableMatches: DTOs.IJoinableMatchDto[];
   //public Xfew: Mutable<DTOs.IUserDto>;
+
+  private sta: game.ShipTypeAvailability;
 
   constructor(
     private readonly gameService: GameService,

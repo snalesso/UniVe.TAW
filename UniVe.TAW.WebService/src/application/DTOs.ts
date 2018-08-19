@@ -52,9 +52,12 @@ export interface IJoinableMatchDto {
 
 //export type IBattleFieldSettingsDto = Partial<game.BattleFieldSettings>;
 
+export interface IBattleFieldSettingsDto extends game.BattleFieldSettings { };
+export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
+
 export interface IMatchSettingsDto {
-    BattleFieldSettings: game.BattleFieldSettings; // IBattleFieldSettingsDto;
-    ShipTypeAvailability: game.ShipTypeAvailability[]; // Partial<game.ShipTypeAvailability>[];
+    BattleFieldSettings: IBattleFieldSettingsDto; // IBattleFieldSettingsDto;
+    ShipTypeAvailability: IShipTypeAvailabilityDto[]; // Partial<game.ShipTypeAvailability>[];
     MinShipDistance: number;
 }
 

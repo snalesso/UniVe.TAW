@@ -1,9 +1,9 @@
-export interface ICoord {
-    readonly X: number;
-    readonly Y: number;
-}
+// export interface ICoord {
+//     readonly X: number;
+//     readonly Y: number;
+// }
 
-export class Coord implements ICoord {
+export class Coord /*implements ICoord*/ {
 
     public constructor(
         public readonly X: number,
@@ -23,11 +23,11 @@ export enum ShipOrientation {
     Vertical
 }
 
-export interface IShipPlacement {
-    Type: ShipType;
-    Coord: Coord;
-    Orientation: ShipOrientation;
-}
+// export interface IShipPlacement {
+//     Type: ShipType;
+//     Coord: Coord;
+//     Orientation: ShipOrientation;
+// }
 
 /** 0 based coord */
 export class ShipPlacement {
@@ -38,7 +38,11 @@ export class ShipPlacement {
     }
 }
 
-export class ShipTypeAvailability {
+// export interface IShipTypeAvailability {
+//     readonly ShipType: ShipType,
+//     readonly Count: number
+// }
+export class ShipTypeAvailability /*implements IShipTypeAvailability*/ {
     public constructor(
         public readonly ShipType: ShipType,
         public readonly Count: number) {
@@ -61,6 +65,7 @@ export class MatchAction {
     }
 }
 
+// TODO: aggregate with match settings
 export class BattleFieldSettings {
 
     public static readonly BattleFieldMinWidth: number = 10;
@@ -77,7 +82,7 @@ export class BattleFieldSettings {
             || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
             || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
             || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
-            throw new Error("Invalid BattleField size");
+            throw new Error("Invalid battlefield size");
 
         this.BattleFieldHeight = battleFieldHeight;
         this.BattleFieldWidth = battleFieldWidth;
@@ -95,7 +100,7 @@ export class MatchSettings {
         minShipDistance: number = 2) {
 
         if (battleFieldSettings == null)
-            throw new Error("Battle field settings must be specified");
+            throw new Error("Invalid battlefield settings");
 
         this.BattleFieldSettings = battleFieldSettings;
         this.AvailableShips = availableShips;
@@ -135,7 +140,7 @@ export class FleetValidator {
         return shipCoords;
     }
 
-    public static validateShipPlacement(
+    public static isValidShipPlacement(
         shipPlacement: ShipPlacement,
         placedShips: ShipPlacement[],
         matchSettings: MatchSettings): boolean {
@@ -158,10 +163,9 @@ export class FleetValidator {
         return noCollisions;
     }
 
-    public static validateFleetConfig(
-        battlefieldWidth: number,
-        battlefieldHeight: number,
-        fleetConfig: ShipPlacement[]): boolean {
+    public static isValidFleetConfig(
+        fleetConfig: ShipPlacement[],
+        matchSettings: MatchSettings): boolean {
         throw new Error("Not implemented");
     }
 }
