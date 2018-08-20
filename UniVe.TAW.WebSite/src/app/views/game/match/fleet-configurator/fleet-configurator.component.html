@@ -16,7 +16,7 @@
       <div class="row justify-content-center">
         <table id="bf-grid" class="bf-grid">
           <tbody>
-            <tr *ngFor="let row of GridCells">
+            <tr *ngFor="let row of Cells">
               <td class="bf-grid-cell" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="cell.ShipType > 0 ? 'ship' : ''"
                 [style.padding-bottom]="100/Settings.BattleFieldSettings.BattleFieldWidth + '%'" *ngFor="let cell of row">
                 <!-- ({{col}},{{row}}) -->

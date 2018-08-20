@@ -5,7 +5,7 @@ import * as ng_http from '@angular/common/http';
 import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
-import Constants from './constants';
+import ServiceConstants from './ServiceConstants';
 
 import * as $ from 'jquery';
 import { Observable } from 'rxjs';
@@ -30,7 +30,7 @@ export class AuthService {
     //     .fail((error, b, c) => {
     //       console.log("Error sending signup");
     //     });
-    const endPoint = Constants.ServerAddress + "/users/signup";
+    const endPoint = ServiceConstants.ServerAddress + "/users/signup";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json'
@@ -70,7 +70,7 @@ export class AuthService {
     //     //return null;
     //   });
 
-    const endPoint = Constants.ServerAddress + "/auth/login";
+    const endPoint = ServiceConstants.ServerAddress + "/auth/login";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/x-www-form-urlencoded',

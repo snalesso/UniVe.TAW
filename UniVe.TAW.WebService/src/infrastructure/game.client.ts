@@ -1,39 +1,28 @@
 import * as game from './game';
 
-export enum ClientSideBattleFieldCellStatus_Owner {
-    Water,
-    Ship,
+export enum OwnBattleFieldCellStatus {
+    Untouched,
     Hit
 }
 
-export enum ClientSideBattleFieldCellStatus_Enemy {
+export enum EnemyBattleFieldCellStatus {
     Unknown,
     Water,
     Hit
 }
 
-export class ClientSideBattleFieldCell_Owner {
-    public constructor(
-        public readonly ShipType: game.ShipType,
-        public readonly Status: ClientSideBattleFieldCellStatus_Owner = ClientSideBattleFieldCellStatus_Owner.Water) {
-        if (this.ShipType != game.ShipType.NoShip
-            && this.Status == ClientSideBattleFieldCellStatus_Owner.Water)
-            throw new Error("A cell with a ship cannot be marked as a miss");
-
-        if (this.ShipType == game.ShipType.NoShip
-            && this.Status != ClientSideBattleFieldCellStatus_Owner.Water)
-            throw new Error("A cell with no ships cannot be hit");
-    }
+export interface IOwnBattleFieldCell {
+    readonly Coord: game.Coord;
+    readonly ShipType: game.ShipType;
+    Status: OwnBattleFieldCellStatus; // = OwnBattleFieldCellStatus.Untouched;
 }
 
-export class ClientSideBattleFieldCell_Enemy {
-    public constructor(
-        public readonly Status: ClientSideBattleFieldCellStatus_Enemy = ClientSideBattleFieldCellStatus_Enemy.Unknown) {
-        //if (this.ShipType != game.ShipType.NoShip)
-    }
+export interface IEnemyBattleFieldCell {
+    readonly Coord: game.Coord;
+    Status: EnemyBattleFieldCellStatus;
 }
 
-// used to organiza ships, generates the readonly battlefield side
+// used to organize ships, generates the readonly battlefield side
 export class BattleFieldConfigurator {
 
     //private readonly _formation: BattleFieldCell;
@@ -67,9 +56,5 @@ export class BattleFieldConfigurator {
         }
 
         this._avShips[type]--;
-    }
-
-    public getFinalBattlefield() {
-
     }
 }

@@ -1,10 +1,25 @@
-/* You can add global styles to this file, and also import other style files */
-.bf-grid-cell.ship {
+.bf-grid {
+    border: 1px solid black;
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+    max-width: 350px;
+}
+
+.bf-grid-cell {
+    border: 1px solid black;
+}
+
+.bf-grid-cell-unknown {
+    background-color: rgb(235, 249, 255);
+    cursor: pointer;
+}
+.bf-grid-cell-ship {
     background-color: #999999;
 }
-.bf-grid-cell.hit-water {
+.bf-grid-cell-water {
     background-color: #0066ff;
 }
-.bf-grid-cell.hit-ship {
+.bf-grid-cell-hit {
     background-color: #cc0000;
 }

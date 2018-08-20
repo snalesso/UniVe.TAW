@@ -1,13 +1,21 @@
-<div class="container">
+<div class="container-fluid">
 
-  <button class="btn btn-primary btn-lg btn-block" (click)="createNewMatch();">Create new match!</button>
+  <div class="row justify-content-center">
+
+    <button class="btn btn-primary btn-block" (click)="createNewMatch();">Create new match!</button>
+
+  </div>
 
   <hr>
 
-  <h3>Joinable matches</h3>
+  <div class="row justify-content-center">
 
-  <ul class="list-group">
-    <a (click)="joinMatch(jm.Id);" *ngFor="let jm of JoinableMatches" class="list-group-item">{{jm.Creator.Username}}</a>
-  </ul>
+    <h3>Joinable matches</h3>
+
+    <ul class="list-group">
+      <a (click)="joinMatch(jm.Id);" *ngFor="let jm of JoinableMatches" class="list-group-item">{{jm.Creator.Username}}</a>
+    </ul>
+
+  </div>
 
 </div>

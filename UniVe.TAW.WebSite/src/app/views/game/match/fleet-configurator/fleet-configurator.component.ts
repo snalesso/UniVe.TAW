@@ -1,21 +1,25 @@
-import { Component, OnInit, AfterViewInit, AfterContentInit } from '@angular/core';
+import { Component, OnInit, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game.client';
-import Constants from '../../../../services/constants';
+import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as DTOs from '../../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as interactjs from 'interactjs';
+//import * as interactjs from 'interactjs';
 import * as utils from '../../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
 import * as $ from 'jquery';
+import { HttpErrorResponse } from '@angular/common/http';
+import * as httpStatusCodes from 'http-status-codes';
+import { AuthService } from '../../../../services/auth.service';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-fleet-configurator',
   templateUrl: './fleet-configurator.component.html',
   styleUrls: ['./fleet-configurator.component.css']
 })
-export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterContentInit {
+export class FleetConfiguratorComponent implements OnInit/*, AfterViewInit, AfterContentInit*/ {
 
   private readonly _matchId: string;
   private _shipPlacements: game.ShipPlacement[] = [];
@@ -23,14 +27,15 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
   constructor(
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-    private readonly gameService: GameService) {
+    private readonly gameService: GameService,
+    private readonly authService: AuthService) {
   }
 
   private _settings: game.MatchSettings;
   public get Settings(): game.MatchSettings { return this._settings; }
 
-  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][];
-  public get GridCells() { return this._gridCells; }
+  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
+  public get Cells() { return this._gridCells; }
 
   private _canRandomize: boolean = true;
   public get CanRandomize(): boolean { return this._canRandomize; }
@@ -112,7 +117,7 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
     this._canSubmitConfig = this._canRandomize = false;
 
     // TODO: handle no resposne
-    this.gameService.createMatch(localStorage.getItem(Constants.AccessTokenKey), this._shipPlacements)
+    this.gameService.createMatch(localStorage.getItem(ServiceConstants.AccessTokenKey), this._shipPlacements)
       .subscribe(response => {
         if (response.HasError) {
           console.log(response.ErrorMessage);
@@ -130,26 +135,61 @@ export class FleetConfiguratorComponent implements OnInit, AfterViewInit, AfterC
 
   ngOnInit(): void {
     // console.log("ngOnInit");
+    this.getSettings();
+  }
+
+  private getSettings(maxRetries: number = 1) {
 
     // TODO: handle no resposne
     this.gameService
-      .getNewMatchSettings(localStorage.getItem(Constants.AccessTokenKey))
-      .subscribe(response => {
-        if (response.HasError) {
-          console.log(response.ErrorMessage);
-        }
-        else if (!response.Content) {
-          console.log("The server returned a null match dto!");
-        }
-        else {
-          const bfs = new game.BattleFieldSettings(response.Content.BattleFieldSettings.BattleFieldWidth, response.Content.BattleFieldSettings.BattleFieldHeight);
-          const stas = response.Content.ShipTypeAvailability.map(staDto => new game.ShipTypeAvailability(staDto.ShipType, staDto.Count));
-          const sett = new game.MatchSettings(bfs, stas, response.Content.MinShipDistance);
-          this._settings = sett;
+      .getNewMatchSettings(localStorage.getItem(ServiceConstants.AccessTokenKey))
+      .subscribe(
+        response => {
+          if (response.HasError) {
+            // TODO: handle
+            console.log(response.ErrorMessage);
+          }
+          else if (!response.Content) {
+            // TODO: handle
+            console.log("The server returned a null match dto!");
+          }
+          else {
+            const bfs = new game.BattleFieldSettings(response.Content.BattleFieldSettings.BattleFieldWidth, response.Content.BattleFieldSettings.BattleFieldHeight);
+            const stas = response.Content.ShipTypeAvailability.map(staDto => new game.ShipTypeAvailability(staDto.ShipType, staDto.Count));
+            const sett = new game.MatchSettings(bfs, stas, response.Content.MinShipDistance);
+            this._settings = sett;
 
-          this.randomizeFleet();
-        }
-      });
+            this.randomizeFleet();
+          }
+        },
+        (error: HttpErrorResponse) => {
+          if (error.status == httpStatusCodes.UNAUTHORIZED) {
+            const credentials: DTOs.ILoginCredentials = {
+              Username: localStorage.getItem(ServiceConstants.AccessCredentials_Username),
+              Password: localStorage.getItem(ServiceConstants.AccessCredentials_Password)
+            };
+            this.authService.login(credentials).subscribe(
+              response => {
+                if (response.HasError) {
+                  // TODO: handle
+                }
+                else if (!response.Content) {
+                  // TODO: handle
+                  console.log("The server returned a null match dto!");
+                }
+                else {
+                  localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
+                }
+
+                if (maxRetries > 0) {
+                  this.getSettings(--maxRetries);
+                }
+              },
+              (error: HttpErrorResponse) => {
+                this.router.navigate([ViewsRoutingKeys.Login])
+              });
+          }
+        });
   }
 
   ngAfterViewInit(): void {

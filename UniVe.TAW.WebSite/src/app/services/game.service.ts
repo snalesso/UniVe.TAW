@@ -6,7 +6,7 @@ import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DT
 import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
 import * as game from '../../assets/imported/unive.taw.webservice/infrastructure/game';
-import Constants from './constants';
+import ServiceConstants from './ServiceConstants';
 
 import * as $ from 'jquery';
 import { Observable } from 'rxjs';
@@ -20,7 +20,7 @@ export class GameService {
   constructor(private readonly http: ng_http.HttpClient) { }
 
   public getJoinableMatches(accessToken: string): Observable<net.HttpMessage<DTOs.IJoinableMatchDto[]>> {
-    const endPoint = Constants.ServerAddress + "/matches/joinables";
+    const endPoint = ServiceConstants.ServerAddress + "/matches/joinables";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export class GameService {
   }
 
   public getNewMatchSettings(accessToken: string): Observable<net.HttpMessage<DTOs.IMatchSettingsDto>> {
-    const endPoint = Constants.ServerAddress + "/matches/newMatchSettings";
+    const endPoint = ServiceConstants.ServerAddress + "/matches/newMatchSettings";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export class GameService {
   }
 
   public getMatchInfo(accessToken: string, matchId: string): Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = Constants.ServerAddress + "/matches/" + matchId;
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ export class GameService {
   }
 
   public createMatch(accessToken: string, fleetConfig: game.ShipPlacement[]): Observable<net.HttpMessage<string>> {
-    const endPoint = Constants.ServerAddress + "/matches/create";
+    const endPoint = ServiceConstants.ServerAddress + "/matches/create";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export class GameService {
   }
 
   public joinMatch(accessToken: string, matchId: string, fleetConfig: game.ShipPlacement[]): Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = Constants.ServerAddress + "/matches/join" + matchId;
+    const endPoint = ServiceConstants.ServerAddress + "/matches/join" + matchId;
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',

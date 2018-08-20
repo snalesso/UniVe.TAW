@@ -219,13 +219,16 @@ router.get("/newMatchSettings", jwtValidator, function (request, response) {
         .status(httpStatusCodes.OK)
         .send(responseData);
 });
-router.get("/sta", jwtValidator, function (request, response) {
-    var sta = new game.ShipTypeAvailability(game.ShipType.Battleship, 3);
-    response
-        //.type("application/json")
-        .status(httpStatusCodes.OK)
-        .send(new net.HttpMessage({ ShipType: sta.ShipType, Count: sta.Count }));
-});
+// router.get(
+//     "/sta",
+//     jwtValidator,
+//     (request: express.Request, response: express.Response) => {
+//         const sta = new game.ShipTypeAvailability(game.ShipType.Battleship, 3);
+//         response
+//             //.type("application/json")
+//             .status(httpStatusCodes.OK)
+//             .send(new net.HttpMessage({ ShipType: sta.ShipType, Count: sta.Count } as DTOs.IShipTypeAvailabilityDto));
+//     });
 router.get("/:" + RoutingParamKeys_1.default.MatchId, jwtValidator, function (request, response) {
     var responseData = null;
     var matchId = request.params[RoutingParamKeys_1.default.MatchId];

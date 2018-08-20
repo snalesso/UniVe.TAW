@@ -4,7 +4,7 @@ import { AuthService } from '../../../services/auth.service';
 import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import Constants from '../../../services/constants';
+import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 
 @Component({
@@ -35,8 +35,10 @@ export class LoginComponent implements OnInit {
           this.ResponseError = response.ErrorMessage;
         }
         else {
-          localStorage.setItem(Constants.AccessTokenKey, response.Content);
-          this.router.navigate([ViewsRoutingKeys.JoinableMatches]);
+          localStorage.setItem(ServiceConstants.AccessCredentials_Username, this.LoginRequest.Username);
+          localStorage.setItem(ServiceConstants.AccessCredentials_Password, this.LoginRequest.Password);
+          localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
+          this.router.navigate([ViewsRoutingKeys.EnemyField]);
         }
       });
   }

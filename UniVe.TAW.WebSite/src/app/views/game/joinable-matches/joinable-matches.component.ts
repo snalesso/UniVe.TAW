@@ -8,10 +8,11 @@ import 'jquery';
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as utils from '../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
-import Constants from '../../../services/constants';
+import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 import { Country } from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as game from '../../../../assets/imported/unive.taw.webservice/infrastructure/game';
+import { HttpErrorResponse } from '@angular/common/http';
 
 // export type Mutable<T> = {
 //   -readonly [P in keyof T]: T[P];
@@ -46,7 +47,7 @@ export class JoinableMatchesComponent implements OnInit {
 
   ngOnInit() {
     this.gameService
-      .getJoinableMatches(localStorage.getItem(Constants.AccessTokenKey))
+      .getJoinableMatches(localStorage.getItem(ServiceConstants.AccessTokenKey))
       .subscribe(
         response => {
           if (response.HasError) {
@@ -55,7 +56,10 @@ export class JoinableMatchesComponent implements OnInit {
             this.JoinableMatches = response.Content;
           }
         },
-        error => console.log(error));
+        (error: HttpErrorResponse) => {
+          // TODO: handle
+          console.log(error);
+        });
   }
 
 }

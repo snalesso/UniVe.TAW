@@ -5,7 +5,7 @@ import * as ng_http from '@angular/common/http';
 import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
-import Constants from './constants';
+import ServiceConstants from './ServiceConstants';
 import * as utils from '../../assets/imported/unive.taw.webservice/infrastructure/utils';
 
 import * as $ from 'jquery';

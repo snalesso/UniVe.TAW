@@ -15,7 +15,6 @@ import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch
 import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
-import { request } from 'http';
 
 // TODO: rename to gameRoutesConfig?
 
