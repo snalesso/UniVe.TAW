@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as crypto from 'crypto';
-
+import * as moment from 'moment';
 import * as Constants from './Constants';
 
 import * as identity from '../../../../infrastructure/identity';
@@ -17,7 +17,8 @@ export interface IMongooseUser extends mongoose.Document {
     Salt: string, // TODO: make readonly?
     Digest: string, // TODO: make readonly?
     setPassword: (pwd: string) => void,
-    validatePassword: (pwd: string) => boolean
+    validatePassword: (pwd: string) => boolean,
+    getAge: () => number
 }
 
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
@@ -70,6 +71,9 @@ userSchema.methods.validatePassword = function (pwd: string): boolean {
     hmac.update(pwd);
     let digest = hmac.digest('hex');
     return (this.Digest === digest);
+}
+userSchema.methods.getAge = function (): number {
+    return this.BirthDate != null ? moment().diff(this.BirthDate, "years", false) : -1;
 }
 
 //export function GetSchema() { return userSchema; }

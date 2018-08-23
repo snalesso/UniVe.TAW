@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var crypto = require("crypto");
+var moment = require("moment");
 var Constants = require("./Constants");
 var identity = require("../../../../infrastructure/identity");
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
@@ -51,6 +52,9 @@ userSchema.methods.validatePassword = function (pwd) {
     hmac.update(pwd);
     var digest = hmac.digest('hex');
     return (this.Digest === digest);
+};
+userSchema.methods.getAge = function () {
+    return this.BirthDate != null ? moment().diff(this.BirthDate, "years", false) : -1;
 };
 //export function GetSchema() { return userSchema; }
 var userModel;
