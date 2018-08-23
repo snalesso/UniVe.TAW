@@ -6,13 +6,13 @@ var pendingMatchSchema = new mongoose.Schema({
     PlayerId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: Constants.ModelsNames.User
+        ref: Constants.ModelsNames.User,
     }
 });
 var matchModel;
 function getModel() {
     if (!matchModel) {
-        matchModel = mongoose.model(Constants.ModelsNames.Match, pendingMatchSchema);
+        matchModel = mongoose.model(Constants.ModelsNames.PendingMatch, pendingMatchSchema);
     }
     return matchModel;
 }

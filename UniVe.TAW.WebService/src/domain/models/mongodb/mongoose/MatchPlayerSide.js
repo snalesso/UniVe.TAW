@@ -69,18 +69,16 @@ function getSchema() {
     return matchPlayerSideSchema;
 }
 exports.getSchema = getSchema;
-var playerSideModel;
-function getModel() {
-    if (!playerSideModel) {
-        playerSideModel = mongoose.model(Constants.ModelsNames.Match, playerSideModel);
-    }
-    return playerSideModel;
-}
-exports.getModel = getModel;
-function create(data) {
-    var matchModelCtor = getModel();
-    var newMatch = new matchModelCtor(data);
-    return newMatch;
-}
-exports.create = create;
+// let playerSideModel;
+// export function getModel(): mongoose.Model<IMongooseMatchPlayerSide> {
+//     if (!playerSideModel) {
+//         playerSideModel = mongoose.model(Constants.ModelsNames.MatchPlayerSide, playerSideModel);
+//     }
+//     return playerSideModel;
+// }
+// export function create(data: any): IMongooseMatchPlayerSide {
+//     let matchModelCtor = getModel();
+//     let newMatch = new matchModelCtor(data);
+//     return newMatch;
+// }
 //# sourceMappingURL=MatchPlayerSide.js.map

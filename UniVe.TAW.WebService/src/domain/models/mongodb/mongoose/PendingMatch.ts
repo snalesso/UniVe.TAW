@@ -10,14 +10,15 @@ const pendingMatchSchema = new mongoose.Schema({
     PlayerId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: Constants.ModelsNames.User
+        ref: Constants.ModelsNames.User,
+        unique: true
     }
 });
 
 let matchModel;
 export function getModel(): mongoose.Model<IMongoosePendingMatch> {
     if (!matchModel) {
-        matchModel = mongoose.model(Constants.ModelsNames.Match, pendingMatchSchema);
+        matchModel = mongoose.model(Constants.ModelsNames.PendingMatch, pendingMatchSchema);
     }
     return matchModel;
 }

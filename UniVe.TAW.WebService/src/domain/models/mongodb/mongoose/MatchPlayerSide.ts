@@ -100,17 +100,17 @@ export function getSchema() {
     return matchPlayerSideSchema;
 }
 
-let playerSideModel;
-export function getModel(): mongoose.Model<IMongooseMatchPlayerSide> {
-    if (!playerSideModel) {
-        playerSideModel = mongoose.model(Constants.ModelsNames.Match, playerSideModel);
-    }
-    return playerSideModel;
-}
+// let playerSideModel;
+// export function getModel(): mongoose.Model<IMongooseMatchPlayerSide> {
+//     if (!playerSideModel) {
+//         playerSideModel = mongoose.model(Constants.ModelsNames.MatchPlayerSide, playerSideModel);
+//     }
+//     return playerSideModel;
+// }
 
-export function create(data: any): IMongooseMatchPlayerSide {
-    let matchModelCtor = getModel();
-    let newMatch = new matchModelCtor(data);
+// export function create(data: any): IMongooseMatchPlayerSide {
+//     let matchModelCtor = getModel();
+//     let newMatch = new matchModelCtor(data);
 
-    return newMatch;
-}
+//     return newMatch;
+// }
