@@ -4,4 +4,5 @@ export default class ViewsRoutingKeys {
     public static readonly JoinableMatches = 'joinable-matches';
     public static readonly FleetConfigurator = 'fleet-configurator';
     public static readonly EnemyField = 'enemy-field';
+    public static readonly Match = 'match';
 }

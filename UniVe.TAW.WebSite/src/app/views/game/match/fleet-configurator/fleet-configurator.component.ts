@@ -117,7 +117,7 @@ export class FleetConfiguratorComponent implements OnInit/*, AfterViewInit, Afte
     this._canSubmitConfig = this._canRandomize = false;
 
     // TODO: handle no resposne
-    this.gameService.createMatch(localStorage.getItem(ServiceConstants.AccessTokenKey), this._shipPlacements)
+    this.gameService.createMatch(this._shipPlacements)
       .subscribe(response => {
         if (response.HasError) {
           console.log(response.ErrorMessage);
@@ -142,9 +142,9 @@ export class FleetConfiguratorComponent implements OnInit/*, AfterViewInit, Afte
 
     // TODO: handle no resposne
     this.gameService
-      .getNewMatchSettings(localStorage.getItem(ServiceConstants.AccessTokenKey))
+      .getNewMatchSettings()
       .subscribe(
-        response => {
+        (response) => {
           if (response.HasError) {
             // TODO: handle
             console.log(response.ErrorMessage);
@@ -163,32 +163,40 @@ export class FleetConfiguratorComponent implements OnInit/*, AfterViewInit, Afte
           }
         },
         (error: HttpErrorResponse) => {
-          if (error.status == httpStatusCodes.UNAUTHORIZED) {
-            const credentials: DTOs.ILoginCredentials = {
-              Username: localStorage.getItem(ServiceConstants.AccessCredentials_Username),
-              Password: localStorage.getItem(ServiceConstants.AccessCredentials_Password)
-            };
-            this.authService.login(credentials).subscribe(
-              response => {
-                if (response.HasError) {
-                  // TODO: handle
-                }
-                else if (!response.Content) {
-                  // TODO: handle
-                  console.log("The server returned a null match dto!");
-                }
-                else {
-                  localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
-                }
+          // TODO: handle
 
-                if (maxRetries > 0) {
-                  this.getSettings(--maxRetries);
-                }
-              },
-              (error: HttpErrorResponse) => {
-                this.router.navigate([ViewsRoutingKeys.Login])
-              });
-          }
+          // switch (error.status) {
+          //   case httpStatusCodes.UNAUTHORIZED: {
+          //     // const credentials: DTOs.ILoginCredentials = {
+          //     //   Username: localStorage.getItem(ServiceConstants.AccessCredentials_Username),
+          //     //   Password: localStorage.getItem(ServiceConstants.AccessCredentials_Password)
+          //     // };
+          //     this.authService.login(credentials).subscribe(
+          //       response => {
+          //         if (response.HasError) {
+          //           // TODO: handle
+          //         }
+          //         else if (!response.Content) {
+          //           // TODO: handle
+          //           console.log("The server returned a null match dto!");
+          //         }
+          //         else {
+          //           localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
+          //         }
+
+          //         if (maxRetries > 0) {
+          //           this.getSettings(--maxRetries);
+          //         }
+          //       },
+          //       (error: HttpErrorResponse) => {
+          //         this.router.navigate([ViewsRoutingKeys.Login])
+          //       });
+          //   }
+          //     break;
+
+          //   default:
+          //     console.log("Unhandled response code");
+          // }
         });
   }
 

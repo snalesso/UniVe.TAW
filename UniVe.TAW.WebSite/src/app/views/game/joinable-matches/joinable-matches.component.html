@@ -1,20 +1,32 @@
 <div class="container-fluid">
 
-  <div class="row justify-content-center">
+  <div class="row justify-content-center" *ngIf="HasPendingMatchOpen">
 
-    <button class="btn btn-primary btn-block" (click)="createNewMatch();">Create new match!</button>
+    <h1>Waiting for a challenger ...!</h1>
+
+    <button class="btn btn-warning btn-block" [disabled]="!HasPendingMatchOpen" (click)="createNewMatch()">Stop waiting</button>
 
   </div>
 
-  <hr>
+  <div class="row justify-content-center" *ngIf="CanCreateMatch">
 
-  <div class="row justify-content-center">
+    <button class="btn btn-primary btn-block" [disabled]="!CanCreateMatch" (click)="createNewMatch()">Wait for a challenger</button>
 
-    <h3>Joinable matches</h3>
+  </div>
 
-    <ul class="list-group">
-      <a (click)="joinMatch(jm.Id);" *ngFor="let jm of JoinableMatches" class="list-group-item">{{jm.Creator.Username}}</a>
-    </ul>
+  <div class="row justify-content-center" *ngIf="AreThereJoinableMatches">
+    <h3>... or choose your opponent!</h3>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="AreThereJoinableMatches">
+
+    <div class="card w-100" *ngFor="let jm of JoinableMatches">
+      <div class="card-body">
+        <h5 class="card-title">{{jm.Creator.Username}}</h5>
+        <p class="card-text">{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from {{getCountryName(jm.Creator.CountryId)}}</p>
+        <button class="btn btn-success" (click)="joinMatch(jm.Id)">Challenge!</button>
+      </div>
+    </div>
 
   </div>
 

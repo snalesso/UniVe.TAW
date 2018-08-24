@@ -11,11 +11,10 @@
         placeholder="Password">
     </div>
 
-    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">
-      Login error: {{ResponseError}}
-    </div>
+    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">{{ResponseError}}</div>
 
-    <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendLoginRequest" (click)="sendLoginRequest();">Log in</button>
+    <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendLoginRequest" (click)="sendLoginRequest();">Log
+      in</button>
   </form>
 
   <hr>

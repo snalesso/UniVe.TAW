@@ -25,10 +25,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class JoinableMatchesComponent implements OnInit {
 
-  public JoinableMatches: DTOs.IJoinableMatchDto[];
-  //public Xfew: Mutable<DTOs.IUserDto>;
-
-  private sta: game.ShipTypeAvailability;
+  private _playables: DTOs.IPlayablesDto;//= { CanCreateMatch: false, PlayingMatch: null, PendingMatchId: null, JoinableMatches: [] };
+  public get CanCreateMatch() {
+    return this._playables != null ? this._playables.CanCreateMatch : false;
+  }
+  public get HasPendingMatchOpen() {
+    return this._playables != null ? this._playables.PendingMatchId != null : false;
+  }
+  public get JoinableMatches() {
+    return this._playables != null ? this._playables.JoinableMatches : null;
+  }
+  public get AreThereJoinableMatches() {
+    return this._playables != null ? (this._playables.JoinableMatches != null && this._playables.JoinableMatches.length > 0) : false;
+  }
 
   constructor(
     private readonly gameService: GameService,
@@ -37,23 +46,37 @@ export class JoinableMatchesComponent implements OnInit {
   ) {
   }
 
-  public joinMatch(matchId: string) {
-    console.log("Clicked match with id " + matchId);
+  public joinMatch(joinableMatchId: string) {
+    // this.gameService.joinMatch(joinableMatchId).subscribe(response => { });
+    this.router.navigate([ViewsRoutingKeys.Match, joinableMatchId]);
   }
 
   public createNewMatch() {
-    this.router.navigate([ViewsRoutingKeys.FleetConfigurator]);
+    if (this.CanCreateMatch) {
+      //this.router.navigate([ViewsRoutingKeys.FleetConfigurator]);
+      this.gameService.waitOpponent().subscribe(response => { });
+    }
+  }
+
+  public getCountryName(countryId: identity.Country) {
+    return identity.Country[countryId];
   }
 
   ngOnInit() {
+
     this.gameService
-      .getJoinableMatches(localStorage.getItem(ServiceConstants.AccessTokenKey))
+      .getPlayables()
       .subscribe(
         response => {
           if (response.HasError) {
             console.log(response.ErrorMessage);
+          }
+          else if (!response.Content) {
           } else {
-            this.JoinableMatches = response.Content;
+            this._playables = response.Content;
+            if (this._playables.PlayingMatch) {
+              this.router.navigate([ViewsRoutingKeys.Match, this._playables.PlayingMatch.Id]);
+            }
           }
         },
         (error: HttpErrorResponse) => {

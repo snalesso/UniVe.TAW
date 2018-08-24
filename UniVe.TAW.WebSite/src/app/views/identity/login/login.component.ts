@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import * as jwt_decode from 'jwt-decode';
+import * as httpStatusCodes from 'http-status-codes';
 import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../ViewsRoutingKeys';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -14,37 +17,57 @@ import ViewsRoutingKeys from '../../ViewsRoutingKeys';
 })
 export class LoginComponent implements OnInit {
 
-  public readonly LoginRequest = { Username: "Daedalus", Password: "aaa" } as DTOs.ILoginCredentials;
-  public ResponseError: string;
-
-  public get canSendLoginRequest(): boolean {
-    return this.LoginRequest.Username != null
-      && this.LoginRequest.Password != null;
-  }
-
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router) {
   }
 
+  private _loginRequest: DTOs.ILoginCredentials = { Username: "Daedalus", Password: "aaa" };
+  public get LoginRequest() { return this._loginRequest; }
+
+  private _responseError: string;
+  public get ResponseError() { return this._responseError; };
+
+  public get canSendLoginRequest(): boolean {
+    return this.LoginRequest != null
+      && this.LoginRequest.Username != null
+      && this.LoginRequest.Password != null;
+  }
+
   public sendLoginRequest() {
     // TODO: handle no response when server is down
     this.authService.login(this.LoginRequest)
-      .subscribe(response => {
-        if (response.HasError) {
-          this.ResponseError = response.ErrorMessage;
-        }
-        else {
-          localStorage.setItem(ServiceConstants.AccessCredentials_Username, this.LoginRequest.Username);
-          localStorage.setItem(ServiceConstants.AccessCredentials_Password, this.LoginRequest.Password);
-          localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
-          this.router.navigate([ViewsRoutingKeys.EnemyField]);
-        }
-      });
+      .subscribe(
+        response => {
+          if (response.HasError) {
+            this._responseError = response.ErrorMessage;
+          }
+          else if (response.Content) {
+            this.router.navigate([ViewsRoutingKeys.JoinableMatches]);
+          }
+        },
+        (error: HttpErrorResponse) => {
+
+          //this._responseError = ;
+          console.log(error);
+
+          switch (error.status) {
+            case httpStatusCodes.UNAUTHORIZED:
+              this._responseError = "Invalid credentials";
+              break;
+
+            default:
+              this._responseError = error.message;
+          }
+
+        });
   }
 
   ngOnInit() {
-    // TODO: if already logged in re-route to avaiable matches
+    // if already logged in re-route to avaiable matches
+    if (this.authService.Token) {
+      this.router.navigate([ViewsRoutingKeys.JoinableMatches]);
+    }
   }
 
 }

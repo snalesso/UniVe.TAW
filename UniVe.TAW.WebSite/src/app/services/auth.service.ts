@@ -1,35 +1,57 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { unescapeIdentifier } from '@angular/compiler';
 import * as ng_http from '@angular/common/http';
+import * as jwt_decode from 'jwt-decode';
 
 import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
 import ServiceConstants from './ServiceConstants';
 
-import * as $ from 'jquery';
-import { Observable } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import 'jquery';
+import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
+import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
+import { pipe } from '@angular/core/src/render3/pipe';
 
 //import chalk from 'chalk';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
 
-  constructor(private readonly http: ng_http.HttpClient) { }
+  private readonly AccessTokenKey = "acces_token";
+
+  private readonly _subscriptions: Subscription[] = [];
+
+  constructor(private readonly http: ng_http.HttpClient) {
+
+    this._whenTokenChanged = new BehaviorSubject<string>(null);
+    this._whenLoggedUserChanged = new BehaviorSubject<DTOs.IUserJWTData>(null);
+    this._whenIsLoggedChanged = new BehaviorSubject<boolean>(false);
+
+    this._subscriptions.push(this._whenTokenChanged.subscribe(value => {
+      this._whenLoggedUserChanged.next(value != null ? jwt_decode<DTOs.IUserJWTData>(value) : null);
+      this._whenIsLoggedChanged.next(this.IsLogged);
+    }));
+
+    this._whenTokenChanged.next(this.Token);
+  }
+
+  public get Token() { return localStorage.getItem(this.AccessTokenKey); }
+  private readonly _whenTokenChanged: BehaviorSubject<string>;
+  public get Token_Observable() { return this._whenTokenChanged.asObservable(); }
+
+  public get LoggedUser() { return this._whenLoggedUserChanged.getValue(); }
+  private readonly _whenLoggedUserChanged: BehaviorSubject<DTOs.IUserJWTData>;
+  public get WhenLoggedUserChanged() { return this._whenLoggedUserChanged.asObservable(); }
+
+  public get IsLogged() { return this.Token != null; }
+  private readonly _whenIsLoggedChanged: BehaviorSubject<boolean>;
+  public get WhenIsLoggedChanged() { return this._whenIsLoggedChanged.asObservable(); }
 
   public signup(signupRequest: DTOs.ISignupRequestDto): Observable<net.HttpMessage<boolean>> {
-    //   $.post(
-    //     Constants.ServerAddress + "/users/signup",
-    //     signupRequest)
-    //     .done((success) => {
-    //       console.log("Signup request sent!");
-    //     })
-    //     .fail((error, b, c) => {
-    //       console.log("Error sending signup");
-    //     });
+
     const endPoint = ServiceConstants.ServerAddress + "/users/signup";
     const options = {
       headers: new ng_http.HttpHeaders({
@@ -42,33 +64,9 @@ export class AuthService {
       options)
   }
 
-  public login(credentials: DTOs.ILoginCredentials): Observable<net.HttpMessage<string>> {
+  public login(credentials: DTOs.ILoginCredentials)/*: Observable<net.HttpMessage<string>>*/ {
 
     const base64Credentials = btoa(credentials.Username + ":" + credentials.Password);
-
-    // const sett: JQueryAjaxSettings = {
-    //   method: "post",
-    //   url: Constants.ServerAddress + "/auth/login",
-    //   data: credentials,
-    //   headers: {
-    //     //"authorization": "Basic RGFlZGFsdXM6c3BhenpvbGlubzk5"
-    //     //   'Access-Control-Allow-Origin': '*',
-    //     //   'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-    //   },
-    //   beforeSend: function (xhr) {
-    //     xhr.setRequestHeader("Authorization", "Basic " + base64Credentials);
-    //   },
-    // };
-
-    // $.ajax(sett)
-    //   .done((success: net.HttpMessage<string>) => {
-    //     console.log("Login request sent!");
-    //     //return success.Content;
-    //   })
-    //   .fail((error, b, c) => {
-    //     console.log("Error sending login");
-    //     //return null;
-    //   });
 
     const endPoint = ServiceConstants.ServerAddress + "/auth/login";
     const options = {
@@ -77,6 +75,43 @@ export class AuthService {
         'Authorization': 'Basic ' + base64Credentials
       })
     };
-    return this.http.post<net.HttpMessage<string>>(endPoint, null, options);
+
+    return this.http
+      .post<net.HttpMessage<string>>(endPoint, null, options)
+      .pipe(
+        tap((response) => {
+          if (response.HasError) {
+            console.log("Login failed - server says: " + JSON.stringify(response.ErrorMessage));
+          }
+          else {
+            this.storeToken(response.Content);
+          }
+        }),
+        map((response) => {
+          return new net.HttpMessage(
+            response.Content != null,
+            response.ErrorMessage);
+        }));
   }
+
+  public logout() {
+    this.clearToken();
+  }
+
+  private storeToken(token: string) {
+    localStorage.setItem(this.AccessTokenKey, token);
+    this._whenTokenChanged.next(token);
+  }
+
+  private clearToken() {
+    localStorage.removeItem(this.AccessTokenKey);
+    this._whenTokenChanged.next(null);
+  }
+
+  ngOnDestroy(): void {
+    for (let sub of this._subscriptions) {
+      sub.unsubscribe();
+    }
+  }
+
 }

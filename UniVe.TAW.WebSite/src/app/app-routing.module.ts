@@ -10,14 +10,15 @@ import { EnemyFieldComponent } from './views/game/match/enemy-field/enemy-field.
 import ViewsRoutingKeys from './views/ViewsRoutingKeys';
 import RoutingHelper from './RoutingHelper';
 import RoutingParamKeys from '../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
+import { MatchComponent } from './views/game/match/match/match.component';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
   { path: ViewsRoutingKeys.Signup, component: SignupComponent },
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
-  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.JoinableMatches]/*, [RoutingParamKeys.MatchId]*/), component: JoinableMatchesComponent },
+  { path: ViewsRoutingKeys.JoinableMatches, component: JoinableMatchesComponent },
   { path: ViewsRoutingKeys.FleetConfigurator, component: FleetConfiguratorComponent },
-  { path: ViewsRoutingKeys.EnemyField, component: EnemyFieldComponent },
+  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.MatchId]), component: MatchComponent },
 ];
 
 @NgModule({

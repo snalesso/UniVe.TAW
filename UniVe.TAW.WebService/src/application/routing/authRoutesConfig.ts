@@ -86,7 +86,7 @@ router.post(
                 jwtPayload,
                 process.env.JWT_KEY,
                 {
-                    expiresIn: 60 * 60 // 60 mins
+                    expiresIn: "7 days" // 60 * 60 * 24 * 7 // 1 week
                 });
             responseData = new net.HttpMessage<string>(token);
         }

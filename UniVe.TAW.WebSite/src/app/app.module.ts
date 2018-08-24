@@ -15,8 +15,8 @@ import { FleetConfiguratorComponent } from './views/game/match/fleet-configurato
 import { SnapAndDropComponent } from './views/game/interact/snap-and-drop/snap-and-drop.component';
 import { OwnFieldComponent } from './views/game/match/own-field/own-field.component';
 import { EnemyFieldComponent } from './views/game/match/enemy-field/enemy-field.component';
-import { MatchRootComponent } from './views/game/match/match-root/match-root.component';
 import { MatchChatComponent } from './views/game/match/match-chat/match-chat.component';
+import { MatchComponent } from './views/game/match/match/match.component';
 
 // services
 //import { AuthService } from './auth.service';
@@ -34,8 +34,8 @@ import { MatchChatComponent } from './views/game/match/match-chat/match-chat.com
     SnapAndDropComponent,
     OwnFieldComponent,
     EnemyFieldComponent,
-    MatchRootComponent,
     MatchChatComponent,
+    MatchComponent,
   ],
   imports: [
     BrowserModule,
