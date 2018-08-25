@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { JoinableMatchesComponent } from './joinable-matches.component';
+import { JoinableMatchesComponent } from './match-finder.component';
 
 describe('JoinableMatchesComponent', () => {
   let component: JoinableMatchesComponent;

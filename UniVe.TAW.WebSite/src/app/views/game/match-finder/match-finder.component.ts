@@ -19,9 +19,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 // };
 
 @Component({
-  selector: 'app-joinable-matches',
-  templateUrl: './joinable-matches.component.html',
-  styleUrls: ['./joinable-matches.component.css']
+  selector: 'app-match-finder',
+  templateUrl: './match-finder.component.html',
+  styleUrls: ['./match-finder.component.css']
 })
 export class JoinableMatchesComponent implements OnInit {
 
