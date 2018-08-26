@@ -64,6 +64,7 @@ router.post(
     '/login',
     passport.authenticate('basic', { session: false }),
     (request: express.Request, response: express.Response) => {
+
         const user = request.user as User.IMongooseUser;
 
         let statusCode: number;
@@ -76,7 +77,6 @@ router.post(
             responseData = new net.HttpMessage<string>(null, "Invalid credentials");
         }
         else {
-            console.log(chalk.green("Login successful for ") + user.Username + " (id: " + user.id + ")");
             statusCode = httpStatusCodes.OK;
             let jwtPayload: DTOs.IUserJWTData = {
                 Id: user.id,
@@ -88,6 +88,7 @@ router.post(
                 {
                     expiresIn: "7 days" // 60 * 60 * 24 * 7 // 1 week
                 });
+            console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user.id + ", token: " + token + ")");
             responseData = new net.HttpMessage<string>(token);
         }
 

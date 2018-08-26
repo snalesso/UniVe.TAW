@@ -20,102 +20,97 @@ export class GameService {
 
   constructor(
     private readonly http: ng_http.HttpClient,
-    private readonly authService: AuthService) { }
-
-  public getJoinableMatches() {//: Observable<net.HttpMessage<DTOs.IJoinableMatchDto[]>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/joinables";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
-    };
-
-    return this.http.get<net.HttpMessage<DTOs.IJoinableMatchDto[]>>(endPoint, options);
+    private readonly authService: AuthService) {
   }
 
-  public getNewMatchSettings() {//: Observable<net.HttpMessage<DTOs.IMatchSettingsDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/newMatchSettings";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
-    };
-
-    return this.http.get<net.HttpMessage<DTOs.IMatchSettingsDto>>(endPoint, options);
-  }
-
-  public getMatchInfo(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
-    };
-
-    return this.http.get<net.HttpMessage<DTOs.IMatchDto>>(endPoint, options);
-  }
-
-  public createMatch(fleetConfig: game.ShipPlacement[]) {//: Observable<net.HttpMessage<string>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/create";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
-    };
-
-    return this.http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
-  }
-
-  public joinMatch(joinableMatchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/join" + joinableMatchId;
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
-    };
-
-    return this.http.post<net.HttpMessage<DTOs.IMatchDto>>(endPoint, options);
-  }
-
-  public getPlayables() {//: Observable<net.HttpMessage<DTOs.IPlayablesDto>> {
+  public getPlayables() {
     const endPoint = ServiceConstants.ServerAddress + "/matches/playables";
     const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
     };
+
+    console.log(this.authService.LoggedUser.Username + " GET " + endPoint + " with token " + this.authService.Token);
 
     return this.http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
   }
 
-  public waitOpponent() {//: Observable<net.HttpMessage<DTOs.IPendingMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/waitOpponent";
+  public createPendingMatch() {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/createPendingMatch";
     const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.authService.Token
-      })
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
     };
 
-    return this.http.post<net.HttpMessage<DTOs.IPendingMatchDto>>(endPoint, options);
+    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+
+    return this.http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
 
-  // public getSta(accessToken: string): Observable<net.HttpMessage<game.ShipTypeAvailability>> {
-  //   const endPoint = Constants.ServerAddress + "/matches/sta";
+  public closePendingMatch(pendingMatchId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/closePendingMatch/" + pendingMatchId;
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
+    };
+
+    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+
+    return this.http.post<net.HttpMessage<boolean>>(endPoint, null, options);
+  }
+
+  public getNewMatchSettings() {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/newMatchSettings";
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
+    };
+
+    console.log(this.authService.LoggedUser.Username + " GET " + endPoint + " with token " + this.authService.Token);
+
+    return this.http.get<net.HttpMessage<DTOs.IMatchSettingsDto>>(endPoint, options);
+  }
+
+  public joinMatch(joinableMatchId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/join/" + joinableMatchId;
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
+    };
+
+    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+
+    return this.http.post<net.HttpMessage<DTOs.IMatchDto>>(endPoint, null, options);
+  }
+
+  public configFleet(fleetConfig: game.ShipPlacement[]) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/create";
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this.authService.Token)
+    };
+
+    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+
+    return this.http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
+  }
+
+  // public getMatchInfo(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
+  //   const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
   //   const options = {
   //     headers: new ng_http.HttpHeaders({
   //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer ' + accessToken
+  //       'Authorization': 'Bearer ' + this.authService.Token
   //     })
   //   };
 
-  //   return this.http.get<net.HttpMessage<DTOs.IShipTypeAvailabilityDto>>(endPoint, options);
+  //   return this.http.get<net.HttpMessage<DTOs.IMatchDto>>(endPoint, options);
   // }
 
 }

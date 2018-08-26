@@ -117,7 +117,7 @@ export class FleetConfiguratorComponent implements OnInit/*, AfterViewInit, Afte
     this._canSubmitConfig = this._canRandomize = false;
 
     // TODO: handle no resposne
-    this.gameService.createMatch(this._shipPlacements)
+    this.gameService.configFleet(this._shipPlacements)
       .subscribe(response => {
         if (response.HasError) {
           console.log(response.ErrorMessage);

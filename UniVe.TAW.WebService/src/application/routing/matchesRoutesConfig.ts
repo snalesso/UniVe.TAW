@@ -9,13 +9,13 @@ import * as net from '../../infrastructure/net';
 import * as game from '../../infrastructure/game';
 import * as utils from '../../infrastructure/utils-2.8';
 
+import RoutingParamKeys from './RoutingParamKeys';
+import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as DTOs from '../DTOs';
-import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
-import { IMongooseUser } from '../../domain/models/mongodb/mongoose/User';
 
 // TODO: rename to gameRoutesConfig?
 
@@ -46,6 +46,7 @@ function getUsersPlayingMatch(userId: mongoose.Types.ObjectId) {
     (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = userId;
 
     return Match.getModel()
+        // TODO: fix OR in criteria
         .findOne(matchCriteria1/*, matchCriteria2*/)
         // .populate("InActionPlayerId")
         // .populate("FirstPlayerSide.PlayerId")
@@ -163,16 +164,102 @@ router.get(
                 console.log(chalk.red("+++ Why are we here?"));
                 throw new Error("WTF");
             });
-    });
+    }
+);
+
+const getPlayables = function (userId: mongoose.Types.ObjectId) /*: Promise<DTOs.IPlayablesDto>*/ {
+
+    const playables = {} as DTOs.IPlayablesDto;
+
+    return getUsersPendingMatch(userId)
+        .then(pendingMatch => {
+
+            if (pendingMatch) {
+                playables.PendingMatchId = pendingMatch.id;
+            }
+
+            return getUsersPlayingMatch(userId)
+                .then(playingMatch => {
+                    if (playingMatch != null) {
+                        playables.PlayingMatch = {
+                            Id: playingMatch._id.toHexString(),
+                            //Settings: playingMatch.Settings.
+                        } as DTOs.IPlayingMatchDto;
+                    }
+                    playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatch == null);
+
+                    // if can't create a match it means can't join, then it's useless to query joinable matches
+                    if (!playables.CanCreateMatch) {
+                        return playables;
+                    }
+
+                    return PendingMatch.getModel()
+                        .find({ PlayerId: { $ne: userId } })
+                        .populate({ path: "PlayerId", model: User.getModel() })
+                        .then(joinableMatches => {
+                            playables.JoinableMatches = joinableMatches.map(jm => {
+
+                                const creator = jm.PlayerId as any as User.IMongooseUser;
+                                return {
+                                    Id: jm._id.toHexString(),
+                                    Creator: {
+                                        Id: creator._id.toHexString(),
+                                        Username: creator.Username,
+                                        Age: creator.getAge(),
+                                        CountryId: creator.CountryId
+                                    }
+                                } as DTOs.IJoinableMatchDto;
+                            });
+
+                            return playables;
+                        })
+                        .catch((error: mongodb.MongoError) => {
+                            console.log(error);
+                            return null as DTOs.IPlayablesDto;
+                        });
+                })
+                .catch((error: mongodb.MongoError) => {
+                    console.log(error);
+                    return null as DTOs.IPlayablesDto;
+                });
+        })
+        .catch((error: mongodb.MongoError) => {
+            console.log(error);
+            return null as DTOs.IPlayablesDto;
+        });
+}
+
+router.get(
+    "/playables",
+    jwtValidator,
+    (request: express.Request, response: express.Response) => {
+
+        let responseData: net.HttpMessage<DTOs.IPlayablesDto> = null;
+
+        const userJWTData = (request.user as DTOs.IUserJWTData);
+        const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+        const playables = getPlayables(userObjectId)
+            .then(playables => {
+
+                responseData = new net.HttpMessage(playables);
+                response
+                    .status(httpStatusCodes.OK)
+                    .json(responseData);
+            })
+            .catch((error: mongodb.MongoError) => {
+                console.log(error);
+            });
+    }
+);
 
 router.post(
-    "/waitOpponent",
+    "/createPendingMatch",
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
         if (!request.user) {
-            response
-                .status(httpStatusCodes.NETWORK_AUTHENTICATION_REQUIRED);
+            response.status(httpStatusCodes.NETWORK_AUTHENTICATION_REQUIRED);
+            return;
         }
 
         let responseData: net.HttpMessage<string> = null;
@@ -188,12 +275,11 @@ router.post(
 
                 // if the user is already playing
                 if (hasOpenMatches) {
-                    responseData = new net.HttpMessage(
-                        null,
-                        "You are already playing!"); // TODO: switch to specific error codes
+                    responseData = new net.HttpMessage(null, "You are already playing!"); // TODO: switch to specific error codes
                     response
                         .status(httpStatusCodes.FORBIDDEN)
                         .json(responseData);
+                    return;
                 }
 
                 // if the user has no pending matches / matches
@@ -222,81 +308,64 @@ router.post(
                 console.log(chalk.red("+++ Why are we here?"));
                 throw new Error("WTF");
             });
-    });
+    }
+);
 
-router.get(
-    "/playables",
+router.post(
+    "/closePendingMatch" + "/:" + RoutingParamKeys.PendingMatchId,
     jwtValidator,
     (request: express.Request, response: express.Response) => {
 
-        let responseData: net.HttpMessage<DTOs.IPlayablesDto> = null;
+        if (!request.user) {
+            response.status(httpStatusCodes.NETWORK_AUTHENTICATION_REQUIRED);
+            return;
+        }
+
+        let responseData: net.HttpMessage<boolean> = null;
 
         const userJWTData = (request.user as DTOs.IUserJWTData);
         const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-        const playables = {} as DTOs.IPlayablesDto;
 
-        getUsersPendingMatch(userObjectId)
-            .then(pendingMatch => {
+        const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+        pendingMatchCriteria.PlayerId = userObjectId;
+        pendingMatchCriteria._id = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.PendingMatchId]);
+
+        PendingMatch
+            .getModel()
+            .findOne(pendingMatchCriteria)
+            .then((pendingMatch) => {
 
                 if (pendingMatch) {
-                    playables.PendingMatchId = pendingMatch.id;
-                }
-
-                getUsersPlayingMatch(userObjectId)
-                    .then(playingMatch => {
-                        if (playingMatch != null) {
-                            playables.PlayingMatch = {
-                                Id: playingMatch._id.toHexString(),
-                                //Settings: playingMatch.Settings.
-                            } as DTOs.IPlayingMatchDto;
-                        }
-                        playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatch == null);
-
-                        // if can create then can also join
-                        if (!playables.CanCreateMatch) {
-                            responseData = new net.HttpMessage(playables);
-
+                    pendingMatch
+                        .remove()
+                        .then(result => {
+                            responseData = new net.HttpMessage(true);
                             response
                                 .status(httpStatusCodes.OK)
                                 .json(responseData);
-                        }
-
-                        PendingMatch.getModel()
-                            .find({ PlayerId: { $ne: userObjectId } })
-                            .populate("PlayerId")
-                            .then(joinableMatches => {
-                                playables.JoinableMatches = joinableMatches.map(jm => {
-
-                                    const creator = jm.PlayerId as any as IMongooseUser;
-                                    return {
-                                        Id: jm._id.toHexString(),
-                                        Creator: {
-                                            Id: creator._id.toHexString(),
-                                            Username: creator.Username,
-                                            Age: creator.getAge(),
-                                            CountryId: creator.CountryId
-                                        }
-                                    } as DTOs.IJoinableMatchDto;
-                                });
-
-                                responseData = new net.HttpMessage(playables);
-
-                                response
-                                    .status(httpStatusCodes.OK)
-                                    .json(responseData);
-                            })
-                            .catch((error: mongodb.MongoError) => {
-                                console.log(error);
-                            });
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        console.log(error);
-                    });
+                        })
+                        .catch((error: mongodb.MongoError) => {
+                            responseData = new net.HttpMessage(false, error.message);
+                            response
+                                .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                                .json(responseData);
+                        });
+                }
+                else {
+                    responseData = new net.HttpMessage(false, "Requested PendingMatch not found");
+                    response
+                        .status(httpStatusCodes.NOT_FOUND)
+                        .json(responseData);
+                }
             })
             .catch((error: mongodb.MongoError) => {
-                console.log(error);
+                responseData = new net.HttpMessage(false, error.message);
+                response
+                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                    .json(responseData);
             });
-    });
+    }
+);
 
 // TODO: ensure can't join a match if already playing
 router.post(
@@ -313,6 +382,7 @@ router.post(
             response
                 .status(httpStatusCodes.BAD_REQUEST)
                 .json(responseData);
+            return;
         }
 
         PendingMatch.getModel()
@@ -327,63 +397,64 @@ router.post(
                 // ensure the pending match is not joined by the same player who created it
                 if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
                     responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "You cannot join your own match! -.-\"");
-                    response.status(httpStatusCodes.FORBIDDEN)
+                    response
+                        .status(httpStatusCodes.FORBIDDEN)
                         .json(responseData);
+                    return;
 
-                } else {
-                    const newMatchSkeleton = {} as utils.Mutable<Match.IMongooseMatch>;
-                    (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                    (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatch.PlayerId;
-                    (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                    (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = jwtUserObjectId;
-
-                    Match
-                        .create(newMatchSkeleton)
-                        .save()
-                        .then((createdMatch) => {
-
-                            console.log(chalk.green("New match created"));
-
-                            PendingMatch.getModel()
-                                .findByIdAndRemove(pendingMatch._id)
-                                .then((deletedPendingMatch) => {
-
-                                    console.log(chalk.green("Pending match deleted"));
-
-                                    responseData = new net.HttpMessage<DTOs.IMatchDto>(
-                                        {
-                                            Id: createdMatch.id,
-                                            FirstPlayerId: createdMatch.FirstPlayerSide.PlayerId.toHexString(),
-                                            SecondPlayerId: createdMatch.SecondPlayerSide.PlayerId.toHexString(),
-                                            CreationDateTime: createdMatch.CreationDateTime
-                                        } as DTOs.IMatchDto);
-
-                                    response
-                                        .status(httpStatusCodes.CREATED)
-                                        .json(responseData);
-                                })
-                                // match created but couldn't delete the original pending match :O
-                                .catch((error: mongodb.MongoError) => {
-
-                                    console.log(chalk.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
-
-                                    responseData = new net.HttpMessage<DTOs.IMatchDto>(
-                                        null,
-                                        "Unable to delete pendingMatch after creating the real match. Reason: " + error.message);
-                                    response
-                                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                        .json(responseData);
-                                });
-                        })
-                        // error when creating the match
-                        .catch((error: mongodb.MongoError) => {
-
-                            responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
-                            response
-                                .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                .json(responseData);
-                        });
                 }
+                const newMatchSkeleton = {} as utils.Mutable<Match.IMongooseMatch>;
+                (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatch.PlayerId;
+                (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
+                (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = jwtUserObjectId;
+
+                Match
+                    .create(newMatchSkeleton)
+                    .save()
+                    .then((createdMatch) => {
+
+                        console.log(chalk.green("New match created"));
+
+                        PendingMatch.getModel()
+                            .findByIdAndRemove(pendingMatch._id)
+                            .then((deletedPendingMatch) => {
+
+                                console.log(chalk.green("Pending match deleted"));
+
+                                responseData = new net.HttpMessage<DTOs.IMatchDto>(
+                                    {
+                                        Id: createdMatch.id,
+                                        FirstPlayerId: createdMatch.FirstPlayerSide.PlayerId.toHexString(),
+                                        SecondPlayerId: createdMatch.SecondPlayerSide.PlayerId.toHexString(),
+                                        CreationDateTime: createdMatch.CreationDateTime
+                                    } as DTOs.IMatchDto);
+
+                                response
+                                    .status(httpStatusCodes.CREATED)
+                                    .json(responseData);
+                            })
+                            // match created but couldn't delete the original pending match :O
+                            .catch((error: mongodb.MongoError) => {
+
+                                console.log(chalk.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
+
+                                responseData = new net.HttpMessage<DTOs.IMatchDto>(
+                                    null,
+                                    "Unable to delete pendingMatch after creating the real match. Reason: " + error.message);
+                                response
+                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                                    .json(responseData);
+                            });
+                    })
+                    // error when creating the match
+                    .catch((error: mongodb.MongoError) => {
+
+                        responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(responseData);
+                    });
             })
             // if the provided id for the pending match to join is not found
             .catch((error: mongodb.MongoError) => {
@@ -396,7 +467,8 @@ router.post(
                     .status(httpStatusCodes.NOT_FOUND)
                     .json(responseData);
             });
-    });
+    }
+);
 
 // TODO: complete, check everything workd as expected 
 router.get(
@@ -427,19 +499,6 @@ router.get(
     }
 );
 
-// router.get(
-//     "/sta",
-//     jwtValidator,
-//     (request: express.Request, response: express.Response) => {
-
-//         const sta = new game.ShipTypeAvailability(game.ShipType.Battleship, 3);
-
-//         response
-//             //.type("application/json")
-//             .status(httpStatusCodes.OK)
-//             .send(new net.HttpMessage({ ShipType: sta.ShipType, Count: sta.Count } as DTOs.IShipTypeAvailabilityDto));
-//     });
-
 router.get(
     "/:" + RoutingParamKeys.MatchId,
     jwtValidator,
@@ -451,7 +510,9 @@ router.get(
 
         Match.getModel()
             .findById(matchId)
-            .populate("")
+            // .populate("FirstPlayerSide.PlayerId")
+            // .populate("SecondPlayerSide.PlayerId")
+            // .populate("InActionPlayerId")
             .then((match) => {
 
                 const matchInfoDto: DTOs.IMatchDto = {
@@ -473,12 +534,14 @@ router.get(
                     .status(httpStatusCodes.NOT_FOUND)
                     .json(responseData);
             });
-    });
+    }
+);
 
 router.post(
     "/:" + RoutingParamKeys.MatchId,
     jwtValidator,
     () => {
-    });
+    }
+);
 
 export default router;

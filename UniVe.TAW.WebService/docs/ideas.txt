@@ -24,3 +24,5 @@
     - turni annullati, entrambi possono tirare 4 colpi in 3 secondi senza aspettare l'altro
     - sasso-carta-forbice, chi perde becca un danno su una barca random già colpita ma non affondata, se non ci sono barche colpite non affondate il colpo ne becca una random
 - resa
+
+- SOUNDZ

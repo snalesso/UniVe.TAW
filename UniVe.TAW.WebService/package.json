@@ -31,6 +31,6 @@
     "gulp": "^3.9.1",
     "gulp-print": "^5.0.0",
     "gulp-typescript": "^5.0.0-alpha.3",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   }
 }

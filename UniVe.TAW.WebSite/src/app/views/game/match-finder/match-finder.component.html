@@ -4,13 +4,15 @@
 
     <h1>Waiting for a challenger ...!</h1>
 
-    <button class="btn btn-warning btn-block" [disabled]="!HasPendingMatchOpen" (click)="createNewMatch()">Stop waiting</button>
+    <button class="btn btn-warning btn-block" [disabled]="IsBudy || !HasPendingMatchOpen" (click)="closePendingMatch()">Stop
+      waiting</button>
 
   </div>
 
   <div class="row justify-content-center" *ngIf="CanCreateMatch">
 
-    <button class="btn btn-primary btn-block" [disabled]="!CanCreateMatch" (click)="createNewMatch()">Wait for a challenger</button>
+    <button class="btn btn-primary btn-block" [disabled]="IsBudy || !CanCreateMatch" (click)="createPendingMatch()">Wait
+      for a challenger</button>
 
   </div>
 
@@ -24,7 +26,7 @@
       <div class="card-body">
         <h5 class="card-title">{{jm.Creator.Username}}</h5>
         <p class="card-text">{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from {{getCountryName(jm.Creator.CountryId)}}</p>
-        <button class="btn btn-success" (click)="joinMatch(jm.Id)">Challenge!</button>
+        <button class="btn btn-success" [disabled]="IsBudy" (click)="joinMatch(jm.Id)">Challenge!</button>
       </div>
     </div>
 
