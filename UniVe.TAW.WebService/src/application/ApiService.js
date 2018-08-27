@@ -1,13 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var http = require("http");
 var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
+var socketio = require("socket.io");
 var chalk_1 = require("chalk");
-var usersRoutesConfig_1 = require("./routing/usersRoutesConfig");
-var authRoutesConfig_1 = require("./routing/authRoutesConfig");
-var matchesRoutesConfig_1 = require("./routing/matchesRoutesConfig");
+var AuthRoutes_1 = require("./routing/AuthRoutes");
+var UsersRoutes_1 = require("./routing/UsersRoutes");
+var GameRoutes_1 = require("./routing/GameRoutes");
 var net = require("../infrastructure/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
@@ -17,6 +19,11 @@ var ApiService = /** @class */ (function () {
             throw new RangeError(port + ' is not a valid port number');
         this.Port = port;
         this._expressApp = express();
+        this._httpServer = http.createServer(this._expressApp);
+        this._socketIoServer = socketio(this._httpServer);
+        this._usersRoutes = new UsersRoutes_1.default(this._socketIoServer);
+        this._authRoutes = new AuthRoutes_1.default(this._socketIoServer);
+        this._gameRoutes = new GameRoutes_1.default(this._socketIoServer);
     }
     ApiService.prototype.Start = function () {
         var _this = this;
@@ -44,7 +51,7 @@ var ApiService = /** @class */ (function () {
             console.log(chalk_1.default.green("mongoose connected to " + _this._dbUrl));
             _this.ConfigRoutes();
             _this.ConfigMiddlewares();
-            _this._expressApp.listen(_this.Port, function () { return console.log(chalk_1.default.green("ApiServer listening on http://localhost:" + _this.Port)); });
+            _this._httpServer.listen(_this.Port, function () { return console.log(chalk_1.default.green("HTTP Server listening @ http://localhost:" + _this.Port)); });
         }, function (error) {
             console.log(chalk_1.default.red("mongoose connection failed! Reason: ") + error.message);
         });
@@ -81,9 +88,9 @@ var ApiService = /** @class */ (function () {
     };
     ApiService.prototype.ConfigRoutes = function () {
         console.log("Configuring routes ...");
-        this._expressApp.use('/users', usersRoutesConfig_1.default);
-        this._expressApp.use('/auth', authRoutesConfig_1.default);
-        this._expressApp.use('/matches', matchesRoutesConfig_1.default); // TODO: rename to /game?
+        this._expressApp.use('/users', this._usersRoutes.Router);
+        this._expressApp.use('/auth', this._authRoutes.Router);
+        this._expressApp.use('/matches', this._gameRoutes.Router); // TODO: rename to /game?
     };
     return ApiService;
 }());

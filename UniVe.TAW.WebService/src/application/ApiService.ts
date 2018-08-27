@@ -1,14 +1,16 @@
-﻿import * as express from 'express';
+﻿import * as http from 'http';
+import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as expressJwt from 'express-jwt';
+import * as socketio from 'socket.io';
 import chalk from 'chalk';
 
-import UsersRouter from './routing/usersRoutesConfig';
-import AuthRouter from './routing/authRoutesConfig';
-import MatchesRouter from './routing/matchesRoutesConfig';
+import AuthRoutes from './routing/AuthRoutes';
+import UsersRoutes from './routing/UsersRoutes';
+import GameRoutes from './routing/GameRoutes';
 
 import * as net from '../infrastructure/net';
 
@@ -17,13 +19,27 @@ export default class ApiService {
 
     private readonly _dbUrl = 'mongodb://localhost:27017/univetaw';
     private readonly _expressApp: express.Application;
+    private readonly _httpServer: http.Server;
+    private readonly _socketIoServer: socketio.Server;
+
+    private readonly _usersRoutes: UsersRoutes;
+    private readonly _authRoutes: AuthRoutes;
+    private readonly _gameRoutes: GameRoutes;
 
     public readonly Port: number;
 
     constructor(port: number) {
+
         if (!port) throw new RangeError(port + ' is not a valid port number');
+
         this.Port = port;
         this._expressApp = express();
+        this._httpServer = http.createServer(this._expressApp);
+        this._socketIoServer = socketio(this._httpServer);
+
+        this._usersRoutes = new UsersRoutes(this._socketIoServer);
+        this._authRoutes = new AuthRoutes(this._socketIoServer);
+        this._gameRoutes = new GameRoutes(this._socketIoServer);
     }
 
     public Start() {
@@ -56,9 +72,10 @@ export default class ApiService {
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();
-                    this._expressApp.listen(
+
+                    this._httpServer.listen(
                         this.Port,
-                        () => console.log(chalk.green("ApiServer listening on http://localhost:" + this.Port)));
+                        () => console.log(chalk.green("HTTP Server listening @ http://localhost:" + this.Port)));
                 },
                 (error: mongodb.MongoError) => {
                     console.log(chalk.red("mongoose connection failed! Reason: ") + error.message);
@@ -101,8 +118,8 @@ export default class ApiService {
     private ConfigRoutes() {
         console.log("Configuring routes ...");
 
-        this._expressApp.use('/users', UsersRouter);
-        this._expressApp.use('/auth', AuthRouter);
-        this._expressApp.use('/matches', MatchesRouter); // TODO: rename to /game?
+        this._expressApp.use('/users', this._usersRoutes.Router);
+        this._expressApp.use('/auth', this._authRoutes.Router);
+        this._expressApp.use('/matches', this._gameRoutes.Router); // TODO: rename to /game?
     }
 }

@@ -15,7 +15,8 @@
     "moment": "^2.22.2",
     "mongoose": "^5.2.4",
     "passport": "^0.4.0",
-    "passport-http": "^0.3.0"
+    "passport-http": "^0.3.0",
+    "socket.io": "^2.1.1"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
@@ -27,6 +28,7 @@
     "@types/jsonwebtoken": "^7.2.8",
     "@types/mongoose": "^5.2.0",
     "@types/node": "^9.6.23",
+    "@types/socket.io": "^1.4.38",
     "chalk": "^2.4.1",
     "gulp": "^3.9.1",
     "gulp-print": "^5.0.0",

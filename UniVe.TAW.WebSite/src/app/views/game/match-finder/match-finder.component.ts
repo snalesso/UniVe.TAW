@@ -103,7 +103,7 @@ export class JoinableMatchesComponent implements OnInit {
 
     this._isBusy = true;
 
-    this.gameService.joinMatch(joinableMatchId).subscribe(
+    this.gameService.joinPendingMatch(joinableMatchId).subscribe(
       response => {
         if (response.HasError) {
           console.log(response.ErrorMessage);

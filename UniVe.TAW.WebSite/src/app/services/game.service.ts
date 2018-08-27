@@ -75,8 +75,8 @@ export class GameService {
     return this.http.get<net.HttpMessage<DTOs.IMatchSettingsDto>>(endPoint, options);
   }
 
-  public joinMatch(joinableMatchId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/join/" + joinableMatchId;
+  public joinPendingMatch(pendingMatchid: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/join/" + pendingMatchid;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
