@@ -5,7 +5,7 @@ import * as mongodb from 'mongodb';
 import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as expressJwt from 'express-jwt';
-import * as socketio from 'socket.io';
+import * as socketIO from 'socket.io';
 import chalk from 'chalk';
 
 import AuthRoutes from './routing/AuthRoutes';
@@ -18,13 +18,16 @@ import * as net from '../infrastructure/net';
 export default class ApiService {
 
     private readonly _dbUrl = 'mongodb://localhost:27017/univetaw';
+
     private readonly _expressApp: express.Application;
     private readonly _httpServer: http.Server;
-    private readonly _socketIoServer: socketio.Server;
+    private readonly _socketIOServer: socketIO.Server;
 
     private readonly _usersRoutes: UsersRoutes;
     private readonly _authRoutes: AuthRoutes;
     private readonly _gameRoutes: GameRoutes;
+
+    private readonly _socketIoConnections: socketIO.Rooms;
 
     public readonly Port: number;
 
@@ -35,11 +38,11 @@ export default class ApiService {
         this.Port = port;
         this._expressApp = express();
         this._httpServer = http.createServer(this._expressApp);
-        this._socketIoServer = socketio(this._httpServer);
+        this._socketIOServer = socketIO(this._httpServer);
 
-        this._usersRoutes = new UsersRoutes(this._socketIoServer);
-        this._authRoutes = new AuthRoutes(this._socketIoServer);
-        this._gameRoutes = new GameRoutes(this._socketIoServer);
+        this._usersRoutes = new UsersRoutes(this._socketIOServer);
+        this._authRoutes = new AuthRoutes(this._socketIOServer);
+        this._gameRoutes = new GameRoutes(this._socketIOServer);
     }
 
     public Start() {
@@ -72,6 +75,13 @@ export default class ApiService {
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();
+
+                    this._socketIOServer.on(
+                        "connection",
+                        function (client) {
+                            client.emit("ciao", { data: 3232 });
+                            console.log("Socket.io client connected");
+                        });
 
                     this._httpServer.listen(
                         this.Port,

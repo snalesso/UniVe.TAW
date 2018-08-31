@@ -5,8 +5,10 @@ export class HttpMessage<T> {
         public readonly ErrorMessage?: string) {
     }
 
+    // TODO: check if angular side can call .HasError()
+    // TODO: should return true/false, sometimes returns undefined, check
     public get HasError(): boolean {
-        return this.ErrorMessage != null; // TODO: should return true/false, sometimes returns undefined, check
+        return this.ErrorMessage != null;
     }
 
 }

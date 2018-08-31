@@ -4,7 +4,8 @@ import * as Constants from './Constants';
 import * as Coord from './Coord';
 import * as ShipPlacement from './ShipPlacement';
 import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
-import * as BattleFieldSettings from './BattleFieldSettings';
+//import * as BattleFieldSettings from './BattleFieldSettings';
+import * as MatchSettings from './MatchSettings';
 
 import * as game from '../../../../infrastructure/game';
 import * as game_server from '../../../../infrastructure/game.server';
@@ -17,7 +18,7 @@ export interface IMongooseMatchPlayerSide extends mongoose.Document {
     FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
     BattleFieldCells: ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
     // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
-    configFleet: (battleFieldSettings: BattleFieldSettings.IMongooseBattleFieldSettings, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
+    configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
     receiveFire: (coord: Coord.IMongooseCoord) => boolean // returns true if something has been hit, false if water, exception if it was already hit
@@ -32,30 +33,31 @@ const matchPlayerSideSchema = new mongoose.Schema(
         },
         FleetConfig: {
             type: [ShipPlacement.getSchema()],
-            validate: {
-                validator: function validator(this: IMongooseMatchPlayerSide, value: ShipPlacement.IMongooseShipPlacement[]) {
-                    return this.FleetConfig == null // fleetconfig cannot be changed once set
-                        && value != null // fleet config cannot be null
-                        && value.length > 0; // fleet config cannot be emprty
-                }
-            }
+            // validate: {
+            //     validator: function validator(this: IMongooseMatchPlayerSide, value: ShipPlacement.IMongooseShipPlacement[]) {
+            //         return (this.FleetConfig == null // fleetconfig cannot be changed once set
+            //             && this.BattleFieldCells == null)
+            //             || (value != null // fleet config cannot be null
+            //                 && value.length > 0); // fleet config cannot be empty
+            //     }
+            // }
         },
         BattleFieldCells: {
             type: [[ServerSideBattleFieldCell.getSchema()]],
-            validate: {
-                validator: function (this: IMongooseMatchPlayerSide, value: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][]) {
-                    return this.FleetConfig != null // fleetconfig must have been set
-                        && value != null // fleet config cannot be null
-                        && value.length > 0; // fleet config cannot be emprty
-                }
-            }
+            // validate: {
+            //     validator: function (this: IMongooseMatchPlayerSide, value: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][]) {
+            //         return this.FleetConfig == null // fleetconfig must have been set
+            //             || (value != null // fleet config cannot be null
+            //                 && value.length > 0); // fleet config cannot be emprty
+            //     }
+            // }
         }
     }, {
         id: false
     });
 matchPlayerSideSchema.methods.configFleet = function (
     this: IMongooseMatchPlayerSide,
-    battleFieldSettings: BattleFieldSettings.IMongooseBattleFieldSettings,
+    matchSettings: MatchSettings.IMongooseMatchSettings,
     fleetConfig: ShipPlacement.IMongooseShipPlacement[]): void {
 
     // TODO: validate fleet config
@@ -64,9 +66,9 @@ matchPlayerSideSchema.methods.configFleet = function (
     const bfCells = [];
 
     // create empty field
-    for (let x = 0; x < battleFieldSettings.BattleFieldWidth; x++) {
+    for (let x = 0; x < matchSettings.BattleFieldWidth; x++) {
         bfCells[x] = [];
-        for (let y = 0; y < battleFieldSettings.BattleFieldHeight; y++) {
+        for (let y = 0; y < matchSettings.BattleFieldHeight; y++) {
             bfCells[x][y] = new game_server.ServerSideBattleFieldCell();
         }
     }

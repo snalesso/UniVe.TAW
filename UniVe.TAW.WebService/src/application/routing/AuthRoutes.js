@@ -26,8 +26,8 @@ var chalk_1 = require("chalk");
 var RoutesBase_1 = require("./RoutesBase");
 var GameRoutes = /** @class */ (function (_super) {
     __extends(GameRoutes, _super);
-    function GameRoutes(socketIoServer) {
-        var _this = _super.call(this, socketIoServer) || this;
+    function GameRoutes(socketIOServer) {
+        var _this = _super.call(this, socketIOServer) || this;
         _this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
         _this._router.use(bodyParser.urlencoded({ extended: true }));
         _this._router.use(bodyParser.json());

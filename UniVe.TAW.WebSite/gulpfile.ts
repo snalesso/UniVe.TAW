@@ -29,6 +29,12 @@ const imports: { bundleName: string, filePaths: string[] }[] = [
         filePaths: [
             "../UniVe.TAW.WebService/src/application/routing/RoutingParamKeys.ts"
         ]
+    },
+    {
+        bundleName: path.join("unive.taw.webservice", "application/services"),
+        filePaths: [
+            "../UniVe.TAW.WebService/src/application/services/ServiceEventKeys.ts"
+        ]
     }
 ];
 

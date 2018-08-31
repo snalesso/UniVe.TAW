@@ -42,13 +42,13 @@ export interface IMatchDto {
     FirstPlayerId: string;
     SecondPlayerId: string;
     CreationDateTime: Date;
-    Settings: IMatchSettingsDto;
+    Settings: game.IMatchSettings;
 }
 
 export interface IPlayingMatchDto {
     Id: string;
     Enemy: IUserDto;
-    Settings: IMatchSettingsDto;
+    Settings: game.IMatchSettings;
 }
 
 export interface IJoinableMatchDto {
@@ -58,20 +58,24 @@ export interface IJoinableMatchDto {
 
 //export type IBattleFieldSettingsDto = Partial<game.BattleFieldSettings>;
 
-export interface IBattleFieldSettingsDto extends game.BattleFieldSettings { };
 export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
 
-export interface IMatchSettingsDto {
-    BattleFieldSettings: IBattleFieldSettingsDto; // IBattleFieldSettingsDto;
-    ShipTypeAvailability: IShipTypeAvailabilityDto[]; // Partial<game.ShipTypeAvailability>[];
-    MinShipDistance: number;
-}
+// export interface IMatchSettingsDto {
+//     BattleFieldWidth: number;
+//     BattleFieldHeight: number;
+//     ShipTypeAvailabilities: ReadonlyArray<IShipTypeAvailabilityDto>; // Partial<game.ShipTypeAvailability>[];
+//     MinShipDistance: number;
+// }
 
 export interface IPlayablesDto {
     CanCreateMatch: boolean;
     PendingMatchId: string;
     PlayingMatch: IPlayingMatchDto;
     JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
+}
+
+export interface IMatchReadyEventDto {
+    MatchId: string;
 }
 
 // export interface IMatchInfoDto extends IMatchDto {

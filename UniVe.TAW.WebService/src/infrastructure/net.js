@@ -6,8 +6,10 @@ var HttpMessage = /** @class */ (function () {
         this.ErrorMessage = ErrorMessage;
     }
     Object.defineProperty(HttpMessage.prototype, "HasError", {
+        // TODO: check if angular side can call .HasError()
+        // TODO: should return true/false, sometimes returns undefined, check
         get: function () {
-            return this.ErrorMessage != null; // TODO: should return true/false, sometimes returns undefined, check
+            return this.ErrorMessage != null;
         },
         enumerable: true,
         configurable: true

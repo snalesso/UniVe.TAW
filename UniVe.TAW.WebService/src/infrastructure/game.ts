@@ -38,10 +38,10 @@ export class ShipPlacement {
     }
 }
 
-// export interface IShipTypeAvailability {
-//     readonly ShipType: ShipType,
-//     readonly Count: number
-// }
+export interface IShipTypeAvailability {
+    readonly ShipType: ShipType,
+    readonly Count: number
+}
 export class ShipTypeAvailability /*implements IShipTypeAvailability*/ {
     public constructor(
         public readonly ShipType: ShipType,
@@ -65,8 +65,15 @@ export class MatchAction {
     }
 }
 
-// TODO: aggregate with match settings
-export class BattleFieldSettings {
+export interface IMatchSettings {
+
+    readonly BattleFieldWidth: number;
+    readonly BattleFieldHeight: number;
+    readonly ShipTypeAvailabilities: ReadonlyArray<IShipTypeAvailability>;
+    readonly MinShipsDistance: number;
+}
+
+export class MatchSettingsFactory {
 
     public static readonly BattleFieldMinWidth: number = 10;
     public static readonly BattleFieldMinHeight: number = 10;
@@ -74,42 +81,25 @@ export class BattleFieldSettings {
     public static readonly BattleFieldMaxWidth: number = 26;
     public static readonly BattleFieldMaxHeight: number = 26;
 
-    constructor(
-        battleFieldWidth: number = BattleFieldSettings.BattleFieldMinWidth,
-        battleFieldHeight: number = BattleFieldSettings.BattleFieldMinWidth) {
+    public static createDefaultSettings(
+        battleFieldWidth: number = MatchSettingsFactory.BattleFieldMinWidth,
+        battleFieldHeight: number = MatchSettingsFactory.BattleFieldMinWidth,
+        availableShips: ShipTypeAvailability[] = MatchSettingsFactory.getDefaultShipTypeAvailability(),
+        minShipsDistance: number = 2) {
 
-        if (battleFieldWidth < BattleFieldSettings.BattleFieldMinWidth
-            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
-            || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
-            || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
+        if (battleFieldWidth < MatchSettingsFactory.BattleFieldMinWidth
+            || battleFieldHeight < MatchSettingsFactory.BattleFieldMinHeight
+            || battleFieldHeight > MatchSettingsFactory.BattleFieldMaxHeight
+            || battleFieldWidth > MatchSettingsFactory.BattleFieldMaxWidth)
             throw new Error("Invalid battlefield size");
 
-        this.BattleFieldHeight = battleFieldHeight;
-        this.BattleFieldWidth = battleFieldWidth;
+        return {
+            BattleFieldHeight: battleFieldHeight,
+            BattleFieldWidth: battleFieldWidth,
+            ShipTypeAvailabilities: availableShips,
+            MinShipsDistance: minShipsDistance
+        } as IMatchSettings;
     }
-
-    public readonly BattleFieldWidth: number;
-    public readonly BattleFieldHeight: number;
-}
-
-export class MatchSettings {
-
-    constructor(
-        battleFieldSettings: BattleFieldSettings = new BattleFieldSettings(),
-        availableShips: ShipTypeAvailability[] = MatchSettings.getDefaultShipTypeAvailability(),
-        minShipDistance: number = 2) {
-
-        if (battleFieldSettings == null)
-            throw new Error("Invalid battlefield settings");
-
-        this.BattleFieldSettings = battleFieldSettings;
-        this.AvailableShips = availableShips;
-        this.MinShipsDistance = minShipDistance;
-    }
-
-    public readonly BattleFieldSettings: BattleFieldSettings;
-    public readonly AvailableShips: ReadonlyArray<ShipTypeAvailability>;
-    public readonly MinShipsDistance: number;
 
     public static getDefaultShipTypeAvailability(): ShipTypeAvailability[] {
         return [
@@ -143,11 +133,11 @@ export class FleetValidator {
     public static isValidShipPlacement(
         shipPlacement: ShipPlacement,
         placedShips: ShipPlacement[],
-        matchSettings: MatchSettings): boolean {
+        matchSettings: IMatchSettings): boolean {
 
         const noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
-            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldWidth
-            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldHeight;
+            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldWidth
+            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldHeight;
 
         if (!noTrespassing)
             return false;
@@ -165,7 +155,7 @@ export class FleetValidator {
 
     public static isValidFleetConfig(
         fleetConfig: ShipPlacement[],
-        matchSettings: MatchSettings): boolean {
+        matchSettings: IMatchSettings): boolean {
         throw new Error("Not implemented");
     }
 }

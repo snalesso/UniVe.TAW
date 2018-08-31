@@ -17,7 +17,7 @@ const routes: Routes = [
   { path: ViewsRoutingKeys.Signup, component: SignupComponent },
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
   { path: ViewsRoutingKeys.MatchFinder, component: JoinableMatchesComponent },
-  { path: ViewsRoutingKeys.FleetConfigurator, component: FleetConfiguratorComponent },
+  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.FleetConfigurator], [RoutingParamKeys.MatchId]), component: FleetConfiguratorComponent },
   { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.MatchId]), component: MatchComponent },
 ];
 

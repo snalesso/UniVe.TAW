@@ -2,10 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var RoutesBase = /** @class */ (function () {
-    function RoutesBase(socketIoServer) {
+    function RoutesBase(socketIOServer) {
         this._router = express.Router();
-        if (!socketIoServer)
+        if (!socketIOServer)
             throw new Error("ArgumentNullException for socketIoServer");
+        this._socketIOServer = socketIOServer;
     }
     Object.defineProperty(RoutesBase.prototype, "Router", {
         get: function () { return this._router; },

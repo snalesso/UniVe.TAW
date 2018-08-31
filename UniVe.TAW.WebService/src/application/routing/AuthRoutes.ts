@@ -23,9 +23,9 @@ export default class GameRoutes extends RoutesBase {
 
     private readonly _jwtValidator: expressJwt.RequestHandler;
 
-    public constructor(socketIoServer: socketio.Server) {
+    public constructor(socketIOServer: socketio.Server) {
 
-        super(socketIoServer);
+        super(socketIOServer);
 
         this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 

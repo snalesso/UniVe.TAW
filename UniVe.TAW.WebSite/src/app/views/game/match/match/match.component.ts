@@ -11,12 +11,11 @@ import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservic
 export class MatchComponent implements OnInit {
 
   constructor(
-    private readonly gameService: GameService,
-    private readonly router: Router,
-    private readonly activatedRoute: ActivatedRoute
+    private readonly _gameService: GameService,
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute
   ) {
-    // console.log("match component ctor");
-    this._matchId = this.activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
   }
 
   private _matchId: string;

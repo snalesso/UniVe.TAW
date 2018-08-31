@@ -3,25 +3,34 @@ import * as mongoose from 'mongoose';
 import * as Constants from './Constants';
 import * as Coord from './Coord';
 import * as ShipTypeAvailability from './ShipTypeAvailability';
-import * as BattleFieldSettings from './BattleFieldSettings';
+//import * as BattleFieldSettings from './BattleFieldSettings';
 
 import * as game from '../../../../infrastructure/game';
 import * as game_server from '../../../../infrastructure/game.server';
 import * as game_client from '../../../../infrastructure/game.client';
 
-export type IMongooseMatchSettings = game.MatchSettings & mongoose.Document;
+export interface IMongooseMatchSettings extends mongoose.Document {
+    readonly BattleFieldWidth: number;
+    readonly BattleFieldHeight: number;
+    readonly AvailableShips: ReadonlyArray<ShipTypeAvailability.IMongooseShipTypeAvailability>;
+    readonly MinShipsDistance: number;
+}
 
 const matchSettingsSchema = new mongoose.Schema(
     {
-        BattleFieldSettings: {
+        BattleFieldWidth: {
             required: true,
-            type: BattleFieldSettings.getSchema()
+            type: mongoose.Schema.Types.Number
         },
-        ShipTypeAvailability: {
+        BattleFieldHeight: {
             required: true,
-            type: ShipTypeAvailability.getSchema()
+            type: mongoose.Schema.Types.Number
         },
-        MinShipDistance: {
+        AvailableShips: {
+            required: true,
+            type: [ShipTypeAvailability.getSchema()]
+        },
+        MinShipsDistance: {
             required: true,
             type: mongoose.Schema.Types.Number
         }

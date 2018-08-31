@@ -11,6 +11,7 @@ import * as game from '../../infrastructure/game';
 import * as utils from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
+import ServiceEventKeys from '../services/ServiceEventKeys';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
@@ -18,14 +19,19 @@ import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch
 import * as DTOs from '../DTOs';
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
+import * as MatchSettings from '../../domain/models/mongodb/mongoose/MatchSettings';
+//import * as BattleFieldSettings from '../../domain/models/mongodb/mongoose/BattleFieldSettings';
+import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlayerSide';
+import * as  ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
+import { IMongooseShipTypeAvailability } from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 
 export default class GameRoutes extends RoutesBase {
 
     private readonly _jwtValidator: expressJwt.RequestHandler;
 
-    public constructor(socketIoServer: socketio.Server) {
+    public constructor(socketIOServer: socketio.Server) {
 
-        super(socketIoServer);
+        super(socketIOServer);
 
         this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
 
@@ -55,7 +61,6 @@ export default class GameRoutes extends RoutesBase {
                     .then((hasOpenMatches) => {
 
                         responseData = new net.HttpMessage(!hasOpenMatches);
-
                         response
                             .status(httpStatusCodes.OK)
                             .json(responseData);
@@ -77,7 +82,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const playables = this.getPlayables(userObjectId)
+                this.getPlayables(userObjectId)
                     .then(playables => {
 
                         responseData = new net.HttpMessage(playables);
@@ -106,8 +111,9 @@ export default class GameRoutes extends RoutesBase {
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
 
-                const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                pendingMatchCriteria.PlayerId = userObjectId;
+                const pendingMatchCriteria = {
+                    PlayerId: userObjectId
+                } as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
 
                 this.hasOpenMatches(userObjectId)
                     .then((hasOpenMatches) => {
@@ -165,9 +171,10 @@ export default class GameRoutes extends RoutesBase {
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
 
-                const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                pendingMatchCriteria.PlayerId = userObjectId;
-                pendingMatchCriteria._id = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.PendingMatchId]);
+                const pendingMatchCriteria = {
+                    PlayerId: userObjectId,
+                    _id: new mongoose.Types.ObjectId(request.params[RoutingParamKeys.PendingMatchId])
+                } as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
 
                 PendingMatch
                     .getModel()
@@ -208,16 +215,16 @@ export default class GameRoutes extends RoutesBase {
 
         // TODO: ensure can't join a match if already playing
         this._router.post(
-            "/join/:" + RoutingParamKeys.PendingMatchId,
+            "/joinPendingMatch/:" + RoutingParamKeys.PendingMatchId,
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
-                let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
+                let responseData: net.HttpMessage<string> = null;
 
                 const pendingMatchId = request.params[RoutingParamKeys.PendingMatchId];
 
                 if (!pendingMatchId) {
-                    responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "Unable to find requested match");
+                    responseData = new net.HttpMessage(null, "Unable to find requested match");
                     response
                         .status(httpStatusCodes.BAD_REQUEST)
                         .json(responseData);
@@ -233,63 +240,69 @@ export default class GameRoutes extends RoutesBase {
                         const jwtUser = (request.user as DTOs.IUserJWTData);
                         const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
-                        // ensure the pending match is not joined by the same player who created it
+                        // ensure the pending match is not trying to be joined by the same player who created it
                         if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
-                            responseData = new net.HttpMessage<DTOs.IMatchDto>(null, "You cannot join your own match! -.-\"");
+                            responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
                             response
                                 .status(httpStatusCodes.FORBIDDEN)
                                 .json(responseData);
+
                             return;
-
                         }
-                        const newMatchSkeleton = {} as utils.Mutable<Match.IMongooseMatch>;
-                        (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                        (newMatchSkeleton.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatch.PlayerId;
-                        (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                        (newMatchSkeleton.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = jwtUserObjectId;
 
-                        Match
-                            .create(newMatchSkeleton)
-                            .save()
-                            .then((createdMatch) => {
+                        pendingMatch.remove()
+                            .then((deletedPendingMatch) => {
 
-                                console.log(chalk.green("New match created"));
+                                console.log(chalk.green("PendingMatch (id: " + deletedPendingMatch._id.toHexString() + ") deleted"));
 
-                                PendingMatch.getModel()
-                                    .findByIdAndRemove(pendingMatch._id)
-                                    .then((deletedPendingMatch) => {
+                                const newMatchSkel = {
+                                    FirstPlayerSide: {
+                                        PlayerId: pendingMatch.PlayerId
+                                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
+                                    SecondPlayerSide: {
+                                        PlayerId: jwtUserObjectId
+                                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
+                                    Settings: {
+                                        MinShipsDistance: 2,
+                                        BattleFieldHeight: 10,
+                                        BattleFieldWidth: 10,
+                                        AvailableShips: [
+                                            { ShipType: game.ShipType.Destroyer, Count: 4 } as ShipTypeAvailability.IMongooseShipTypeAvailability,
+                                            { ShipType: game.ShipType.Submarine, Count: 2 } as ShipTypeAvailability.IMongooseShipTypeAvailability,
+                                            { ShipType: game.ShipType.Battleship, Count: 2 } as ShipTypeAvailability.IMongooseShipTypeAvailability,
+                                            { ShipType: game.ShipType.Carrier, Count: 1 } as ShipTypeAvailability.IMongooseShipTypeAvailability
+                                        ] as ReadonlyArray<IMongooseShipTypeAvailability>
+                                    } as MatchSettings.IMongooseMatchSettings
+                                } as Match.IMongooseMatch;
 
-                                        console.log(chalk.green("Pending match deleted"));
+                                Match
+                                    .create(newMatchSkel)
+                                    .save()
+                                    .then((createdMatch) => {
 
-                                        responseData = new net.HttpMessage<DTOs.IMatchDto>(
-                                            {
-                                                Id: createdMatch.id,
-                                                FirstPlayerId: createdMatch.FirstPlayerSide.PlayerId.toHexString(),
-                                                SecondPlayerId: createdMatch.SecondPlayerSide.PlayerId.toHexString(),
-                                                CreationDateTime: createdMatch.CreationDateTime
-                                            } as DTOs.IMatchDto);
+                                        console.log(chalk.green("New match created (id:" + createdMatch._id.toHexString() + ")"));
 
+                                        this._socketIOServer.emit(ServiceEventKeys.MatchReady, { MatchId: createdMatch._id.toHexString() } as DTOs.IMatchReadyEventDto);
+
+                                        responseData = new net.HttpMessage(createdMatch._id.toHexString());
                                         response
                                             .status(httpStatusCodes.CREATED)
                                             .json(responseData);
                                     })
-                                    // match created but couldn't delete the original pending match :O
+                                    // error when creating the match
                                     .catch((error: mongodb.MongoError) => {
 
-                                        console.log(chalk.red("Shit happening: pending match found, new match created, pending match not deleted D:"));
+                                        console.log(chalk.red("SHITSTORM: PendingMatch found & deleted BUT couldn't create the Match D:"));
 
-                                        responseData = new net.HttpMessage<DTOs.IMatchDto>(
-                                            null,
-                                            "Unable to delete pendingMatch after creating the real match. Reason: " + error.message);
+                                        responseData = new net.HttpMessage(null, "PendingMatch deleted but couldn't create the real Match! Reason: " + error.message);
                                         response
                                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                                             .json(responseData);
                                     });
                             })
-                            // error when creating the match
+                            // couldn't delete pending match
                             .catch((error: mongodb.MongoError) => {
-
-                                responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
+                                responseData = new net.HttpMessage(null, error.message);
                                 response
                                     .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                                     .json(responseData);
@@ -299,9 +312,7 @@ export default class GameRoutes extends RoutesBase {
                     .catch((error: mongodb.MongoError) => {
 
                         console.log(chalk.red("Could not find requested pending match"));
-                        responseData = new net.HttpMessage<DTOs.IMatchDto>(
-                            null,
-                            "Unable to find requested pending match. Reason: " + error.message);
+                        responseData = new net.HttpMessage(null, "Unable to find requested pending match. Reason: " + error.message);
                         response
                             .status(httpStatusCodes.NOT_FOUND)
                             .json(responseData);
@@ -315,21 +326,8 @@ export default class GameRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
-                const dnms = new game.MatchSettings();
-                const responseData = new net.HttpMessage({
-                    MinShipDistance: dnms.MinShipsDistance,
-                    ShipTypeAvailability: dnms.AvailableShips.map(as => {
-                        return {
-                            Count: as.Count,
-                            ShipType: as.ShipType
-                        } as DTOs.IShipTypeAvailabilityDto;
-                    }),
-                    BattleFieldSettings: {
-                        BattleFieldWidth: dnms.BattleFieldSettings.BattleFieldWidth,
-                        BattleFieldHeight: dnms.BattleFieldSettings.BattleFieldHeight,
-
-                    } as DTOs.IBattleFieldSettingsDto
-                } as DTOs.IMatchSettingsDto);
+                const dnms = null; // new game.MatchSettings();
+                const responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
 
                 response
                     //.type("application/json")
@@ -354,18 +352,22 @@ export default class GameRoutes extends RoutesBase {
                     // .populate("InActionPlayerId")
                     .then((match) => {
 
-                        const matchInfoDto: DTOs.IMatchDto = {
+                        const matchDto: DTOs.IMatchDto = {
                             Id: match.id,
                             FirstPlayerId: match.FirstPlayerSide.PlayerId.toHexString(),
                             SecondPlayerId: match.SecondPlayerSide.PlayerId.toHexString(),
                             CreationDateTime: match.CreationDateTime,
                             Settings: {
-                            } as DTOs.IMatchSettingsDto
+                                BattleFieldWidth: match.Settings.BattleFieldWidth,
+                                BattleFieldHeight: match.Settings.BattleFieldHeight,
+                                MinShipsDistance: match.Settings.MinShipsDistance,
+                                ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
+                            } as game.IMatchSettings
                         };
-                        responseData = new net.HttpMessage<DTOs.IMatchDto>(matchInfoDto);
+                        responseData = new net.HttpMessage<DTOs.IMatchDto>(matchDto);
                         response
                             .status(httpStatusCodes.OK)
-                            .json(matchInfoDto);
+                            .json(matchDto);
                     })
                     .catch((error: mongodb.MongoError) => {
                         responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
@@ -459,7 +461,7 @@ export default class GameRoutes extends RoutesBase {
 
         return Match.getModel()
             // TODO: fix OR in criteria
-            .findOne(matchCriteria1/*, matchCriteria2*/)
+            .findOne({ $or: [matchCriteria1, matchCriteria2] })
             // .populate("InActionPlayerId")
             // .populate("FirstPlayerSide.PlayerId")
             // .populate("SecondPlayerSide.PlayerId")

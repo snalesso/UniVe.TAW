@@ -27,8 +27,8 @@ export class EnemyFieldComponent implements OnInit {
     //this._matchId = this.route.para
   }
 
-  private _settings: game.MatchSettings;
-  public get Settings(): game.MatchSettings { return this._settings; }
+  private _settings: game.IMatchSettings;
+  public get Settings(): game.IMatchSettings { return this._settings; }
 
   private _gridCells: game_client.IEnemyBattleFieldCell[][];
   public get Cells() { return this._gridCells; }
@@ -62,10 +62,10 @@ export class EnemyFieldComponent implements OnInit {
     this._canFire = false;
 
     if (this._gridCells == null) {
-      this._gridCells = new Array(this._settings.BattleFieldSettings.BattleFieldWidth);
-      for (let x = 0; x < this._settings.BattleFieldSettings.BattleFieldWidth; x++) {
-        this._gridCells[x] = new Array(this._settings.BattleFieldSettings.BattleFieldHeight);
-        for (let y = 0; y < this._settings.BattleFieldSettings.BattleFieldHeight; y++) {
+      this._gridCells = new Array(this._settings.BattleFieldWidth);
+      for (let x = 0; x < this._settings.BattleFieldWidth; x++) {
+        this._gridCells[x] = new Array(this._settings.BattleFieldHeight);
+        for (let y = 0; y < this._settings.BattleFieldHeight; y++) {
           this._gridCells[x][y] = {
             Coord: new game.Coord(x, y),
             Status: game_client.EnemyBattleFieldCellStatus.Unknown
@@ -101,7 +101,7 @@ export class EnemyFieldComponent implements OnInit {
     //     }
     //   });
 
-    this._settings = new game.MatchSettings();
+    //this._settings = new game.MatchSettings();
     this.cleanFieldGrid();
   }
 }

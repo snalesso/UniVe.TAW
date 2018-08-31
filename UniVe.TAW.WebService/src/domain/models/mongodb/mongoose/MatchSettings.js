@@ -2,17 +2,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mongoose = require("mongoose");
 var ShipTypeAvailability = require("./ShipTypeAvailability");
-var BattleFieldSettings = require("./BattleFieldSettings");
 var matchSettingsSchema = new mongoose.Schema({
-    BattleFieldSettings: {
+    BattleFieldWidth: {
         required: true,
-        type: BattleFieldSettings.getSchema()
+        type: mongoose.Schema.Types.Number
     },
-    ShipTypeAvailability: {
+    BattleFieldHeight: {
         required: true,
-        type: ShipTypeAvailability.getSchema()
+        type: mongoose.Schema.Types.Number
     },
-    MinShipDistance: {
+    AvailableShips: {
+        required: true,
+        type: [ShipTypeAvailability.getSchema()]
+    },
+    MinShipsDistance: {
         required: true,
         type: mongoose.Schema.Types.Number
     }

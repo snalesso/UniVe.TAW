@@ -40,10 +40,6 @@ var ShipPlacement = /** @class */ (function () {
     return ShipPlacement;
 }());
 exports.ShipPlacement = ShipPlacement;
-// export interface IShipTypeAvailability {
-//     readonly ShipType: ShipType,
-//     readonly Count: number
-// }
 var ShipTypeAvailability /*implements IShipTypeAvailability*/ = /** @class */ (function () {
     function ShipTypeAvailability(ShipType, Count) {
         this.ShipType = ShipType;
@@ -68,38 +64,27 @@ var MatchAction = /** @class */ (function () {
     return MatchAction;
 }());
 exports.MatchAction = MatchAction;
-// TODO: aggregate with match settings
-var BattleFieldSettings = /** @class */ (function () {
-    function BattleFieldSettings(battleFieldWidth, battleFieldHeight) {
-        if (battleFieldWidth === void 0) { battleFieldWidth = BattleFieldSettings.BattleFieldMinWidth; }
-        if (battleFieldHeight === void 0) { battleFieldHeight = BattleFieldSettings.BattleFieldMinWidth; }
-        if (battleFieldWidth < BattleFieldSettings.BattleFieldMinWidth
-            || battleFieldHeight < BattleFieldSettings.BattleFieldMinHeight
-            || battleFieldHeight > BattleFieldSettings.BattleFieldMaxHeight
-            || battleFieldWidth > BattleFieldSettings.BattleFieldMaxWidth)
+var MatchSettingsFactory = /** @class */ (function () {
+    function MatchSettingsFactory() {
+    }
+    MatchSettingsFactory.createDefaultSettings = function (battleFieldWidth, battleFieldHeight, availableShips, minShipsDistance) {
+        if (battleFieldWidth === void 0) { battleFieldWidth = MatchSettingsFactory.BattleFieldMinWidth; }
+        if (battleFieldHeight === void 0) { battleFieldHeight = MatchSettingsFactory.BattleFieldMinWidth; }
+        if (availableShips === void 0) { availableShips = MatchSettingsFactory.getDefaultShipTypeAvailability(); }
+        if (minShipsDistance === void 0) { minShipsDistance = 2; }
+        if (battleFieldWidth < MatchSettingsFactory.BattleFieldMinWidth
+            || battleFieldHeight < MatchSettingsFactory.BattleFieldMinHeight
+            || battleFieldHeight > MatchSettingsFactory.BattleFieldMaxHeight
+            || battleFieldWidth > MatchSettingsFactory.BattleFieldMaxWidth)
             throw new Error("Invalid battlefield size");
-        this.BattleFieldHeight = battleFieldHeight;
-        this.BattleFieldWidth = battleFieldWidth;
-    }
-    BattleFieldSettings.BattleFieldMinWidth = 10;
-    BattleFieldSettings.BattleFieldMinHeight = 10;
-    BattleFieldSettings.BattleFieldMaxWidth = 26;
-    BattleFieldSettings.BattleFieldMaxHeight = 26;
-    return BattleFieldSettings;
-}());
-exports.BattleFieldSettings = BattleFieldSettings;
-var MatchSettings = /** @class */ (function () {
-    function MatchSettings(battleFieldSettings, availableShips, minShipDistance) {
-        if (battleFieldSettings === void 0) { battleFieldSettings = new BattleFieldSettings(); }
-        if (availableShips === void 0) { availableShips = MatchSettings.getDefaultShipTypeAvailability(); }
-        if (minShipDistance === void 0) { minShipDistance = 2; }
-        if (battleFieldSettings == null)
-            throw new Error("Invalid battlefield settings");
-        this.BattleFieldSettings = battleFieldSettings;
-        this.AvailableShips = availableShips;
-        this.MinShipsDistance = minShipDistance;
-    }
-    MatchSettings.getDefaultShipTypeAvailability = function () {
+        return {
+            BattleFieldHeight: battleFieldHeight,
+            BattleFieldWidth: battleFieldWidth,
+            ShipTypeAvailabilities: availableShips,
+            MinShipsDistance: minShipsDistance
+        };
+    };
+    MatchSettingsFactory.getDefaultShipTypeAvailability = function () {
         return [
             new ShipTypeAvailability(ShipType.Destroyer, 4),
             new ShipTypeAvailability(ShipType.Submarine, 2),
@@ -107,9 +92,13 @@ var MatchSettings = /** @class */ (function () {
             new ShipTypeAvailability(ShipType.Carrier, 1)
         ];
     };
-    return MatchSettings;
+    MatchSettingsFactory.BattleFieldMinWidth = 10;
+    MatchSettingsFactory.BattleFieldMinHeight = 10;
+    MatchSettingsFactory.BattleFieldMaxWidth = 26;
+    MatchSettingsFactory.BattleFieldMaxHeight = 26;
+    return MatchSettingsFactory;
 }());
-exports.MatchSettings = MatchSettings;
+exports.MatchSettingsFactory = MatchSettingsFactory;
 var FleetValidator = /** @class */ (function () {
     function FleetValidator() {
     }
@@ -129,8 +118,8 @@ var FleetValidator = /** @class */ (function () {
     FleetValidator.isValidShipPlacement = function (shipPlacement, placedShips, matchSettings) {
         var _this = this;
         var noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
-            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldWidth
-            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldSettings.BattleFieldHeight;
+            ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldWidth
+            : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldHeight;
         if (!noTrespassing)
             return false;
         var newShipPlacementCoords = this.getShipPlacementCoords(shipPlacement);

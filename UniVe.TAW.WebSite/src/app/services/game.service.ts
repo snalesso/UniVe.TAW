@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { unescapeIdentifier } from '@angular/compiler';
 import * as ng_http from '@angular/common/http';
 
 import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
 import * as game from '../../assets/imported/unive.taw.webservice/infrastructure/game';
 import ServiceConstants from './ServiceConstants';
 
-import * as $ from 'jquery';
+//import * as $ from 'jquery';
 import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+//import 'socket.io-client';
+import { SocketIOService } from './socket-io.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +19,10 @@ import { AuthService } from './auth.service';
 export class GameService {
 
   constructor(
-    private readonly http: ng_http.HttpClient,
-    private readonly authService: AuthService) {
+    private readonly _http: ng_http.HttpClient,
+    private readonly _authService: AuthService,
+    private readonly _socketIOService: SocketIOService
+  ) {
   }
 
   public getPlayables() {
@@ -28,12 +30,12 @@ export class GameService {
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " GET " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
   }
 
   public createPendingMatch() {
@@ -41,12 +43,12 @@ export class GameService {
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.post<net.HttpMessage<string>>(endPoint, null, options);
+    return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
 
   public closePendingMatch(pendingMatchId: string) {
@@ -54,12 +56,12 @@ export class GameService {
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.post<net.HttpMessage<boolean>>(endPoint, null, options);
+    return this._http.post<net.HttpMessage<boolean>>(endPoint, null, options);
   }
 
   public getNewMatchSettings() {
@@ -67,25 +69,25 @@ export class GameService {
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " GET " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.get<net.HttpMessage<DTOs.IMatchSettingsDto>>(endPoint, options);
+    return this._http.get<net.HttpMessage<game.IMatchSettings>>(endPoint, options);
   }
 
   public joinPendingMatch(pendingMatchid: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/join/" + pendingMatchid;
+    const endPoint = ServiceConstants.ServerAddress + "/matches/joinPendingMatch/" + pendingMatchid;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.post<net.HttpMessage<DTOs.IMatchDto>>(endPoint, null, options);
+    return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
 
   public configFleet(fleetConfig: game.ShipPlacement[]) {
@@ -93,12 +95,12 @@ export class GameService {
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this.authService.Token)
+        .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this.authService.LoggedUser.Username + " POST " + endPoint + " with token " + this.authService.Token);
+    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this.http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
+    return this._http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
   }
 
   // public getMatchInfo(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {

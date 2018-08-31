@@ -14,35 +14,21 @@ var matchPlayerSideSchema = new mongoose.Schema({
     },
     FleetConfig: {
         type: [ShipPlacement.getSchema()],
-        validate: {
-            validator: function validator(value) {
-                return this.FleetConfig == null // fleetconfig cannot be changed once set
-                    && value != null // fleet config cannot be null
-                    && value.length > 0; // fleet config cannot be emprty
-            }
-        }
     },
     BattleFieldCells: {
         type: [[ServerSideBattleFieldCell.getSchema()]],
-        validate: {
-            validator: function (value) {
-                return this.FleetConfig != null // fleetconfig must have been set
-                    && value != null // fleet config cannot be null
-                    && value.length > 0; // fleet config cannot be emprty
-            }
-        }
     }
 }, {
     id: false
 });
-matchPlayerSideSchema.methods.configFleet = function (battleFieldSettings, fleetConfig) {
+matchPlayerSideSchema.methods.configFleet = function (matchSettings, fleetConfig) {
     // TODO: validate fleet config
     this.FleetConfig = fleetConfig;
     var bfCells = [];
     // create empty field
-    for (var x = 0; x < battleFieldSettings.BattleFieldWidth; x++) {
+    for (var x = 0; x < matchSettings.BattleFieldWidth; x++) {
         bfCells[x] = [];
-        for (var y = 0; y < battleFieldSettings.BattleFieldHeight; y++) {
+        for (var y = 0; y < matchSettings.BattleFieldHeight; y++) {
             bfCells[x][y] = new game_server.ServerSideBattleFieldCell();
         }
     }

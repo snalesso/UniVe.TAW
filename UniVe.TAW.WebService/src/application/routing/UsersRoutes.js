@@ -24,8 +24,8 @@ var moment = require("moment");
 var RoutesBase_1 = require("./RoutesBase");
 var UsersRoutes = /** @class */ (function (_super) {
     __extends(UsersRoutes, _super);
-    function UsersRoutes(socketIoServer) {
-        var _this = _super.call(this, socketIoServer) || this;
+    function UsersRoutes(socketIOServer) {
+        var _this = _super.call(this, socketIOServer) || this;
         _this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
         _this._router.use(bodyParser.urlencoded({ extended: true }));
         _this._router.use(bodyParser.json());

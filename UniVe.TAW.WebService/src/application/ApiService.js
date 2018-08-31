@@ -5,7 +5,7 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var httpStatusCodes = require("http-status-codes");
-var socketio = require("socket.io");
+var socketIO = require("socket.io");
 var chalk_1 = require("chalk");
 var AuthRoutes_1 = require("./routing/AuthRoutes");
 var UsersRoutes_1 = require("./routing/UsersRoutes");
@@ -20,10 +20,10 @@ var ApiService = /** @class */ (function () {
         this.Port = port;
         this._expressApp = express();
         this._httpServer = http.createServer(this._expressApp);
-        this._socketIoServer = socketio(this._httpServer);
-        this._usersRoutes = new UsersRoutes_1.default(this._socketIoServer);
-        this._authRoutes = new AuthRoutes_1.default(this._socketIoServer);
-        this._gameRoutes = new GameRoutes_1.default(this._socketIoServer);
+        this._socketIOServer = socketIO(this._httpServer);
+        this._usersRoutes = new UsersRoutes_1.default(this._socketIOServer);
+        this._authRoutes = new AuthRoutes_1.default(this._socketIOServer);
+        this._gameRoutes = new GameRoutes_1.default(this._socketIOServer);
     }
     ApiService.prototype.Start = function () {
         var _this = this;
@@ -51,6 +51,10 @@ var ApiService = /** @class */ (function () {
             console.log(chalk_1.default.green("mongoose connected to " + _this._dbUrl));
             _this.ConfigRoutes();
             _this.ConfigMiddlewares();
+            _this._socketIOServer.on("connection", function (client) {
+                client.emit("ciao", { data: 3232 });
+                console.log("Socket.io client connected");
+            });
             _this._httpServer.listen(_this.Port, function () { return console.log(chalk_1.default.green("HTTP Server listening @ http://localhost:" + _this.Port)); });
         }, function (error) {
             console.log(chalk_1.default.red("mongoose connection failed! Reason: ") + error.message);

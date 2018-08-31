@@ -11,12 +11,6 @@ var shipTypeAvailabilitySchema = new mongoose.Schema({
     Count: {
         required: true,
         type: mongoose.Schema.Types.Number,
-        validate: {
-            validator: function (value) {
-                return value >= 0;
-            },
-            msg: "Cannot provide a negative quantity of ships"
-        }
     }
 }, {
     id: false
