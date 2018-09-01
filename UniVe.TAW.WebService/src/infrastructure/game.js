@@ -25,11 +25,6 @@ var ShipOrientation;
     ShipOrientation[ShipOrientation["Horizontal"] = 0] = "Horizontal";
     ShipOrientation[ShipOrientation["Vertical"] = 1] = "Vertical";
 })(ShipOrientation = exports.ShipOrientation || (exports.ShipOrientation = {}));
-// export interface IShipPlacement {
-//     Type: ShipType;
-//     Coord: Coord;
-//     Orientation: ShipOrientation;
-// }
 /** 0 based coord */
 var ShipPlacement = /** @class */ (function () {
     function ShipPlacement(Type, Coord, Orientation) {

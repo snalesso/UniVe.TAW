@@ -24,6 +24,7 @@ import * as MatchSettings from '../../domain/models/mongodb/mongoose/MatchSettin
 import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlayerSide';
 import * as  ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipTypeAvailability } from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
+import { IMongooseShipPlacement } from '../../domain/models/mongodb/mongoose/ShipPlacement';
 
 export default class GameRoutes extends RoutesBase {
 
@@ -379,12 +380,66 @@ export default class GameRoutes extends RoutesBase {
         );
 
         this._router.post(
-            "/:" + RoutingParamKeys.MatchId,
+            "/:" + RoutingParamKeys.MatchId + "/config",
             this._jwtValidator,
-            () => {
+            (request: express.Request, response: express.Response) => {
+
+                let responseData: net.HttpMessage<boolean> = null;
+
+                const userJWTData = (request.user as DTOs.IUserJWTData);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.MatchId]);
+
+                Match.getModel()
+                    .findById(matchObjectId)
+                    .then(match => {
+
+                        if (!match) {
+                            responseData = new net.HttpMessage<boolean>(false, "Could not find requested match");
+                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
+                            return;
+                        }
+                        else if (!match.FirstPlayerSide.PlayerId.equals(userObjectId) && !match.SecondPlayerSide.PlayerId.equals(userObjectId)) {
+                            responseData = new net.HttpMessage<boolean>(false, "You are not authorized to intervene in this match");
+                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                            return;
+                        }
+
+                        const wasConfigSuccessful = match.configFleet(userObjectId, request.body as IMongooseShipPlacement[]);
+
+                        if (wasConfigSuccessful) {
+                            responseData = new net.HttpMessage(wasConfigSuccessful);
+                            response.status(httpStatusCodes.OK).json(responseData);
+                        }
+                        else {
+                            responseData = new net.HttpMessage(wasConfigSuccessful, "Match is already configured and cannot be changed");
+                            response.status(httpStatusCodes.LOCKED).json(responseData); // TODO: return info instead of http error response
+                        }
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        const msg = "error looking for specified match with specified player";
+                        console.log(chalk.red(msg));
+                        //throw new Error("error looking for specified match with specified player");
+                        responseData = new net.HttpMessage(false, msg);
+                        response.status(httpStatusCodes.OK).json(responseData);
+                    })
             }
         );
 
+    }
+
+    private getCanUserInterveneInMatch(playerId: mongoose.Types.ObjectId, matchId: mongoose.Types.ObjectId) {
+        if (playerId == null || matchId == null)
+            throw new Error("playerId & matchId cannot be null");
+
+        return Match.getModel().findById(matchId)
+            .then(match => {
+                return match && (match.FirstPlayerSide.PlayerId === playerId || match.SecondPlayerSide.PlayerId === playerId);
+            })
+            .catch((error: mongodb.MongoError) => {
+                console.log(chalk.red("error looking for specified match with specified player"));
+                throw new Error("error looking for specified match with specified player");
+            });
     }
 
     private getPlayables(userId: mongoose.Types.ObjectId) {
@@ -404,7 +459,7 @@ export default class GameRoutes extends RoutesBase {
                             playables.PlayingMatch = {
                                 Id: playingMatch._id.toHexString(),
                                 //Settings: playingMatch.Settings.
-                            } as DTOs.IPlayingMatchDto;
+                            } as DTOs.IMatchSnapshotDto;
                         }
                         playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatch == null);
 

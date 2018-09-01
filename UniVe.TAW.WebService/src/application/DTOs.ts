@@ -1,5 +1,6 @@
 import * as enums from "../infrastructure/identity";
 import * as game from "../infrastructure/game";
+import * as game_client from "../infrastructure/game.client";
 
 export interface ISignupRequestDto {
     Username: string;
@@ -45,10 +46,20 @@ export interface IMatchDto {
     Settings: game.IMatchSettings;
 }
 
-export interface IPlayingMatchDto {
-    Id: string;
-    Enemy: IUserDto;
+export interface IMatchConfigStatus {
+    IsConfigNeeded: boolean;
     Settings: game.IMatchSettings;
+}
+
+export interface IMatchSnapshotDto {
+    Id: string;
+    Settings: game.IMatchSettings;
+    IsConfigNeeded: boolean;
+    OwnField: ReadonlyArray<game_client.IOwnBattleFieldCell>;
+    Enemy: IUserDto;
+    EnemyField: ReadonlyArray<game_client.IEnemyBattleFieldCell>;
+    IsOwnTurn: boolean;
+    IsEnemyTurn: boolean;
 }
 
 export interface IJoinableMatchDto {
@@ -70,7 +81,7 @@ export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
 export interface IPlayablesDto {
     CanCreateMatch: boolean;
     PendingMatchId: string;
-    PlayingMatch: IPlayingMatchDto;
+    PlayingMatch: IMatchSnapshotDto;
     JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
 }
 

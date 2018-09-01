@@ -23,7 +23,7 @@ export interface IMongooseMatch extends mongoose.Document {
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     // readonly ActionsHistory: game.MatchAction[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
-    configFleet: (playerId: mongoose.Types.ObjectId, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
+    configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     executeAction: (playerId: mongoose.Types.ObjectId, actionCode: game.MatchActionCode) => void,
     //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
     getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,
@@ -133,8 +133,8 @@ matchSchema.methods.getOwnerMatchPlayerSide = function (
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId == playerId) ? this.FirstPlayerSide : this.SecondPlayerSide;
-    if (playersSide.PlayerId != playerId)
+    const playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.FirstPlayerSide : this.SecondPlayerSide;
+    if (!playersSide.PlayerId.equals(playerId))
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return playersSide;
 };
@@ -145,27 +145,28 @@ matchSchema.methods.getEnemyMatchPlayerSide = function (
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const enemySide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId == playerId) ? this.SecondPlayerSide : this.FirstPlayerSide;
-    if (this.SecondPlayerSide.PlayerId != playerId)
+    const enemySide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.SecondPlayerSide : this.FirstPlayerSide;
+    if (!this.SecondPlayerSide.PlayerId.equals(playerId))
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return enemySide;
 };
 matchSchema.methods.configFleet = function (
     this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId,
-    fleetConfig: ShipPlacement.IMongooseShipPlacement[]): void {
+    shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean {
 
     const sideToConfig = this.getOwnerMatchPlayerSide(playerId);
     // TODO: check settings compliance
-    if (fleetConfig == null || fleetConfig.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
+    if (shipPlacements == null || shipPlacements.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
-    sideToConfig.configFleet(this.Settings as MatchSettings.IMongooseMatchSettings, fleetConfig);
 
-    if (this.FirstPlayerSide.FleetConfig != null
-        && this.SecondPlayerSide.FleetConfig != null) {
+    const wasFleetConfigSuccessful = sideToConfig.configFleet(this.Settings as MatchSettings.IMongooseMatchSettings, shipPlacements);
+    if (wasFleetConfigSuccessful) {
         // TODO: set random starting player, then StartDateTime
         this.StartDateTime = new Date();
     }
+
+    return wasFleetConfigSuccessful;
 };
 matchSchema.methods.executeAction = function (
     this: IMongooseMatch,

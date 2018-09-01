@@ -44,4 +44,6 @@ testem.log
 Thumbs.db
 
 # custom
-data/db
+/data/db/*
+/src/**/*.js
+/src/**/*.map.js

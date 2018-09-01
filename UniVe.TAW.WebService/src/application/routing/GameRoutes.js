@@ -292,10 +292,56 @@ var GameRoutes = /** @class */ (function (_super) {
                     .json(responseData);
             });
         });
-        _this._router.post("/:" + RoutingParamKeys_1.default.MatchId, _this._jwtValidator, function () {
+        _this._router.post("/:" + RoutingParamKeys_1.default.MatchId + "/config", _this._jwtValidator, function (request, response) {
+            var responseData = null;
+            var userJWTData = request.user;
+            var userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+            var matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys_1.default.MatchId]);
+            Match.getModel()
+                .findById(matchObjectId)
+                .then(function (match) {
+                if (!match) {
+                    responseData = new net.HttpMessage(false, "Could not find requested match");
+                    response.status(httpStatusCodes.NOT_FOUND).json(responseData);
+                    return;
+                }
+                else if (!match.FirstPlayerSide.PlayerId.equals(userObjectId) && !match.SecondPlayerSide.PlayerId.equals(userObjectId)) {
+                    responseData = new net.HttpMessage(false, "You are not authorized to intervene in this match");
+                    response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                    return;
+                }
+                var wasConfigSuccessful = match.configFleet(userObjectId, request.body);
+                if (wasConfigSuccessful) {
+                    responseData = new net.HttpMessage(wasConfigSuccessful);
+                    response.status(httpStatusCodes.OK).json(responseData);
+                }
+                else {
+                    responseData = new net.HttpMessage(wasConfigSuccessful, "Match is already configured and cannot be changed");
+                    response.status(httpStatusCodes.LOCKED).json(responseData);
+                }
+            })
+                .catch(function (error) {
+                var msg = "error looking for specified match with specified player";
+                console.log(chalk_1.default.red(msg));
+                //throw new Error("error looking for specified match with specified player");
+                responseData = new net.HttpMessage(false, msg);
+                response.status(httpStatusCodes.OK).json(responseData);
+            });
         });
         return _this;
     }
+    GameRoutes.prototype.getCanUserInterveneInMatch = function (playerId, matchId) {
+        if (playerId == null || matchId == null)
+            throw new Error("playerId & matchId cannot be null");
+        return Match.getModel().findById(matchId)
+            .then(function (match) {
+            return match && (match.FirstPlayerSide.PlayerId === playerId || match.SecondPlayerSide.PlayerId === playerId);
+        })
+            .catch(function (error) {
+            console.log(chalk_1.default.red("error looking for specified match with specified player"));
+            throw new Error("error looking for specified match with specified player");
+        });
+    };
     GameRoutes.prototype.getPlayables = function (userId) {
         var _this = this;
         var playables = {};

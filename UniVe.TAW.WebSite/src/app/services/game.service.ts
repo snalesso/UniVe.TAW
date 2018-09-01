@@ -33,7 +33,7 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
   }
@@ -46,7 +46,7 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
@@ -59,7 +59,7 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<boolean>>(endPoint, null, options);
   }
@@ -72,7 +72,7 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<game.IMatchSettings>>(endPoint, options);
   }
@@ -85,34 +85,47 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
 
-  public configFleet(fleetConfig: game.ShipPlacement[]) {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/create";
+  // TODO: rename
+  public configMatchLineUp(matchId: string, fleetConfig: game.ShipPlacement[]) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/config";
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.post<net.HttpMessage<string>>(endPoint, fleetConfig, options);
+    return this._http.post<net.HttpMessage<boolean>>(endPoint, fleetConfig, options);
   }
 
-  // public getMatchInfo(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-  //   const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
-  //   const options = {
-  //     headers: new ng_http.HttpHeaders({
-  //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer ' + this.authService.Token
-  //     })
-  //   };
+  public getMatchConfigStatus(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
 
-  //   return this.http.get<net.HttpMessage<DTOs.IMatchDto>>(endPoint, options);
-  // }
+    return this._http.get<net.HttpMessage<DTOs.IMatchConfigStatus>>(endPoint, options);
+  }
+
+  public getMatchSnapshot(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.get<net.HttpMessage<DTOs.IMatchSnapshotDto>>(endPoint, options);
+  }
 
 }

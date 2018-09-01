@@ -21,11 +21,14 @@ export class EnemyFieldComponent implements OnInit {
   private readonly _matchId: string;
 
   constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly gameService: GameService) {
-    //this._matchId = this.route.para
+    private readonly _router: Router,
+    private readonly _activatedRoute: ActivatedRoute,
+    private readonly _gameService: GameService) {
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
   }
+
+  private _isEnabled: boolean = false;
+  public get IsEnabled(): boolean { return this._isEnabled; }
 
   private _settings: game.IMatchSettings;
   public get Settings(): game.IMatchSettings { return this._settings; }
@@ -37,7 +40,7 @@ export class EnemyFieldComponent implements OnInit {
   public get CanFire(): boolean { return this._canFire; }
 
   private _fireResults: game_client.EnemyBattleFieldCellStatus[] = [
-    game_client.EnemyBattleFieldCellStatus.Hit,
+    game_client.EnemyBattleFieldCellStatus.HitShip,
     game_client.EnemyBattleFieldCellStatus.Water,
   ];
   public fire(cell: game_client.IEnemyBattleFieldCell) {

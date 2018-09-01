@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import 'jquery';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
-import * as DTOs from '../../../assets/imported/unive.taw.webservice/application/DTOs';
-import ServiceConstants from '../../services/ServiceConstants';
-import ViewsRoutingKeys from '../../views/ViewsRoutingKeys';
+import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
+import ServiceConstants from '../../../services/ServiceConstants';
+import ViewsRoutingKeys from '../../../ui/ViewsRoutingKeys';
 
 @Component({
   selector: 'app-header',

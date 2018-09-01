@@ -15,10 +15,10 @@ import * as game_client from '../../../../infrastructure/game.client';
 
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
-    FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
+    //FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
     BattleFieldCells: ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
     // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
-    configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, fleetConfig: ShipPlacement.IMongooseShipPlacement[]) => void,
+    configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
     receiveFire: (coord: Coord.IMongooseCoord) => boolean // returns true if something has been hit, false if water, exception if it was already hit
@@ -31,17 +31,17 @@ const matchPlayerSideSchema = new mongoose.Schema(
             ref: Constants.ModelsNames.User,
             required: true
         },
-        FleetConfig: {
-            type: [ShipPlacement.getSchema()],
-            // validate: {
-            //     validator: function validator(this: IMongooseMatchPlayerSide, value: ShipPlacement.IMongooseShipPlacement[]) {
-            //         return (this.FleetConfig == null // fleetconfig cannot be changed once set
-            //             && this.BattleFieldCells == null)
-            //             || (value != null // fleet config cannot be null
-            //                 && value.length > 0); // fleet config cannot be empty
-            //     }
-            // }
-        },
+        // FleetConfig: {
+        //     type: [ShipPlacement.getSchema()],
+        //     // validate: {
+        //     //     validator: function validator(this: IMongooseMatchPlayerSide, value: ShipPlacement.IMongooseShipPlacement[]) {
+        //     //         return (this.FleetConfig == null // fleetconfig cannot be changed once set
+        //     //             && this.BattleFieldCells == null)
+        //     //             || (value != null // fleet config cannot be null
+        //     //                 && value.length > 0); // fleet config cannot be empty
+        //     //     }
+        //     // }
+        // },
         BattleFieldCells: {
             type: [[ServerSideBattleFieldCell.getSchema()]],
             // validate: {
@@ -58,11 +58,14 @@ const matchPlayerSideSchema = new mongoose.Schema(
 matchPlayerSideSchema.methods.configFleet = function (
     this: IMongooseMatchPlayerSide,
     matchSettings: MatchSettings.IMongooseMatchSettings,
-    fleetConfig: ShipPlacement.IMongooseShipPlacement[]): void {
+    shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean {
 
-    // TODO: validate fleet config
+    if (this.BattleFieldCells != null) {
+        // TODO: consider throwing something
+        return false;
+    }
 
-    this.FleetConfig = fleetConfig;
+    //this.FleetConfig = fleetConfig;
     const bfCells = [];
 
     // create empty field
@@ -74,16 +77,19 @@ matchPlayerSideSchema.methods.configFleet = function (
     }
 
     // place ships
-    fleetConfig.forEach(sp => {
+    for (let sp of shipPlacements) {
         for (let i = 0; i < sp.Type; i++) {
             if (sp.Orientation == game.ShipOrientation.Horizontal)
                 bfCells[sp.Coord.X + i][sp.Coord.Y] = new game_server.ServerSideBattleFieldCell(sp.Type);
             else
                 bfCells[sp.Coord.X][sp.Coord.Y + i] = new game_server.ServerSideBattleFieldCell(sp.Type);
         }
-    });
+    }
 
+    // update it with definitive value so column validator can do its job
     this.BattleFieldCells = bfCells;
+
+    return this.BattleFieldCells != null;
 };
 matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: Coord.IMongooseCoord): boolean {
 

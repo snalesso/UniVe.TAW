@@ -1,20 +1,20 @@
 export default class RoutingHelper {
 
-    public static readonly PathChunksSep: string = "/";
-    public static readonly ArgKeysSep: string = RoutingHelper.PathChunksSep + ":";
+    // param is the key, arg is the value
 
-    public static buildRoutePath(pathChunks: string[], argKeys?: string[]): string {
-        if (!pathChunks || pathChunks.length <= 0)
+    public static readonly PathStepsSep: string = "/";
+    public static readonly ParamKeysSep: string = RoutingHelper.PathStepsSep + ":";
+
+    public static buildRoutePath(pathSteps: string[], paramKeys?: string[]): string {
+        if (!pathSteps || pathSteps.length <= 0)
             throw new Error("Invalid path chunks");
-        let path = pathChunks.join(RoutingHelper.ArgKeysSep);
-        let args = this.concatArgs(argKeys);
 
-        return path + this.concatArgs(argKeys);
+        return pathSteps.join(RoutingHelper.ParamKeysSep) + this.buildQueryString(paramKeys);
     }
 
-    public static concatArgs(argKeys: string[]): string {
-        if (!argKeys || argKeys.length <= 0)
+    public static buildQueryString(paramKeys: string[]): string {
+        if (!paramKeys || paramKeys.length <= 0)
             return "";
-        return RoutingHelper.ArgKeysSep + argKeys.join(RoutingHelper.ArgKeysSep)
+        return RoutingHelper.ParamKeysSep + paramKeys.join(RoutingHelper.ParamKeysSep)
     }
 }

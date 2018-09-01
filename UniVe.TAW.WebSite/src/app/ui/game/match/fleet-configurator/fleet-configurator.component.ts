@@ -1,4 +1,4 @@
-import { Component, OnInit, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
@@ -13,12 +13,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import * as httpStatusCodes from 'http-status-codes';
 import { AuthService } from '../../../../services/auth.service';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
+import { TouchSequence } from 'selenium-webdriver';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-fleet-configurator',
   templateUrl: './fleet-configurator.component.html',
   styleUrls: ['./fleet-configurator.component.css']
 })
+// TODO: rename to match-setup
 export class FleetConfiguratorComponent implements OnInit {
 
   private _shipPlacements: game.ShipPlacement[] = [];
@@ -28,8 +32,17 @@ export class FleetConfiguratorComponent implements OnInit {
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _gameService: GameService,
     private readonly _authService: AuthService) {
+
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
   }
+
+  private _whenIsEnabledChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  @Output()
+  public get WhenIsEnabledChanged(): Observable<boolean> { return this._whenIsEnabledChanged.asObservable(); }
+
+  // private _whenStatusChanged = new BehaviorSubject<string>(null);
+  // @Output()
+  // public get WhenStatusChanged(): Observable<string> { return this._whenStatusChanged.asObservable(); }
 
   private readonly _matchId: string;
   public get MatchId() { return this._matchId; }
@@ -40,10 +53,10 @@ export class FleetConfiguratorComponent implements OnInit {
   private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
   public get Cells() { return this._gridCells; }
 
-  private _canRandomize: boolean = true;
+  private _canRandomize: boolean = false;
   public get CanRandomize(): boolean { return this._canRandomize; }
 
-  private _canSubmitConfig: boolean = true;
+  private _canSubmitConfig: boolean = false;
   public get CanSubmitConfig(): boolean { return this._canSubmitConfig; }
 
   private cleanFieldGrid() {
@@ -69,6 +82,8 @@ export class FleetConfiguratorComponent implements OnInit {
   public randomizeFleet() {
 
     this._canRandomize = this._canSubmitConfig = false;
+
+    //this._whenStatusChanged.next("Randomizing ...");
 
     this.cleanFieldGrid();
 
@@ -100,7 +115,6 @@ export class FleetConfiguratorComponent implements OnInit {
       } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._settings));
 
       this._shipPlacements.push(rPlacement);
-      //this._gridCells[rPlacement.Coord.X][rPlacement.Coord.Y] = rPlacement;
     }
 
     // generates grid cells from ship placements
@@ -112,28 +126,46 @@ export class FleetConfiguratorComponent implements OnInit {
       }
     }
 
+    //this._whenStatusChanged.next("Randomization completed!");
+
     this._canRandomize = this._canSubmitConfig = true;
   }
 
-  public submitConfig(): void {
+  public submitMatchConfig(): void {
 
     this._canSubmitConfig = this._canRandomize = false;
 
     // TODO: handle no resposne
-    this._gameService.configFleet(this._shipPlacements)
-      .subscribe(response => {
-        if (response.HasError) {
-          console.log(response.ErrorMessage);
-          this._canSubmitConfig = this._canRandomize = true;
-        }
-        else if (!response.Content) {
-          console.log("The server returned a null matchId");
-          this._canSubmitConfig = this._canRandomize = true;
-        }
-        else {
-          throw new Error("Match creation/joining not implemented!");
-        }
-      });
+    this._gameService
+      .configMatchLineUp(this._matchId, this._shipPlacements)
+      .subscribe(
+        response => {
+          if (response.HasError) {
+            console.log(response.ErrorMessage);
+            this._canSubmitConfig = this._canRandomize = true;
+          }
+          else if (!response.Content) {
+            console.log("Match config failed");
+            this._canSubmitConfig = this._canRandomize = true;
+          }
+          else {
+            this._whenIsEnabledChanged.next(false);
+            this._whenIsEnabledChanged.complete();
+          }
+        },
+        (error: HttpErrorResponse) => {
+          switch (error.status) {
+
+            case httpStatusCodes.LOCKED:
+              console.log("Match config failed: config is locked");
+              this._whenIsEnabledChanged.next(false);
+              this._whenIsEnabledChanged.complete();
+              break;
+
+            default:
+              console.log("Unhandled response status code");
+          }
+        });
   }
 
   ngOnInit(): void {
@@ -144,6 +176,7 @@ export class FleetConfiguratorComponent implements OnInit {
   private getSettings(maxRetries: number = 1) {
 
     // TODO: handle no resposne
+    // TODO: get config info only, anche determine at ngOnInit if it's visible or not
     this._gameService
       .getNewMatchSettings()
       .subscribe(
@@ -160,6 +193,7 @@ export class FleetConfiguratorComponent implements OnInit {
             // const stas = response.Content.ShipTypeAvailabilities.map(staDto => new game.ShipTypeAvailability(staDto.ShipType, staDto.Count));
             // const sett = new game.MatchSettings(response.Content.BattleFieldWidth, response.Content.BattleFieldHeight, stas, response.Content.MinShipDistance);
             this._settings = response.Content;
+            this._whenIsEnabledChanged.next(true);
 
             this.randomizeFleet();
           }

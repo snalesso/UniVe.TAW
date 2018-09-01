@@ -1,7 +1,7 @@
-<div class="container-fluid">
+<div class="container-fluid" *ngIf="(WhenIsEnabledChanged | async)">
 
   <div class="row justify-content-center">
-    <h1>Choose your lineup!</h1>
+    <h1>Choose your line-up!</h1>
   </div>
 
   <div class="row justify-content-center">
@@ -18,7 +18,7 @@
           <tbody>
             <tr *ngFor="let row of Cells">
               <td class="bf-grid-cell" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="cell.ShipType > 0 ? 'bf-grid-cell-ship' : ''"
-                [style.padding-bottom]="100/Settings.BattleFieldSettings.BattleFieldWidth + '%'" *ngFor="let cell of row">
+                [style.padding-bottom]="100/Settings.BattleFieldWidth + '%'" *ngFor="let cell of row">
                 <!-- ({{col}},{{row}}) -->
               </td>
             </tr>
@@ -29,7 +29,7 @@
       <div class="row mt-2 justify-content-center">
         <!-- <div class="col-lg-12"> -->
         <button type="button" class="btn btn-primary mr-2" [disabled]="!CanRandomize" (click)="randomizeFleet()">Randomize!</button>
-        <button type="button" class="btn btn-success" (click)="submitConfig()">Play!</button>
+        <button type="button" class="btn btn-success" (click)="submitMatchConfig()">Play!</button>
         <!-- </div> -->
       </div>
 

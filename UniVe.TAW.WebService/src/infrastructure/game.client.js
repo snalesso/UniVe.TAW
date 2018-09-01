@@ -9,7 +9,8 @@ var EnemyBattleFieldCellStatus;
 (function (EnemyBattleFieldCellStatus) {
     EnemyBattleFieldCellStatus[EnemyBattleFieldCellStatus["Unknown"] = 0] = "Unknown";
     EnemyBattleFieldCellStatus[EnemyBattleFieldCellStatus["Water"] = 1] = "Water";
-    EnemyBattleFieldCellStatus[EnemyBattleFieldCellStatus["Hit"] = 2] = "Hit";
+    EnemyBattleFieldCellStatus[EnemyBattleFieldCellStatus["Ship"] = 2] = "Ship";
+    EnemyBattleFieldCellStatus[EnemyBattleFieldCellStatus["HitShip"] = 3] = "HitShip";
 })(EnemyBattleFieldCellStatus = exports.EnemyBattleFieldCellStatus || (exports.EnemyBattleFieldCellStatus = {}));
 // used to organize ships, generates the readonly battlefield side
 var BattleFieldConfigurator = /** @class */ (function () {

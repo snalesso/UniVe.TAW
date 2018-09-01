@@ -8,7 +8,8 @@ export enum OwnBattleFieldCellStatus {
 export enum EnemyBattleFieldCellStatus {
     Unknown,
     Water,
-    Hit
+    Ship,
+    HitShip
 }
 
 export interface IOwnBattleFieldCell {

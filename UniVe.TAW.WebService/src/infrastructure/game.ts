@@ -23,14 +23,14 @@ export enum ShipOrientation {
     Vertical
 }
 
-// export interface IShipPlacement {
-//     Type: ShipType;
-//     Coord: Coord;
-//     Orientation: ShipOrientation;
-// }
+export interface IShipPlacement {
+    Type: ShipType;
+    Coord: Coord;
+    Orientation: ShipOrientation;
+}
 
 /** 0 based coord */
-export class ShipPlacement {
+export class ShipPlacement implements IShipPlacement {
     constructor(
         public readonly Type: ShipType,
         public readonly Coord: Coord,

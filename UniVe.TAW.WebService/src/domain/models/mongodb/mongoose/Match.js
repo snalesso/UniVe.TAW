@@ -41,30 +41,30 @@ var matchSchema = new mongoose.Schema({
 matchSchema.methods.getOwnerMatchPlayerSide = function (playerId) {
     if (playerId == null)
         throw new Error("Invalid playerId");
-    var playersSide = (this.FirstPlayerSide.PlayerId == playerId) ? this.FirstPlayerSide : this.SecondPlayerSide;
-    if (playersSide.PlayerId != playerId)
+    var playersSide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.FirstPlayerSide : this.SecondPlayerSide;
+    if (!playersSide.PlayerId.equals(playerId))
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return playersSide;
 };
 matchSchema.methods.getEnemyMatchPlayerSide = function (playerId) {
     if (playerId == null)
         throw new Error("Invalid playerId");
-    var enemySide = (this.FirstPlayerSide.PlayerId == playerId) ? this.SecondPlayerSide : this.FirstPlayerSide;
-    if (this.SecondPlayerSide.PlayerId != playerId)
+    var enemySide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.SecondPlayerSide : this.FirstPlayerSide;
+    if (!this.SecondPlayerSide.PlayerId.equals(playerId))
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
     return enemySide;
 };
-matchSchema.methods.configFleet = function (playerId, fleetConfig) {
+matchSchema.methods.configFleet = function (playerId, shipPlacements) {
     var sideToConfig = this.getOwnerMatchPlayerSide(playerId);
     // TODO: check settings compliance
-    if (fleetConfig == null || fleetConfig.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
+    if (shipPlacements == null || shipPlacements.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
-    sideToConfig.configFleet(this.Settings, fleetConfig);
-    if (this.FirstPlayerSide.FleetConfig != null
-        && this.SecondPlayerSide.FleetConfig != null) {
+    var wasFleetConfigSuccessful = sideToConfig.configFleet(this.Settings, shipPlacements);
+    if (wasFleetConfigSuccessful) {
         // TODO: set random starting player, then StartDateTime
         this.StartDateTime = new Date();
     }
+    return wasFleetConfigSuccessful;
 };
 matchSchema.methods.executeAction = function (playerId, actionCode, coord) {
     // TODO: check the player is in this match
