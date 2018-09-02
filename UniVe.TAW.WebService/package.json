@@ -2,7 +2,7 @@
   "name": "unive.taw.webservice",
   "version": "0.0.0",
   "description": "UniVe.TAW.WebService",
-  "main": "src/Bootstrapper.ts",
+  "main": "src/application/Bootstrapper.ts",
   "author": {
     "name": "Sergio"
   },

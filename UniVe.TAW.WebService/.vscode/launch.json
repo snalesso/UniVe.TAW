@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch WebService",
-            "program": "${workspaceFolder}/src/Bootstrapper.ts",
+            "program": "${workspaceFolder}/src/application/Bootstrapper.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
