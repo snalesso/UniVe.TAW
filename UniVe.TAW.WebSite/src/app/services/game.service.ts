@@ -105,7 +105,7 @@ export class GameService {
   }
 
   public getMatchConfigStatus(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/ownConfigStatus";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -113,7 +113,9 @@ export class GameService {
       })
     };
 
-    return this._http.get<net.HttpMessage<DTOs.IMatchConfigStatus>>(endPoint, options);
+    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
+
+    return this._http.get<net.HttpMessage<DTOs.IOwnMatchSideConfigStatus>>(endPoint, options);
   }
 
   public getMatchSnapshot(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {

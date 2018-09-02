@@ -16,7 +16,7 @@ import * as game_client from '../../../../infrastructure/game.client';
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
     //FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
-    BattleFieldCells: ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
+    BattleFieldCells: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][], //ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
     // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
     configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
@@ -44,6 +44,7 @@ const matchPlayerSideSchema = new mongoose.Schema(
         // },
         BattleFieldCells: {
             type: [[ServerSideBattleFieldCell.getSchema()]],
+            default: null,
             // validate: {
             //     validator: function (this: IMongooseMatchPlayerSide, value: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][]) {
             //         return this.FleetConfig == null // fleetconfig must have been set
@@ -60,13 +61,14 @@ matchPlayerSideSchema.methods.configFleet = function (
     matchSettings: MatchSettings.IMongooseMatchSettings,
     shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean {
 
-    if (this.BattleFieldCells != null) {
+    // even tho default is null, at runtime it's never null, so we check if there are cells inside the array
+    if (this.BattleFieldCells.length > 0) {
         // TODO: consider throwing something
         return false;
     }
 
     //this.FleetConfig = fleetConfig;
-    const bfCells = [];
+    const bfCells: game_server.ServerSideBattleFieldCell[][] = [];
 
     // create empty field
     for (let x = 0; x < matchSettings.BattleFieldWidth; x++) {
@@ -86,10 +88,17 @@ matchPlayerSideSchema.methods.configFleet = function (
         }
     }
 
-    // update it with definitive value so column validator can do its job
-    this.BattleFieldCells = bfCells;
+    //    this.BattleFieldCells = bfCells as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][];
+    for (let x = 0; x < bfCells.length; x++) {
+        this.BattleFieldCells[x] = [];
+        for (let y = 0; y < bfCells[x].length; y++) {
+            this.BattleFieldCells[x][y] = bfCells[x][y] as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell;
+        }
+    }
 
-    return this.BattleFieldCells != null;
+    // this.markModified("BattleFieldCells");
+
+    return this.BattleFieldCells.length == matchSettings.BattleFieldWidth;
 };
 matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: Coord.IMongooseCoord): boolean {
 

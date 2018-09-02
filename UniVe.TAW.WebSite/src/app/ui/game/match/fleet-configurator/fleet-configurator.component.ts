@@ -45,10 +45,10 @@ export class FleetConfiguratorComponent implements OnInit {
   // public get WhenStatusChanged(): Observable<string> { return this._whenStatusChanged.asObservable(); }
 
   private readonly _matchId: string;
-  public get MatchId() { return this._matchId; }
+  //public get MatchId() { return this._matchId; }
 
-  private _settings: game.IMatchSettings;
-  public get Settings(): game.IMatchSettings { return this._settings; }
+  private _ownMatchSideConfigStatus: DTOs.IOwnMatchSideConfigStatus;
+  public get OwnMatchSideConfigStatus(): DTOs.IOwnMatchSideConfigStatus { return this._ownMatchSideConfigStatus; }
 
   private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
   public get Cells() { return this._gridCells; }
@@ -61,10 +61,10 @@ export class FleetConfiguratorComponent implements OnInit {
 
   private cleanFieldGrid() {
     if (this._gridCells == null) {
-      this._gridCells = new Array(this._settings.BattleFieldWidth);
-      for (let x = 0; x < this._settings.BattleFieldWidth; x++) {
-        this._gridCells[x] = new Array(this._settings.BattleFieldHeight);
-        for (let y = 0; y < this._settings.BattleFieldHeight; y++) {
+      this._gridCells = new Array(this._ownMatchSideConfigStatus.Settings.BattleFieldWidth);
+      for (let x = 0; x < this._ownMatchSideConfigStatus.Settings.BattleFieldWidth; x++) {
+        this._gridCells[x] = new Array(this._ownMatchSideConfigStatus.Settings.BattleFieldHeight);
+        for (let y = 0; y < this._ownMatchSideConfigStatus.Settings.BattleFieldHeight; y++) {
           this._gridCells[x][y] = { Coord: new game.Coord(x, y), ShipType: game.ShipType.NoShip };
         }
       }
@@ -94,7 +94,7 @@ export class FleetConfiguratorComponent implements OnInit {
     let rOrient: game.ShipOrientation;
     let rPlacement: game.ShipPlacement;
 
-    for (let avShip of this._settings.ShipTypeAvailabilities) {
+    for (let avShip of this._ownMatchSideConfigStatus.Settings.ShipTypeAvailabilities) {
       for (let i = 0; i < avShip.Count; i++) {
         sortedShipsTypesToPlace.push(avShip.ShipType);
       }
@@ -106,13 +106,13 @@ export class FleetConfiguratorComponent implements OnInit {
       do {
         rOrient = utils.getRandomBoolean() ? game.ShipOrientation.Vertical : game.ShipOrientation.Horizontal;
         do {
-          rx = utils.getRandomInt(0, this._settings.BattleFieldWidth - (rOrient == game.ShipOrientation.Horizontal ? shipTypeToPlace : 1));
-          ry = utils.getRandomInt(0, this._settings.BattleFieldHeight - (rOrient == game.ShipOrientation.Vertical ? shipTypeToPlace : 1));
+          rx = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldWidth - (rOrient == game.ShipOrientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldHeight - (rOrient == game.ShipOrientation.Vertical ? shipTypeToPlace : 1));
         } while (this._gridCells[rx][ry].ShipType != game.ShipType.NoShip);
 
         rPlacement = new game.ShipPlacement(shipTypeToPlace, new game.Coord(rx, ry), rOrient);
 
-      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._settings));
+      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._ownMatchSideConfigStatus.Settings));
 
       this._shipPlacements.push(rPlacement);
     }
@@ -170,15 +170,15 @@ export class FleetConfiguratorComponent implements OnInit {
 
   ngOnInit(): void {
     // console.log("ngOnInit");
-    this.getSettings();
+    this.getMatchConfigStatus();
   }
 
-  private getSettings(maxRetries: number = 1) {
+  private getMatchConfigStatus(maxRetries: number = 1) {
 
     // TODO: handle no resposne
     // TODO: get config info only, anche determine at ngOnInit if it's visible or not
     this._gameService
-      .getNewMatchSettings()
+      .getMatchConfigStatus(this._matchId)
       .subscribe(
         (response) => {
           if (response.HasError) {
@@ -190,12 +190,14 @@ export class FleetConfiguratorComponent implements OnInit {
             console.log("The server returned a null match dto!");
           }
           else {
-            // const stas = response.Content.ShipTypeAvailabilities.map(staDto => new game.ShipTypeAvailability(staDto.ShipType, staDto.Count));
-            // const sett = new game.MatchSettings(response.Content.BattleFieldWidth, response.Content.BattleFieldHeight, stas, response.Content.MinShipDistance);
-            this._settings = response.Content;
-            this._whenIsEnabledChanged.next(true);
+            this._ownMatchSideConfigStatus = response.Content;
 
-            this.randomizeFleet();
+            this._whenIsEnabledChanged.next(this.OwnMatchSideConfigStatus.IsConfigNeeded);
+
+            if (!this.OwnMatchSideConfigStatus.IsConfigNeeded)
+              this._whenIsEnabledChanged.complete();
+            else
+              this.randomizeFleet();
           }
         },
         (error: HttpErrorResponse) => {

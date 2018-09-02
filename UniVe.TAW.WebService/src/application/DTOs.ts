@@ -46,7 +46,7 @@ export interface IMatchDto {
     Settings: game.IMatchSettings;
 }
 
-export interface IMatchConfigStatus {
+export interface IOwnMatchSideConfigStatus {
     IsConfigNeeded: boolean;
     Settings: game.IMatchSettings;
 }

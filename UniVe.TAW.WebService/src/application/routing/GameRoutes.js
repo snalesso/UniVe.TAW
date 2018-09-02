@@ -184,7 +184,7 @@ var GameRoutes = /** @class */ (function (_super) {
                 var jwtUser = request.user;
                 var jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
                 // ensure the pending match is not trying to be joined by the same player who created it
-                if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
+                if (pendingMatch.PlayerId.equals(jwtUserObjectId)) {
                     responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
                     response
                         .status(httpStatusCodes.FORBIDDEN)
@@ -250,15 +250,19 @@ var GameRoutes = /** @class */ (function (_super) {
                     .json(responseData);
             });
         });
-        // TODO: complete, check everything workd as expected 
-        _this._router.get("/newMatchSettings", _this._jwtValidator, function (request, response) {
-            var dnms = null; // new game.MatchSettings();
-            var responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
-            response
-                //.type("application/json")
-                .status(httpStatusCodes.OK)
-                .send(responseData);
-        });
+        // // TODO: complete, check everything workd as expected 
+        // this._router.get(
+        //     "/newMatchSettings",
+        //     this._jwtValidator,
+        //     (request: express.Request, response: express.Response) => {
+        //         const dnms = null; // new game.MatchSettings();
+        //         const responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
+        //         response
+        //             //.type("application/json")
+        //             .status(httpStatusCodes.OK)
+        //             .send(responseData);
+        //     }
+        // );
         _this._router.get("/:" + RoutingParamKeys_1.default.MatchId, _this._jwtValidator, function (request, response) {
             var responseData = null;
             var matchId = request.params[RoutingParamKeys_1.default.MatchId];
@@ -292,6 +296,47 @@ var GameRoutes = /** @class */ (function (_super) {
                     .json(responseData);
             });
         });
+        _this._router.get("/:" + RoutingParamKeys_1.default.MatchId + "/ownConfigStatus", _this._jwtValidator, function (request, response) {
+            var responseData = null;
+            var userJWTData = request.user;
+            var userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+            var matchHexId = request.params[RoutingParamKeys_1.default.MatchId];
+            var matchObjectId = new mongoose.Types.ObjectId(matchHexId);
+            Match.getModel()
+                .findById(matchObjectId)
+                .then(function (match) {
+                if (!match) {
+                    responseData = new net.HttpMessage(null, "Could not find requested match");
+                    response.status(httpStatusCodes.NOT_FOUND).json(responseData);
+                    return;
+                }
+                var ownSide = match.getOwnerMatchPlayerSide(userObjectId);
+                if (ownSide) {
+                    var ownMatchSideConfigStatusDto = {
+                        IsConfigNeeded: ownSide.BattleFieldCells.length < match.Settings.BattleFieldWidth,
+                        Settings: {
+                            BattleFieldWidth: match.Settings.BattleFieldWidth,
+                            BattleFieldHeight: match.Settings.BattleFieldHeight,
+                            MinShipsDistance: match.Settings.MinShipsDistance,
+                            ShipTypeAvailabilities: match.Settings.AvailableShips.map(function (as) { return ({ ShipType: as.ShipType, Count: as.Count }); })
+                        }
+                    };
+                    responseData = new net.HttpMessage(ownMatchSideConfigStatusDto);
+                    response.status(httpStatusCodes.OK).json(responseData);
+                }
+                else {
+                    responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
+                    response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                }
+            })
+                .catch(function (error) {
+                var msg = "error looking for specified match";
+                console.log(chalk_1.default.red(msg));
+                //throw new Error("error looking for specified match with specified player");
+                responseData = new net.HttpMessage(null, msg);
+                response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+            });
+        });
         _this._router.post("/:" + RoutingParamKeys_1.default.MatchId + "/config", _this._jwtValidator, function (request, response) {
             var responseData = null;
             var userJWTData = request.user;
@@ -311,13 +356,14 @@ var GameRoutes = /** @class */ (function (_super) {
                     return;
                 }
                 var wasConfigSuccessful = match.configFleet(userObjectId, request.body);
+                match.save();
                 if (wasConfigSuccessful) {
                     responseData = new net.HttpMessage(wasConfigSuccessful);
                     response.status(httpStatusCodes.OK).json(responseData);
                 }
                 else {
                     responseData = new net.HttpMessage(wasConfigSuccessful, "Match is already configured and cannot be changed");
-                    response.status(httpStatusCodes.LOCKED).json(responseData);
+                    response.status(httpStatusCodes.LOCKED).json(responseData); // TODO: return info instead of http error response
                 }
             })
                 .catch(function (error) {
@@ -345,6 +391,16 @@ var GameRoutes = /** @class */ (function (_super) {
     GameRoutes.prototype.getPlayables = function (userId) {
         var _this = this;
         var playables = {};
+        // Match.getModel().find().then(matches => {
+        //     const x = matches.map(m => {
+        //         return {
+        //             matchId: m._id,
+        //             first: m.FirstPlayerSide.PlayerId,
+        //             second: m.SecondPlayerSide.PlayerId,
+        //             cazzo: m.FirstPlayerSide.PlayerId.equals(userId) || m.SecondPlayerSide.PlayerId.equals(userId)
+        //         };
+        //     });
+        // });
         return this.getUsersPendingMatch(userId)
             .then(function (pendingMatch) {
             if (pendingMatch) {
@@ -396,15 +452,18 @@ var GameRoutes = /** @class */ (function (_super) {
         });
     };
     GameRoutes.prototype.getUsersPlayingMatch = function (userId) {
-        var matchCriteria1 = {};
-        matchCriteria1.FirstPlayerSide = {};
-        matchCriteria1.FirstPlayerSide.PlayerId = userId;
-        var matchCriteria2 = {};
-        matchCriteria2.SecondPlayerSide = {};
-        matchCriteria2.SecondPlayerSide.PlayerId = userId;
+        var matchCriteria1 = {
+            FirstPlayerSide: {
+                PlayerId: userId
+            }
+        };
+        var matchCriteria2 = {
+            SecondPlayerSide: {
+                PlayerId: userId
+            }
+        };
         return Match.getModel()
-            // TODO: fix OR in criteria
-            .findOne({ $or: [matchCriteria1, matchCriteria2] })
+            .findOne({ $or: [{ "FirstPlayerSide.PlayerId": userId }, { "SecondPlayerSide.PlayerId": userId }] })
             // .populate("InActionPlayerId")
             // .populate("FirstPlayerSide.PlayerId")
             // .populate("SecondPlayerSide.PlayerId")
@@ -431,8 +490,9 @@ var GameRoutes = /** @class */ (function (_super) {
         });
     };
     GameRoutes.prototype.getUsersPendingMatch = function (userId) {
-        var criteria = {};
-        criteria.PlayerId = userId;
+        var criteria = {
+            PlayerId: userId
+        };
         return PendingMatch.getModel()
             .findOne(criteria)
             .then(function (pendingMatch) {
@@ -444,26 +504,15 @@ var GameRoutes = /** @class */ (function (_super) {
             throw new Error("WTF");
         });
     };
+    // TODO: review if it works with id filtering
     GameRoutes.prototype.hasOpenMatches = function (userId) {
-        var pendingMatchCriteria = {};
-        pendingMatchCriteria.PlayerId = userId;
-        return PendingMatch
-            .getModel()
-            // ensure the user has no pending matches opened
-            .findOne(pendingMatchCriteria)
+        var _this = this;
+        var pendingMatchCriteria = { PlayerId: userId };
+        return this.getUsersPendingMatch(userId)
             .then(function (existingPendingMatch) {
-            if (existingPendingMatch) {
+            if (existingPendingMatch)
                 return true;
-            }
-            // ensure the user isn't already playing
-            var matchCriteria1 = {};
-            matchCriteria1.FirstPlayerSide = {};
-            matchCriteria1.FirstPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
-            var matchCriteria2 = {};
-            matchCriteria2.SecondPlayerSide = {};
-            matchCriteria2.SecondPlayerSide.PlayerId = pendingMatchCriteria.PlayerId;
-            return Match.getModel()
-                .findOne({ $or: [matchCriteria1, matchCriteria2] })
+            return _this.getUsersPlayingMatch(userId)
                 .then(function (existingMatch) {
                 return existingMatch != null;
             })

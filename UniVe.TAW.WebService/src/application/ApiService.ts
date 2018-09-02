@@ -12,6 +12,8 @@ import AuthRoutes from './routing/AuthRoutes';
 import UsersRoutes from './routing/UsersRoutes';
 import GameRoutes from './routing/GameRoutes';
 
+import * as Match from '../domain/models/mongodb/mongoose/Match';
+
 import * as net from '../infrastructure/net';
 
 // TODO: rename into WebService?
@@ -72,6 +74,18 @@ export default class ApiService {
             .then(
                 () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
+
+                    console.log("deleting all matches ...");
+
+                    Match.getModel().find().then(matches => {
+
+                        for (let m of matches) {
+                            m.remove();
+                            console.log("deleted (id: " + m._id.toHexString() + ")");
+                        }
+                    }).catch(error => { console.log("error deleting match") });
+
+                    console.log("all matches deleted");
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

@@ -242,7 +242,7 @@ export default class GameRoutes extends RoutesBase {
                         const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
                         // ensure the pending match is not trying to be joined by the same player who created it
-                        if (pendingMatch.PlayerId.toHexString() === jwtUser.Id) {
+                        if (pendingMatch.PlayerId.equals(jwtUserObjectId)) {
                             responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
                             response
                                 .status(httpStatusCodes.FORBIDDEN)
@@ -321,21 +321,21 @@ export default class GameRoutes extends RoutesBase {
             }
         );
 
-        // TODO: complete, check everything workd as expected 
-        this._router.get(
-            "/newMatchSettings",
-            this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
+        // // TODO: complete, check everything workd as expected 
+        // this._router.get(
+        //     "/newMatchSettings",
+        //     this._jwtValidator,
+        //     (request: express.Request, response: express.Response) => {
 
-                const dnms = null; // new game.MatchSettings();
-                const responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
+        //         const dnms = null; // new game.MatchSettings();
+        //         const responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
 
-                response
-                    //.type("application/json")
-                    .status(httpStatusCodes.OK)
-                    .send(responseData);
-            }
-        );
+        //         response
+        //             //.type("application/json")
+        //             .status(httpStatusCodes.OK)
+        //             .send(responseData);
+        //     }
+        // );
 
         this._router.get(
             "/:" + RoutingParamKeys.MatchId,
@@ -379,6 +379,58 @@ export default class GameRoutes extends RoutesBase {
             }
         );
 
+        this._router.get(
+            "/:" + RoutingParamKeys.MatchId + "/ownConfigStatus",
+            this._jwtValidator,
+            (request: express.Request, response: express.Response) => {
+
+                let responseData: net.HttpMessage<DTOs.IOwnMatchSideConfigStatus> = null;
+
+                const userJWTData = (request.user as DTOs.IUserJWTData);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const matchHexId = request.params[RoutingParamKeys.MatchId];
+                const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
+
+                Match.getModel()
+                    .findById(matchObjectId)
+                    .then(match => {
+
+                        if (!match) {
+                            responseData = new net.HttpMessage(null, "Could not find requested match");
+                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
+                            return;
+                        }
+
+                        const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
+
+                        if (ownSide) {
+                            const ownMatchSideConfigStatusDto = {
+                                IsConfigNeeded: ownSide.BattleFieldCells.length < match.Settings.BattleFieldWidth,
+                                Settings: {
+                                    BattleFieldWidth: match.Settings.BattleFieldWidth,
+                                    BattleFieldHeight: match.Settings.BattleFieldHeight,
+                                    MinShipsDistance: match.Settings.MinShipsDistance,
+                                    ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
+                                } as game.IMatchSettings
+                            } as DTOs.IOwnMatchSideConfigStatus;
+
+                            responseData = new net.HttpMessage(ownMatchSideConfigStatusDto);
+                            response.status(httpStatusCodes.OK).json(responseData);
+                        }
+                        else {
+                            responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
+                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                        }
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        const msg = "error looking for specified match";
+                        console.log(chalk.red(msg));
+                        //throw new Error("error looking for specified match with specified player");
+                        responseData = new net.HttpMessage(null, msg);
+                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                    })
+            });
+
         this._router.post(
             "/:" + RoutingParamKeys.MatchId + "/config",
             this._jwtValidator,
@@ -395,17 +447,18 @@ export default class GameRoutes extends RoutesBase {
                     .then(match => {
 
                         if (!match) {
-                            responseData = new net.HttpMessage<boolean>(false, "Could not find requested match");
+                            responseData = new net.HttpMessage(false, "Could not find requested match");
                             response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                             return;
                         }
                         else if (!match.FirstPlayerSide.PlayerId.equals(userObjectId) && !match.SecondPlayerSide.PlayerId.equals(userObjectId)) {
-                            responseData = new net.HttpMessage<boolean>(false, "You are not authorized to intervene in this match");
+                            responseData = new net.HttpMessage(false, "You are not authorized to intervene in this match");
                             response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                             return;
                         }
 
                         const wasConfigSuccessful = match.configFleet(userObjectId, request.body as IMongooseShipPlacement[]);
+                        match.save();
 
                         if (wasConfigSuccessful) {
                             responseData = new net.HttpMessage(wasConfigSuccessful);
@@ -422,7 +475,7 @@ export default class GameRoutes extends RoutesBase {
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(false, msg);
                         response.status(httpStatusCodes.OK).json(responseData);
-                    })
+                    });
             }
         );
 
@@ -446,6 +499,17 @@ export default class GameRoutes extends RoutesBase {
 
         const playables = {} as DTOs.IPlayablesDto;
 
+        // Match.getModel().find().then(matches => {
+        //     const x = matches.map(m => {
+        //         return {
+        //             matchId: m._id,
+        //             first: m.FirstPlayerSide.PlayerId,
+        //             second: m.SecondPlayerSide.PlayerId,
+        //             cazzo: m.FirstPlayerSide.PlayerId.equals(userId) || m.SecondPlayerSide.PlayerId.equals(userId)
+        //         };
+        //     });
+        // });
+
         return this.getUsersPendingMatch(userId)
             .then(pendingMatch => {
 
@@ -455,6 +519,7 @@ export default class GameRoutes extends RoutesBase {
 
                 return this.getUsersPlayingMatch(userId)
                     .then(playingMatch => {
+
                         if (playingMatch != null) {
                             playables.PlayingMatch = {
                                 Id: playingMatch._id.toHexString(),
@@ -472,6 +537,7 @@ export default class GameRoutes extends RoutesBase {
                             .find({ PlayerId: { $ne: userId } })
                             .populate({ path: "PlayerId", model: User.getModel() })
                             .then(joinableMatches => {
+
                                 playables.JoinableMatches = joinableMatches.map(jm => {
 
                                     const creator = jm.PlayerId as any as User.IMongooseUser;
@@ -506,17 +572,19 @@ export default class GameRoutes extends RoutesBase {
 
     private getUsersPlayingMatch(userId: mongoose.Types.ObjectId) {
 
-        const matchCriteria1 = {} as utils.Mutable<Match.IMongooseMatch>;
-        (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-        (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = userId;
-
-        const matchCriteria2 = {} as utils.Mutable<Match.IMongooseMatch>;
-        (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-        (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = userId;
+        const matchCriteria1 = {
+            FirstPlayerSide: {
+                PlayerId: userId
+            }
+        } as utils.Mutable<Match.IMongooseMatch>;
+        const matchCriteria2 = {
+            SecondPlayerSide: {
+                PlayerId: userId
+            }
+        } as utils.Mutable<Match.IMongooseMatch>;
 
         return Match.getModel()
-            // TODO: fix OR in criteria
-            .findOne({ $or: [matchCriteria1, matchCriteria2] })
+            .findOne({ $or: [{ "FirstPlayerSide.PlayerId": userId }, { "SecondPlayerSide.PlayerId": userId }] })
             // .populate("InActionPlayerId")
             // .populate("FirstPlayerSide.PlayerId")
             // .populate("SecondPlayerSide.PlayerId")
@@ -552,8 +620,9 @@ export default class GameRoutes extends RoutesBase {
 
     private getUsersPendingMatch(userId: mongoose.Types.ObjectId) {
 
-        const criteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-        criteria.PlayerId = userId;
+        const criteria = {
+            PlayerId: userId
+        } as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
 
         return PendingMatch.getModel()
             .findOne(criteria)
@@ -567,32 +636,18 @@ export default class GameRoutes extends RoutesBase {
             });
     }
 
+    // TODO: review if it works with id filtering
     private hasOpenMatches(userId: mongoose.Types.ObjectId): Promise<boolean> {
 
-        const pendingMatchCriteria = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-        pendingMatchCriteria.PlayerId = userId;
+        const pendingMatchCriteria = { PlayerId: userId } as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
 
-        return PendingMatch
-            .getModel()
-            // ensure the user has no pending matches opened
-            .findOne(pendingMatchCriteria)
+        return this.getUsersPendingMatch(userId)
             .then((existingPendingMatch) => {
 
-                if (existingPendingMatch) {
+                if (existingPendingMatch)
                     return true;
-                }
 
-                // ensure the user isn't already playing
-                const matchCriteria1 = {} as utils.Mutable<Match.IMongooseMatch>;
-                (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                (matchCriteria1.FirstPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatchCriteria.PlayerId;
-
-                const matchCriteria2 = {} as utils.Mutable<Match.IMongooseMatch>;
-                (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>) = {} as utils.Mutable<PendingMatch.IMongoosePendingMatch>;
-                (matchCriteria2.SecondPlayerSide as utils.Mutable<PendingMatch.IMongoosePendingMatch>).PlayerId = pendingMatchCriteria.PlayerId;
-
-                return Match.getModel()
-                    .findOne({ $or: [matchCriteria1, matchCriteria2] })
+                return this.getUsersPlayingMatch(userId)
                     .then((existingMatch) => {
                         return existingMatch != null;
                     })

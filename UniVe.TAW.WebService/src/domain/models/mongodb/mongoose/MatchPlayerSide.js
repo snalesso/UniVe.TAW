@@ -24,12 +24,14 @@ var matchPlayerSideSchema = new mongoose.Schema({
     // },
     BattleFieldCells: {
         type: [[ServerSideBattleFieldCell.getSchema()]],
+        default: null,
     }
 }, {
     id: false
 });
 matchPlayerSideSchema.methods.configFleet = function (matchSettings, shipPlacements) {
-    if (this.BattleFieldCells != null) {
+    // even tho default is null, at runtime it's never null, so we check if there are cells inside the array
+    if (this.BattleFieldCells.length > 0) {
         // TODO: consider throwing something
         return false;
     }
@@ -52,9 +54,15 @@ matchPlayerSideSchema.methods.configFleet = function (matchSettings, shipPlaceme
                 bfCells[sp.Coord.X][sp.Coord.Y + i] = new game_server.ServerSideBattleFieldCell(sp.Type);
         }
     }
-    // update it with definitive value so column validator can do its job
-    this.BattleFieldCells = bfCells;
-    return this.BattleFieldCells != null;
+    //    this.BattleFieldCells = bfCells as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][];
+    for (var x = 0; x < bfCells.length; x++) {
+        this.BattleFieldCells[x] = [];
+        for (var y = 0; y < bfCells[x].length; y++) {
+            this.BattleFieldCells[x][y] = bfCells[x][y];
+        }
+    }
+    // this.markModified("BattleFieldCells");
+    return this.BattleFieldCells.length == matchSettings.BattleFieldWidth;
 };
 matchPlayerSideSchema.methods.receiveFire = function (coord) {
     var cellStatus = this.BattleFieldCells[coord.X][coord.Y];

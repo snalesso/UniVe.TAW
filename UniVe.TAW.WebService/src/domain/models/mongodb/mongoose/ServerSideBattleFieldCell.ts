@@ -12,7 +12,7 @@ const serverSideBattleFieldCellSchema = new mongoose.Schema(
             type: game.ShipType
         },
         FireReceivedDateTime: {
-            required: true,
+            required: false,
             type: mongoose.Schema.Types.Date
         }
     }, {

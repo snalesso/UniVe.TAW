@@ -10,6 +10,7 @@ var chalk_1 = require("chalk");
 var AuthRoutes_1 = require("./routing/AuthRoutes");
 var UsersRoutes_1 = require("./routing/UsersRoutes");
 var GameRoutes_1 = require("./routing/GameRoutes");
+var Match = require("../domain/models/mongodb/mongoose/Match");
 var net = require("../infrastructure/net");
 // TODO: rename into WebService?
 var ApiService = /** @class */ (function () {
@@ -49,6 +50,15 @@ var ApiService = /** @class */ (function () {
             .connect(this._dbUrl, { useNewUrlParser: true })
             .then(function () {
             console.log(chalk_1.default.green("mongoose connected to " + _this._dbUrl));
+            console.log("deleting all matches ...");
+            Match.getModel().find().then(function (matches) {
+                for (var _i = 0, matches_1 = matches; _i < matches_1.length; _i++) {
+                    var m = matches_1[_i];
+                    m.remove();
+                    console.log("deleted (id: " + m._id.toHexString() + ")");
+                }
+            }).catch(function (error) { console.log("error deleting match"); });
+            console.log("all matches deleted");
             _this.ConfigRoutes();
             _this.ConfigMiddlewares();
             _this._socketIOServer.on("connection", function (client) {
