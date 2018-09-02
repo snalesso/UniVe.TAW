@@ -4,7 +4,6 @@ import * as path from 'path';
 const del = require('del');
 import chalk from 'chalk';
 
-
 const importDestPath = "./src/assets/imported";
 const imports: { bundleName: string, filePaths: string[] }[] = [
     {

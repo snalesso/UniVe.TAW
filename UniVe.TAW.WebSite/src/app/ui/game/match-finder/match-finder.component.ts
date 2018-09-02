@@ -21,6 +21,7 @@ import ServiceEventKeys from '../../../../assets/imported/unive.taw.webservice/a
   templateUrl: './match-finder.component.html',
   styleUrls: ['./match-finder.component.css']
 })
+// TODO: update when server emits new pending matches available
 export class JoinableMatchesComponent implements OnInit {
 
   private _playables: DTOs.IPlayablesDto;

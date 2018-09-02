@@ -45,5 +45,5 @@ Thumbs.db
 
 # custom
 /data/db/*
-/src/**/*.js
-/src/**/*.map.js
+# /src/**/*.js
+# /src/**/*.map.js

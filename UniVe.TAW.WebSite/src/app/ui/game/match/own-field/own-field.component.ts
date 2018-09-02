@@ -17,9 +17,9 @@ import * as utils from '../../../../../assets/imported/unive.taw.webservice/infr
 export class OwnFieldComponent implements OnInit {
 
   constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly gameService: GameService) { }
+    private readonly _router: Router,
+    private readonly _route: ActivatedRoute,
+    private readonly _gameService: GameService) { }
 
   ngOnInit() {
   }
