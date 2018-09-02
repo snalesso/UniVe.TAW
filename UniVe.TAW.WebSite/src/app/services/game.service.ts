@@ -91,7 +91,7 @@ export class GameService {
   }
 
   // TODO: rename
-  public configMatchLineUp(matchId: string, fleetConfig: game.ShipPlacement[]) {
+  public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
     const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/config";
     const options = {
       headers: new ng_http.HttpHeaders()
@@ -105,7 +105,7 @@ export class GameService {
   }
 
   public getMatchConfigStatus(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/ownConfigStatus";
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/config";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -113,13 +113,13 @@ export class GameService {
       })
     };
 
-    console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
+    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<DTOs.IOwnMatchSideConfigStatus>>(endPoint, options);
   }
 
-  public getMatchSnapshot(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
-    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId;
+  public getOwnTurnInfo(matchId: string) {//: Observable<net.HttpMessage<DTOs.IMatchDto>> {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/ownTurnInfo";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export class GameService {
       })
     };
 
-    return this._http.get<net.HttpMessage<DTOs.IMatchSnapshotDto>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IOwnTurnInfoDto>>(endPoint, options);
   }
 
 }

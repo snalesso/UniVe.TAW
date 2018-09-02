@@ -8,8 +8,8 @@
     <table id="bf-grid" class="bf-grid">
       <tbody>
         <tr *ngFor="let row of Cells">
-          <td class="bf-grid-cell" (click)="fire(cell)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="getCellStatusUIClass(cell)"
-            [style.padding-bottom]="100/Settings.BattleFieldSettings.BattleFieldWidth + '%'" *ngFor="let cell of row">
+          <td class="bf-grid-cell" (click)="fire(cell)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="getCellStatusUIClass(cell) + ' ' + (!this.CanFire ? 'bf-grid-cell-locked' : '')"
+            [style.padding-bottom]="100/BattleFieldWidth + '%'" *ngFor="let cell of row">
           </td>
         </tr>
       </tbody>

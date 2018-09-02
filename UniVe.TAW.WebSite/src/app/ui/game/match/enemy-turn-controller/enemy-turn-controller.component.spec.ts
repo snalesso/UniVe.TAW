@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OwnFieldComponent } from './own-field.component';
+import { EnemyTurnControllerComponent } from './enemy-turn-controller.component';
 
 describe('OwnFieldComponent', () => {
-  let component: OwnFieldComponent;
-  let fixture: ComponentFixture<OwnFieldComponent>;
+  let component: EnemyTurnControllerComponent;
+  let fixture: ComponentFixture<EnemyTurnControllerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ OwnFieldComponent ]
+      declarations: [EnemyTurnControllerComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OwnFieldComponent);
+    fixture = TestBed.createComponent(EnemyTurnControllerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

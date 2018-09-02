@@ -36,9 +36,9 @@ export class FleetConfiguratorComponent implements OnInit {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
   }
 
-  private _whenIsEnabledChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private _whenIsConfigNeededChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   @Output()
-  public get WhenIsEnabledChanged(): Observable<boolean> { return this._whenIsEnabledChanged.asObservable(); }
+  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged.asObservable(); }
 
   // private _whenStatusChanged = new BehaviorSubject<string>(null);
   // @Output()
@@ -50,16 +50,24 @@ export class FleetConfiguratorComponent implements OnInit {
   private _ownMatchSideConfigStatus: DTOs.IOwnMatchSideConfigStatus;
   public get OwnMatchSideConfigStatus(): DTOs.IOwnMatchSideConfigStatus { return this._ownMatchSideConfigStatus; }
 
+  public get BattleFieldWidth(): number {
+    if (this.OwnMatchSideConfigStatus && this.OwnMatchSideConfigStatus.Settings)
+      return this.OwnMatchSideConfigStatus.Settings.BattleFieldWidth;
+    return 0;
+  }
+
   private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
   public get Cells() { return this._gridCells; }
+
+  public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus && this._ownMatchSideConfigStatus.IsConfigNeeded }
 
   private _canRandomize: boolean = false;
   public get CanRandomize(): boolean { return this._canRandomize; }
 
   private _canSubmitConfig: boolean = false;
-  public get CanSubmitConfig(): boolean { return this._canSubmitConfig; }
+  public get CanSubmitConfig(): boolean { return this._canSubmitConfig && this.IsConfigNeeded; }
 
-  private cleanFieldGrid() {
+  private rebuildGridCells() {
     if (this._gridCells == null) {
       this._gridCells = new Array(this._ownMatchSideConfigStatus.Settings.BattleFieldWidth);
       for (let x = 0; x < this._ownMatchSideConfigStatus.Settings.BattleFieldWidth; x++) {
@@ -85,7 +93,7 @@ export class FleetConfiguratorComponent implements OnInit {
 
     //this._whenStatusChanged.next("Randomizing ...");
 
-    this.cleanFieldGrid();
+    this.rebuildGridCells();
 
     let sortedShipsTypesToPlace: game.ShipType[] = [];
     let shipTypeToPlace: game.ShipType;
@@ -137,7 +145,7 @@ export class FleetConfiguratorComponent implements OnInit {
 
     // TODO: handle no resposne
     this._gameService
-      .configMatchLineUp(this._matchId, this._shipPlacements)
+      .configMatch(this._matchId, this._shipPlacements)
       .subscribe(
         response => {
           if (response.HasError) {
@@ -149,8 +157,8 @@ export class FleetConfiguratorComponent implements OnInit {
             this._canSubmitConfig = this._canRandomize = true;
           }
           else {
-            this._whenIsEnabledChanged.next(false);
-            this._whenIsEnabledChanged.complete();
+            this._whenIsConfigNeededChanged.next(false);
+            this._whenIsConfigNeededChanged.complete();
           }
         },
         (error: HttpErrorResponse) => {
@@ -158,8 +166,8 @@ export class FleetConfiguratorComponent implements OnInit {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
-              this._whenIsEnabledChanged.next(false);
-              this._whenIsEnabledChanged.complete();
+              this._whenIsConfigNeededChanged.next(false);
+              this._whenIsConfigNeededChanged.complete();
               break;
 
             default:
@@ -192,10 +200,10 @@ export class FleetConfiguratorComponent implements OnInit {
           else {
             this._ownMatchSideConfigStatus = response.Content;
 
-            this._whenIsEnabledChanged.next(this.OwnMatchSideConfigStatus.IsConfigNeeded);
+            this._whenIsConfigNeededChanged.next(this.OwnMatchSideConfigStatus.IsConfigNeeded);
 
             if (!this.OwnMatchSideConfigStatus.IsConfigNeeded)
-              this._whenIsEnabledChanged.complete();
+              this._whenIsConfigNeededChanged.complete();
             else
               this.randomizeFleet();
           }

@@ -6,15 +6,14 @@ import * as game_client from '../../../../../assets/imported/unive.taw.webservic
 import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as DTOs from '../../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as interactjs from 'interactjs';
 import * as utils from '../../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
 
 @Component({
-  selector: 'app-own-field',
-  templateUrl: './own-field.component.html',
-  styleUrls: ['./own-field.component.css']
+  selector: 'app-enemy-turn-controller',
+  templateUrl: './enemy-turn-controller.component.html',
+  styleUrls: ['./enemy-turn-controller.component.css']
 })
-export class OwnFieldComponent implements OnInit {
+export class EnemyTurnControllerComponent implements OnInit {
 
   constructor(
     private readonly _router: Router,

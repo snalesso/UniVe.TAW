@@ -51,6 +51,21 @@ export interface IOwnMatchSideConfigStatus {
     Settings: game.IMatchSettings;
 }
 
+export interface IPlayersTurnInfoDto {
+    MatchId: string;
+    MatchSettings: game.IMatchSettings;
+}
+
+export interface IOwnTurnInfoDto extends IPlayersTurnInfoDto {
+    Enemy: IUserDto;
+    EnemyField: ReadonlyArray<ReadonlyArray<game_client.EnemyBattleFieldCellStatus>>;
+    IsOwnTurn: boolean;
+}
+
+export interface IEnemyTurnInfoDto extends IPlayersTurnInfoDto {
+    OwnField: ReadonlyArray<ReadonlyArray<game_client.OwnBattleFieldCellStatus>>;
+}
+
 export interface IMatchSnapshotDto {
     Id: string;
     Settings: game.IMatchSettings;
@@ -87,6 +102,11 @@ export interface IPlayablesDto {
 
 export interface IMatchReadyEventDto {
     MatchId: string;
+}
+
+export interface IMatchStartedEventDto {
+    MatchId: string;
+    InActionPlayerId: string;
 }
 
 // export interface IMatchInfoDto extends IMatchDto {

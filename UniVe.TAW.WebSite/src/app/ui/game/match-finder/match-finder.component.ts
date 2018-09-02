@@ -15,6 +15,8 @@ import { Country } from '../../../../assets/imported/unive.taw.webservice/infras
 import * as game from '../../../../assets/imported/unive.taw.webservice/infrastructure/game';
 import * as http from '@angular/common/http';
 import ServiceEventKeys from '../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
+import * as ngxSocketIO from 'ngx-socket-io';
+
 
 @Component({
   selector: 'app-match-finder',
@@ -29,7 +31,9 @@ export class JoinableMatchesComponent implements OnInit {
   constructor(
     private readonly _gameService: GameService,
     private readonly _router: Router,
-    private readonly _socketIOService: SocketIOService) {
+    //private readonly _socketIOService: SocketIOService
+    private readonly _socketIOService: ngxSocketIO.Socket
+  ) {
   }
 
   private _isBusy: boolean = false;
@@ -108,7 +112,7 @@ export class JoinableMatchesComponent implements OnInit {
             alert("WTF?? Server returned null Match.Id without providing a reason! :O");
           }
           else {
-            this._router.navigate([ViewsRoutingKeys.Match, joinableMatchId]);
+            this._router.navigate([ViewsRoutingKeys.Match, response.Content]);
           }
           this._isBusy = false;
         }, this.errorHandler);
@@ -131,6 +135,7 @@ export class JoinableMatchesComponent implements OnInit {
           else if (!response.Content) {
           } else {
             this._playables = response.Content;
+
             if (this._playables.PendingMatchId) {
               this._socketIOService.once(
                 ServiceEventKeys.MatchReady,

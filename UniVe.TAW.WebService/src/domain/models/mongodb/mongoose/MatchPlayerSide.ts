@@ -18,6 +18,7 @@ export interface IMongooseMatchPlayerSide extends mongoose.Document {
     //FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
     BattleFieldCells: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][], //ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
     // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
+    isConfigured: (matchSettings: MatchSettings.IMongooseMatchSettings) => boolean,
     configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
@@ -56,13 +57,17 @@ const matchPlayerSideSchema = new mongoose.Schema(
     }, {
         id: false
     });
+matchPlayerSideSchema.methods.isConfigured = function (
+    this: IMongooseMatchPlayerSide): boolean {
+    return this.BattleFieldCells.length > 0;
+};
 matchPlayerSideSchema.methods.configFleet = function (
     this: IMongooseMatchPlayerSide,
     matchSettings: MatchSettings.IMongooseMatchSettings,
     shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean {
 
     // even tho default is null, at runtime it's never null, so we check if there are cells inside the array
-    if (this.BattleFieldCells.length > 0) {
+    if (this.isConfigured(matchSettings)) {
         // TODO: consider throwing something
         return false;
     }
@@ -98,7 +103,7 @@ matchPlayerSideSchema.methods.configFleet = function (
 
     // this.markModified("BattleFieldCells");
 
-    return this.BattleFieldCells.length == matchSettings.BattleFieldWidth;
+    return this.isConfigured(matchSettings);
 };
 matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: Coord.IMongooseCoord): boolean {
 

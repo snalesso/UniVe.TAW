@@ -4,6 +4,7 @@ import * as Constants from './Constants';
 import * as MatchPlayerSide from './MatchPlayerSide';
 import * as ShipPlacement from './ShipPlacement';
 import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
+import * as User from './User';
 //import * as BattleFieldSettings from './BattleFieldSettings';
 import * as MatchSettings from './MatchSettings';
 import * as Coord from './Coord';
@@ -23,6 +24,7 @@ export interface IMongooseMatch extends mongoose.Document {
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     // readonly ActionsHistory: game.MatchAction[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
+    areBothConfigured: () => boolean,
     configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     executeAction: (playerId: mongoose.Types.ObjectId, actionCode: game.MatchActionCode) => void,
     //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
@@ -126,6 +128,11 @@ const matchSchema = new mongoose.Schema({
     //     required: true
     // }
 });
+matchSchema.methods.areBothConfigured = function (
+    this: IMongooseMatch): boolean {
+
+    return this.FirstPlayerSide.isConfigured(this.Settings) && this.SecondPlayerSide.isConfigured(this.Settings);
+};
 matchSchema.methods.getOwnerMatchPlayerSide = function (
     this: IMongooseMatch,
     playerId: mongoose.Types.ObjectId): MatchPlayerSide.IMongooseMatchPlayerSide {
@@ -133,9 +140,32 @@ matchSchema.methods.getOwnerMatchPlayerSide = function (
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.FirstPlayerSide : this.SecondPlayerSide;
-    if (!playersSide.PlayerId.equals(playerId))
+    let playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = null;
+
+    if (this.FirstPlayerSide.PlayerId instanceof mongoose.Types.ObjectId) {
+        if (this.FirstPlayerSide.PlayerId.equals(playerId))
+            playersSide = this.FirstPlayerSide;
+    }
+    else if (this.FirstPlayerSide.PlayerId != null) {
+        const user = this.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
+        if (user._id.equals(playerId))
+            playersSide = this.FirstPlayerSide;
+    }
+    if (!playersSide) {
+        if (this.SecondPlayerSide.PlayerId instanceof mongoose.Types.ObjectId) {
+            if (this.SecondPlayerSide.PlayerId.equals(playerId))
+                playersSide = this.SecondPlayerSide;
+        }
+        else if (this.SecondPlayerSide.PlayerId != null) {
+            const user = this.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
+            if (user._id.equals(playerId))
+                playersSide = this.SecondPlayerSide;
+        }
+    }
+
+    if (!playersSide)
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
+
     return playersSide;
 };
 matchSchema.methods.getEnemyMatchPlayerSide = function (
@@ -145,10 +175,33 @@ matchSchema.methods.getEnemyMatchPlayerSide = function (
     if (playerId == null)
         throw new Error("Invalid playerId");
 
-    const enemySide: MatchPlayerSide.IMongooseMatchPlayerSide = (this.FirstPlayerSide.PlayerId.equals(playerId)) ? this.SecondPlayerSide : this.FirstPlayerSide;
-    if (!this.SecondPlayerSide.PlayerId.equals(playerId))
+    let playersSide: MatchPlayerSide.IMongooseMatchPlayerSide = null;
+
+    if (this.FirstPlayerSide.PlayerId instanceof mongoose.Types.ObjectId) {
+        if (this.FirstPlayerSide.PlayerId.equals(playerId))
+            playersSide = this.SecondPlayerSide;
+    }
+    else if (this.FirstPlayerSide.PlayerId != null) {
+        const user = this.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
+        if (user._id.equals(playerId))
+            playersSide = this.SecondPlayerSide;
+    }
+    if (!playersSide) {
+        if (this.SecondPlayerSide.PlayerId instanceof mongoose.Types.ObjectId) {
+            if (this.SecondPlayerSide.PlayerId.equals(playerId))
+                playersSide = this.FirstPlayerSide;
+        }
+        else if (this.SecondPlayerSide.PlayerId != null) {
+            const user = this.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
+            if (user._id.equals(playerId))
+                playersSide = this.FirstPlayerSide;
+        }
+    }
+
+    if (!playersSide)
         throw new Error("Player " + playerId.toHexString() + " is not playing in this match");
-    return enemySide;
+
+    return playersSide;
 };
 matchSchema.methods.configFleet = function (
     this: IMongooseMatch,
@@ -161,10 +214,6 @@ matchSchema.methods.configFleet = function (
         throw new Error("Fleet config does not comply with match settings!");
 
     const wasFleetConfigSuccessful = sideToConfig.configFleet(this.Settings as MatchSettings.IMongooseMatchSettings, shipPlacements);
-    if (wasFleetConfigSuccessful) {
-        // TODO: set random starting player, then StartDateTime
-        this.StartDateTime = new Date();
-    }
 
     return wasFleetConfigSuccessful;
 };

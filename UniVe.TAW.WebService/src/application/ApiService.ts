@@ -95,6 +95,7 @@ export default class ApiService {
                         function (client) {
                             client.emit("ciao", { data: 3232 });
                             console.log("Socket.io client connected");
+                            client.on("disconnection", (data) => console.log("Socket.io client disconnected"));
                         });
 
                     this._httpServer.listen(

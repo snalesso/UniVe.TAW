@@ -15,7 +15,7 @@ import { tap, catchError, map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
-export class DummyGameService {
+export class DummyGameService { // TODO: delete
 
   constructor() { }
 

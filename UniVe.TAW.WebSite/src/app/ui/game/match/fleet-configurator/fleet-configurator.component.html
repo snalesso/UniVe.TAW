@@ -1,4 +1,4 @@
-<div class="container-fluid" *ngIf="(WhenIsEnabledChanged | async)">
+<div class="container-fluid" *ngIf="(WhenIsConfigNeededChanged | async)">
 
   <div class="row justify-content-center">
     <h1>Choose your line-up!</h1>
@@ -18,7 +18,7 @@
           <tbody>
             <tr *ngFor="let row of Cells">
               <td class="bf-grid-cell" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="cell.ShipType > 0 ? 'bf-grid-cell-ship' : ''"
-                [style.padding-bottom]="100/OwnMatchSideConfigStatus.Settings.BattleFieldWidth + '%'" *ngFor="let cell of row">
+                [style.padding-bottom]="100/BattleFieldWidth + '%'" *ngFor="let cell of row">
                 <!-- ({{col}},{{row}}) -->
               </td>
             </tr>

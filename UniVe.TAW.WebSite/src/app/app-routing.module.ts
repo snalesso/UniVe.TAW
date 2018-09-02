@@ -6,11 +6,13 @@ import { SignupComponent } from './ui/identity/signup/signup.component';
 import { LoginComponent } from './ui/identity/login/login.component';
 import { JoinableMatchesComponent } from './ui/game/match-finder/match-finder.component';
 import { FleetConfiguratorComponent } from './ui/game/match/fleet-configurator/fleet-configurator.component';
-import { EnemyFieldComponent } from './ui/game/match/enemy-field/enemy-field.component';
+import { OwnTurnControllerComponent } from './ui/game/match/own-turn-controller/own-turn-controller.component';
 import ViewsRoutingKeys from './ui/ViewsRoutingKeys';
 import RoutingHelper from './RoutingHelper';
 import RoutingParamKeys from '../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import { MatchComponent } from './ui/game/match/match/match.component';
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+import ServiceConstants from './services/ServiceConstants';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
@@ -22,7 +24,9 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [
+    RouterModule.forRoot(routes),
+    SocketIoModule.forRoot({ url: ServiceConstants.ServerAddress, options: {} })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

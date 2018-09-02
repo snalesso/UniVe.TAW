@@ -59,8 +59,9 @@ export class SocketIOService {
   }
 
   fromEvent<T>(eventName: string): Observable<T> {
+
     this._subscribersCounter++;
-    return Observable.create((observer: any) => {
+    return Observable.create((observer) => {
       this._socket.on(eventName, (data: T) => {
         observer.next(data);
       });
@@ -76,5 +77,18 @@ export class SocketIOService {
   fromOneTimeEvent<T>(eventName: string): Promise<T> {
     return new Promise<T>(resolve => this.once(eventName, resolve));
   }
+
+  // subscribe<T>(eventKey: string) {
+  //   let observable = new Observable<T>(observer => {
+  //     this._socket = socketIOClient();
+  //     this._socket.on(eventKey, (data: T) => {
+  //       observer.next(data);
+  //     });
+  //     return () => {
+  //       this._socket.disconnect();
+  //     };
+  //   })
+  //   return observable;
+  // }
 
 }
