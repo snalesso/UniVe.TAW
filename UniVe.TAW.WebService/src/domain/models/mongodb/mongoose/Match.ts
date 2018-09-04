@@ -10,6 +10,7 @@ import * as MatchSettings from './MatchSettings';
 import * as Coord from './Coord';
 
 import * as game from '../../../../infrastructure/game';
+//import * as game_client from '../../../../infrastructure/game.client';
 import * as chat from '../../../../infrastructure/chat';
 
 export interface IMongooseMatch extends mongoose.Document {
@@ -26,7 +27,8 @@ export interface IMongooseMatch extends mongoose.Document {
     // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     areBothConfigured: () => boolean,
     configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
-    executeAction: (playerId: mongoose.Types.ObjectId, actionCode: game.MatchActionCode) => void,
+    /** returns true if hit, false if water, exception if it was already hit */
+    fire: (firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord) => boolean,
     //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
     getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,
     getEnemyMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide
@@ -217,34 +219,27 @@ matchSchema.methods.configFleet = function (
 
     return wasFleetConfigSuccessful;
 };
-matchSchema.methods.executeAction = function (
+matchSchema.methods.fire = function (
     this: IMongooseMatch,
-    playerId: mongoose.Types.ObjectId,
-    actionCode: game.MatchActionCode,
-    coord: Coord.IMongooseCoord): void {
+    firingPlayerId: mongoose.Types.ObjectId,
+    targetCoord: game.Coord): boolean {
 
-    // TODO: check the player is in this match
+    if (!this.InActionPlayerId.equals(firingPlayerId))
+        throw new Error("You are not allowed to fire!");
 
-    switch (actionCode) {
-        case game.MatchActionCode.Attack:
-            const targetSide = this.getEnemyMatchPlayerSide(playerId);
-            targetSide.receiveFire(coord);
-            break;
+    const targetSide = this.getEnemyMatchPlayerSide(firingPlayerId);
+    const didHit = targetSide.receiveFire(targetCoord);
 
-        case game.MatchActionCode.RequestTimeOut:
-            throw new Error("Not implemented!");
-            break;
-
-        case game.MatchActionCode.Surrend:
-            throw new Error("Not implemented!");
-            break;
-
-        default:
-            const errMsg = "Invalid MatchActionCode!";
-            console.log(errMsg);
-            throw new Error(errMsg);
-            break;
+    if (didHit) {
+        if (targetSide.areAllShipsHit()) {
+            this.EndDateTime = new Date();
+        }
+    } else {
+        this.InActionPlayerId = targetSide.PlayerId;
+        //this.markModified("InActionPlayerId");
     }
+
+    return didHit;
 };
 
 let matchModel;

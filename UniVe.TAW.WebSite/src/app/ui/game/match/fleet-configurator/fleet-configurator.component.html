@@ -1,8 +1,23 @@
-<div class="container-fluid" *ngIf="(WhenIsConfigNeededChanged | async)">
+<div class="container-fluid" *ngIf="WhenIsConfigNeededChanged | async">
+
+  <!-- <button (click)="toggle()">Toggle</button>
+  <p class="inline" *ngIf="WhenToggleChanged | async">fewafwfea</p> -->
 
   <div class="row justify-content-center">
     <h1>Choose your line-up!</h1>
   </div>
+
+  <!-- <div class="row justify-content-center">
+    <p>IsConfigNeeded: {{IsConfigNeeded}}</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <p>_IsConfigNeeded: {{this._ownMatchSideConfigStatus != null}}</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <h1>Choose your line-up!</h1>
+  </div> -->
 
   <div class="row justify-content-center">
 

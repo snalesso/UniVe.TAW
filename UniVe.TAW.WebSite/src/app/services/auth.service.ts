@@ -18,6 +18,7 @@ import { pipe } from '@angular/core/src/render3/pipe';
 @Injectable({
   providedIn: 'root'
 })
+// TODO: handle socket.io connection to send user, and disconnection to inform server and close user connection so in case of new login with another account, the newly logged user (that is different from the previous) does not keep using the other user's connection
 export class AuthService implements OnDestroy {
 
   private readonly AccessTokenKey = "access_token";

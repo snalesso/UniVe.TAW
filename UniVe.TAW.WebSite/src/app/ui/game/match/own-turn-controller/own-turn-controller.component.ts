@@ -19,8 +19,8 @@ import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservic
 export class OwnTurnControllerComponent implements OnInit {
 
   private readonly _matchId: string;
-  private _ownTurnInfo: DTOs.IOwnTurnInfoDto;
 
+  private _ownTurnInfo: DTOs.IOwnTurnInfoDto;
   private _firing: boolean = false;
   private _isRebuildingCells: boolean = true;
 
@@ -38,23 +38,49 @@ export class OwnTurnControllerComponent implements OnInit {
   private _gridCells: game_client.IEnemyBattleFieldCell[][];
   public get Cells() { return this._gridCells; }
 
-  private get IsMyTurn() { return this._ownTurnInfo ? this._ownTurnInfo.IsOwnTurn : false; }
+  private get IsMyTurn(): boolean { return this._ownTurnInfo != null ? this._ownTurnInfo.IsOwnTurn : false; }
 
   public get IsEnabled(): boolean { return this.IsMyTurn && !this._isRebuildingCells && !this._firing; }
 
-  public get CanFire(): boolean { return this.IsMyTurn && !this._firing; }
+  public get CanFire(): boolean { return this.IsMyTurn && !this._firing && !this._isRebuildingCells; }
 
   public fire(cell: game_client.IEnemyBattleFieldCell) {
 
+    if (!this.CanFire)
+      return;
+
     this._firing = true;
 
-    if (cell.Status != game_client.EnemyBattleFieldCellStatus.Unknown)
+    if (cell.Status != game_client.EnemyBattleFieldCellStatus.Unknown) {
+
+      this._firing = false;
       return;
+    }
 
     // const fireResult = this._fireResults[utils.getRandomInt(0, this._fireResults.length - 1)];
     // this._gridCells[cell.Coord.X][cell.Coord.Y].Status = fireResult;
 
-    this._firing = false;
+    this._gameService.singleShot(this._matchId, { Coord: cell.Coord } as game.ISingleShotMatchAction)
+      .subscribe(
+        response => {
+          if (response.HasError) {
+            console.log(response.ErrorMessage);
+          }
+          else if (!response.Content) {
+            console.log("The server returned null");
+          }
+          else {
+            this._ownTurnInfo.EnemyField = response.Content.NewEnemyField;
+            this._ownTurnInfo.IsOwnTurn = response.Content.CanFireAgain;
+            this.rebuildGridCells();
+          }
+
+          this._firing = false;
+        },
+        (error: ngHttp.HttpErrorResponse) => {
+
+          this._firing = false;
+        });
   }
 
   public getCellStatusUIClass(cell: game_client.IEnemyBattleFieldCell): string {
@@ -75,7 +101,7 @@ export class OwnTurnControllerComponent implements OnInit {
         for (let y = 0; y < this._ownTurnInfo.MatchSettings.BattleFieldHeight; y++) {
           this._gridCells[x][y] = {
             Coord: new game.Coord(x, y),
-            Status: game_client.EnemyBattleFieldCellStatus.Unknown
+            Status: this._ownTurnInfo.EnemyField[x][y]
           };
         }
       }
@@ -83,7 +109,7 @@ export class OwnTurnControllerComponent implements OnInit {
     else {
       for (let x = 0; x < this._gridCells.length; x++) {
         for (let y = 0; y < this._gridCells[x].length; y++) {
-          this._gridCells[x][y].Status = game_client.EnemyBattleFieldCellStatus.Unknown;
+          this._gridCells[x][y].Status = this._ownTurnInfo.EnemyField[x][y];
         }
       }
     }
@@ -116,6 +142,12 @@ export class OwnTurnControllerComponent implements OnInit {
 
     this._socketIOService.once(
       ServiceEventKeys.MatchStarted,
+      (matchStarted: DTOs.IMatchStartedEventDto) => {
+        this.updateInfo();
+      });
+
+    this._socketIOService.on(
+      ServiceEventKeys.MatchUpdated,
       (matchStarted: DTOs.IMatchStartedEventDto) => {
         this.updateInfo();
       });

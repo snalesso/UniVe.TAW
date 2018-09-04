@@ -1,14 +1,16 @@
 <div class="container-fluid">
 
-  <div class="row justify-content-center">
+  <p>{{Toggle}}</p>
+
+  <div class="row justify-content-center" *ngIf="IsMatchSetupVisible">
     <app-fleet-configurator></app-fleet-configurator>
   </div>
 
-  <div class="row justify-content-center">
+  <div class="row justify-content-center" *ngIf="AreTurnControllersVisible">
     <div class="col-lg-6">
-      <app-own-turn-controller></app-own-turn-controller>
+      <app-own-turn-controller (WhenIsConfigNeededChanged)="aaa($event)" (WhenToggleChanged)="aaa($event)"></app-own-turn-controller>
     </div>
-    <div class="col-lg-6">
+    <div class=" col-lg-6 ">
       <app-enemy-turn-controller></app-enemy-turn-controller>
     </div>
   </div>

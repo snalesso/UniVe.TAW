@@ -21,7 +21,7 @@ const shipPlacementSchema = new mongoose.Schema(
         },
         Orientation: {
             required: true,
-            type: game.ShipOrientation
+            type: game.Orientation
         }
     }, {
         id: false

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
@@ -16,7 +16,7 @@ import * as game from '../../../../assets/imported/unive.taw.webservice/infrastr
 import * as http from '@angular/common/http';
 import ServiceEventKeys from '../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
 import * as ngxSocketIO from 'ngx-socket-io';
-
+import * as io from 'socket.io-client';
 
 @Component({
   selector: 'app-match-finder',
@@ -24,15 +24,16 @@ import * as ngxSocketIO from 'ngx-socket-io';
   styleUrls: ['./match-finder.component.css']
 })
 // TODO: update when server emits new pending matches available
-export class JoinableMatchesComponent implements OnInit {
+export class JoinableMatchesComponent implements OnInit, OnDestroy {
 
   private _playables: DTOs.IPlayablesDto;
+  private _socket = io(ServiceConstants.ServerAddress);
 
   constructor(
     private readonly _gameService: GameService,
     private readonly _router: Router,
     //private readonly _socketIOService: SocketIOService
-    private readonly _socketIOService: ngxSocketIO.Socket
+    //private readonly _socketIOService: ngxSocketIO.Socket
   ) {
   }
 
@@ -133,11 +134,12 @@ export class JoinableMatchesComponent implements OnInit {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
+            console.log("Server returned null");
           } else {
             this._playables = response.Content;
 
             if (this._playables.PendingMatchId) {
-              this._socketIOService.once(
+              this._socket.once(
                 ServiceEventKeys.MatchReady,
                 (matchReadyEvent: DTOs.IMatchReadyEventDto) => {
                   this._router.navigate([ViewsRoutingKeys.Match, matchReadyEvent.MatchId]);
@@ -159,10 +161,14 @@ export class JoinableMatchesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._socketIOService.on("connection", (socket) => {
-      console.log("ciaoqwid9i0d23");
+    this._socket.on(ServiceEventKeys.PendingMatchesChanged, (socket) => {
+      this.updatePlayables();
     });
     this.updatePlayables();
+  }
+
+  ngOnDestroy(): void {
+    this._socket.removeListener(ServiceEventKeys.PendingMatchesChanged);
   }
 
 }

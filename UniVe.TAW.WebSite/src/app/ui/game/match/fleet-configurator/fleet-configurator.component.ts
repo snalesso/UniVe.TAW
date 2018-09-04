@@ -25,6 +25,8 @@ import { startWith } from 'rxjs/operators';
 // TODO: rename to match-setup
 export class FleetConfiguratorComponent implements OnInit {
 
+  private readonly _matchId: string;
+
   private _shipPlacements: game.ShipPlacement[] = [];
 
   constructor(
@@ -34,32 +36,35 @@ export class FleetConfiguratorComponent implements OnInit {
     private readonly _authService: AuthService) {
 
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    //this.WhenToggleChanged.subscribe(v => console.log("fc - toggle - " + v));
   }
 
   private _whenIsConfigNeededChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   @Output()
-  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged.asObservable(); }
+  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged; }
 
-  // private _whenStatusChanged = new BehaviorSubject<string>(null);
-  // @Output()
-  // public get WhenStatusChanged(): Observable<string> { return this._whenStatusChanged.asObservable(); }
+  private _toggle: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output()
+  public get WhenToggleChanged() { return this._toggle; }
 
-  private readonly _matchId: string;
-  //public get MatchId() { return this._matchId; }
+  private _toggleV: boolean = false;
+  public toggle() {
+    this._toggleV = !this._toggleV;
+    this._toggle.emit(this._toggleV);
+  }
 
   private _ownMatchSideConfigStatus: DTOs.IOwnMatchSideConfigStatus;
-  public get OwnMatchSideConfigStatus(): DTOs.IOwnMatchSideConfigStatus { return this._ownMatchSideConfigStatus; }
 
   public get BattleFieldWidth(): number {
-    if (this.OwnMatchSideConfigStatus && this.OwnMatchSideConfigStatus.Settings)
-      return this.OwnMatchSideConfigStatus.Settings.BattleFieldWidth;
+    if (this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.Settings != null)
+      return this._ownMatchSideConfigStatus.Settings.BattleFieldWidth;
     return 0;
   }
 
   private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
   public get Cells() { return this._gridCells; }
 
-  public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus && this._ownMatchSideConfigStatus.IsConfigNeeded }
+  public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.IsConfigNeeded }
 
   private _canRandomize: boolean = false;
   public get CanRandomize(): boolean { return this._canRandomize; }
@@ -91,15 +96,13 @@ export class FleetConfiguratorComponent implements OnInit {
 
     this._canRandomize = this._canSubmitConfig = false;
 
-    //this._whenStatusChanged.next("Randomizing ...");
-
     this.rebuildGridCells();
 
     let sortedShipsTypesToPlace: game.ShipType[] = [];
     let shipTypeToPlace: game.ShipType;
     let rx: number;
     let ry: number;
-    let rOrient: game.ShipOrientation;
+    let rOrient: game.Orientation;
     let rPlacement: game.ShipPlacement;
 
     for (let avShip of this._ownMatchSideConfigStatus.Settings.ShipTypeAvailabilities) {
@@ -112,10 +115,10 @@ export class FleetConfiguratorComponent implements OnInit {
     while ((shipTypeToPlace = sortedShipsTypesToPlace.pop()) != null) {
 
       do {
-        rOrient = utils.getRandomBoolean() ? game.ShipOrientation.Vertical : game.ShipOrientation.Horizontal;
+        rOrient = utils.getRandomBoolean() ? game.Orientation.Vertical : game.Orientation.Horizontal;
         do {
-          rx = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldWidth - (rOrient == game.ShipOrientation.Horizontal ? shipTypeToPlace : 1));
-          ry = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldHeight - (rOrient == game.ShipOrientation.Vertical ? shipTypeToPlace : 1));
+          rx = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
         } while (this._gridCells[rx][ry].ShipType != game.ShipType.NoShip);
 
         rPlacement = new game.ShipPlacement(shipTypeToPlace, new game.Coord(rx, ry), rOrient);
@@ -134,8 +137,6 @@ export class FleetConfiguratorComponent implements OnInit {
       }
     }
 
-    //this._whenStatusChanged.next("Randomization completed!");
-
     this._canRandomize = this._canSubmitConfig = true;
   }
 
@@ -152,13 +153,21 @@ export class FleetConfiguratorComponent implements OnInit {
             console.log(response.ErrorMessage);
             this._canSubmitConfig = this._canRandomize = true;
           }
-          else if (!response.Content) {
-            console.log("Match config failed");
-            this._canSubmitConfig = this._canRandomize = true;
-          }
           else {
-            this._whenIsConfigNeededChanged.next(false);
-            this._whenIsConfigNeededChanged.complete();
+            if (!response.Content) {
+              console.log("Match config failed");
+            }
+            else {
+              this._ownMatchSideConfigStatus = response.Content;
+              this._whenIsConfigNeededChanged.next(this._ownMatchSideConfigStatus.IsConfigNeeded);
+              console.log("_whenIsConfigNeededChanged = " + this._ownMatchSideConfigStatus.IsConfigNeeded);
+              this._canSubmitConfig = this._canRandomize = this._ownMatchSideConfigStatus.IsConfigNeeded;
+
+              if (!this._ownMatchSideConfigStatus.IsConfigNeeded) {
+                this._whenIsConfigNeededChanged.complete();
+                console.log("_whenIsConfigNeededChanged.complete");
+              }
+            }
           }
         },
         (error: HttpErrorResponse) => {
@@ -166,7 +175,8 @@ export class FleetConfiguratorComponent implements OnInit {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
-              this._whenIsConfigNeededChanged.next(false);
+              this._ownMatchSideConfigStatus.IsConfigNeeded = false;
+              this._whenIsConfigNeededChanged.next(true);
               this._whenIsConfigNeededChanged.complete();
               break;
 
@@ -178,10 +188,10 @@ export class FleetConfiguratorComponent implements OnInit {
 
   ngOnInit(): void {
     // console.log("ngOnInit");
-    this.getMatchConfigStatus();
+    this.updateMatchConfigStatus();
   }
 
-  private getMatchConfigStatus(maxRetries: number = 1) {
+  private updateMatchConfigStatus(maxRetries: number = 1) {
 
     // TODO: handle no resposne
     // TODO: get config info only, anche determine at ngOnInit if it's visible or not
@@ -199,50 +209,16 @@ export class FleetConfiguratorComponent implements OnInit {
           }
           else {
             this._ownMatchSideConfigStatus = response.Content;
+            this._whenIsConfigNeededChanged.next(this._ownMatchSideConfigStatus.IsConfigNeeded);
 
-            this._whenIsConfigNeededChanged.next(this.OwnMatchSideConfigStatus.IsConfigNeeded);
-
-            if (!this.OwnMatchSideConfigStatus.IsConfigNeeded)
-              this._whenIsConfigNeededChanged.complete();
-            else
+            if (this._ownMatchSideConfigStatus.IsConfigNeeded)
               this.randomizeFleet();
+            else
+              this._whenIsConfigNeededChanged.complete();
           }
         },
         (error: HttpErrorResponse) => {
           // TODO: handle
-
-          // switch (error.status) {
-          //   case httpStatusCodes.UNAUTHORIZED: {
-          //     // const credentials: DTOs.ILoginCredentials = {
-          //     //   Username: localStorage.getItem(ServiceConstants.AccessCredentials_Username),
-          //     //   Password: localStorage.getItem(ServiceConstants.AccessCredentials_Password)
-          //     // };
-          //     this.authService.login(credentials).subscribe(
-          //       response => {
-          //         if (response.HasError) {
-          //           // TODO: handle
-          //         }
-          //         else if (!response.Content) {
-          //           // TODO: handle
-          //           console.log("The server returned a null match dto!");
-          //         }
-          //         else {
-          //           localStorage.setItem(ServiceConstants.AccessTokenKey, response.Content);
-          //         }
-
-          //         if (maxRetries > 0) {
-          //           this.getSettings(--maxRetries);
-          //         }
-          //       },
-          //       (error: HttpErrorResponse) => {
-          //         this.router.navigate([ViewsRoutingKeys.Login])
-          //       });
-          //   }
-          //     break;
-
-          //   default:
-          //     console.log("Unhandled response code");
-          // }
         });
   }
 }

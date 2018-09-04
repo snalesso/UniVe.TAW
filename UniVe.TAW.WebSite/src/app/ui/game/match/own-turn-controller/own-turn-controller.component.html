@@ -1,14 +1,23 @@
 <div class="container-fluid">
 
   <div class="row justify-content-center">
-    <h1>Fire!</h1>
+    <h1>Enemy field</h1>
   </div>
+  <!-- <div class="row justify-content-center">
+    <p>IsMyTurn: {{IsMyTurn}}</p>
+  </div>
+  <div class="row justify-content-center">
+    <p>IsEnabled: {{IsEnabled}}</p>
+  </div>
+  <div class="row justify-content-center">
+    <p>CanFire: {{CanFire}}</p>
+  </div> -->
 
   <div class="row justify-content-center">
-    <table id="bf-grid" class="bf-grid">
+    <table id="bf-grid" class="bf-grid" [ngClass]="!IsEnabled ? 'bf-grid-disabled' : ''">
       <tbody>
         <tr *ngFor="let row of Cells">
-          <td class="bf-grid-cell" (click)="fire(cell)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="getCellStatusUIClass(cell) + ' ' + (!this.CanFire ? 'bf-grid-cell-locked' : '')"
+          <td class="bf-grid-cell" (click)="fire(cell)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="getCellStatusUIClass(cell) + ' ' + (!this.CanFire ? 'bf-grid-cell-disabled' : '')"
             [style.padding-bottom]="100/BattleFieldWidth + '%'" *ngFor="let cell of row">
           </td>
         </tr>

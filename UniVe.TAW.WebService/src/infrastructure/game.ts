@@ -18,7 +18,7 @@ export enum ShipType {
     Carrier = 5  // Portaerei
 }
 
-export enum ShipOrientation {
+export enum Orientation {
     Horizontal,
     Vertical
 }
@@ -26,7 +26,7 @@ export enum ShipOrientation {
 export interface IShipPlacement {
     Type: ShipType;
     Coord: Coord;
-    Orientation: ShipOrientation;
+    Orientation: Orientation;
 }
 
 /** 0 based coord */
@@ -34,7 +34,7 @@ export class ShipPlacement implements IShipPlacement {
     constructor(
         public readonly Type: ShipType,
         public readonly Coord: Coord,
-        public readonly Orientation: ShipOrientation) {
+        public readonly Orientation: Orientation) {
     }
 }
 
@@ -51,19 +51,51 @@ export class ShipTypeAvailability /*implements IShipTypeAvailability*/ {
     }
 }
 
-export enum MatchActionCode {
-    Attack,
-    Surrend,
-    RequestTimeOut
+// export enum MatchActionCode {
+//     SingleShot = 1,
+//     Torpedo,
+//     RequestTimeOutStart,
+//     RequestTimeOutEnd,
+//     Surrend,
+// }
+
+export interface IMatchAction {
+    //     readonly ActionCode: MatchActionCode;
 }
 
-export class MatchAction {
-
-    constructor(
-        public readonly ActionCode: MatchActionCode,
-        public readonly Coord: Coord) {
-    }
+export interface ISingleShotMatchAction extends IMatchAction {
+    //readonly ActionCode: MatchActionCode.SingleShot;
+    readonly Coord: Coord;
 }
+
+// export interface ITorpedoShot extends IMatchAction {
+//     readonly ActionCode: MatchActionCode.Torpedo;
+//     readonly Orientation: Orientation;
+//     readonly StartCoord: Coord;
+// }
+
+// export interface IRequestTimeOutStart extends IMatchAction {
+//     readonly ActionCode: MatchActionCode.RequestTimeOutStart;
+//     readonly DurationSeconds: number;
+// }
+
+// export interface IRequestTimeOutEnd extends IMatchAction {
+//     readonly ActionCode: MatchActionCode.RequestTimeOutEnd;
+// }
+
+// export interface ISurrend extends IMatchAction {
+//     readonly ActionCode: MatchActionCode.Surrend;
+// }
+
+// export type UMatchAction = ISingleShot | ITorpedoShot | IRequestTimeOutStart | IRequestTimeOutEnd | ISurrend;
+
+// export class MatchAction implements IMatchAction {
+
+//     constructor(
+//         public readonly ActionCode: MatchActionCode,
+//         public readonly Coord: Coord) {
+//     }
+// }
 
 export interface IMatchSettings {
 
@@ -121,7 +153,7 @@ export class FleetValidator {
         const shipCoords: Coord[] = [];
 
         for (let i = 0; i < shipPlacement.Type; i++) {
-            if (shipPlacement.Orientation == ShipOrientation.Horizontal)
+            if (shipPlacement.Orientation == Orientation.Horizontal)
                 shipCoords.push(new Coord(shipPlacement.Coord.X + i, shipPlacement.Coord.Y));
             else
                 shipCoords.push(new Coord(shipPlacement.Coord.X, shipPlacement.Coord.Y + i));
@@ -135,7 +167,7 @@ export class FleetValidator {
         placedShips: ShipPlacement[],
         matchSettings: IMatchSettings): boolean {
 
-        const noTrespassing = shipPlacement.Orientation == ShipOrientation.Horizontal
+        const noTrespassing = shipPlacement.Orientation == Orientation.Horizontal
             ? (shipPlacement.Coord.X + shipPlacement.Type) <= matchSettings.BattleFieldWidth
             : (shipPlacement.Coord.Y + shipPlacement.Type) <= matchSettings.BattleFieldHeight;
 

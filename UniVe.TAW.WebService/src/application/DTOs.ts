@@ -46,6 +46,11 @@ export interface IMatchDto {
     Settings: game.IMatchSettings;
 }
 
+export interface IOwnSideMatchStatus {
+    IsConfigNeeded: boolean;
+    IsMatchStarted: boolean;
+}
+
 export interface IOwnMatchSideConfigStatus {
     IsConfigNeeded: boolean;
     Settings: game.IMatchSettings;
@@ -107,6 +112,11 @@ export interface IMatchReadyEventDto {
 export interface IMatchStartedEventDto {
     MatchId: string;
     InActionPlayerId: string;
+}
+
+export interface IAttackResultDto {
+    readonly NewEnemyField: ReadonlyArray<ReadonlyArray<game_client.EnemyBattleFieldCellStatus>>;
+    CanFireAgain: boolean;
 }
 
 // export interface IMatchInfoDto extends IMatchDto {

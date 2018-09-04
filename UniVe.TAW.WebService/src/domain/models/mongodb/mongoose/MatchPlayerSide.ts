@@ -9,7 +9,8 @@ import * as MatchSettings from './MatchSettings';
 
 import * as game from '../../../../infrastructure/game';
 import * as game_server from '../../../../infrastructure/game.server';
-import * as game_client from '../../../../infrastructure/game.client';
+import * as utils_2_8 from '../../../../infrastructure/utils-2.8';
+//import * as game_client from '../../../../infrastructure/game.client';
 
 // TODO: split validators into many single validators each with its own error message
 
@@ -22,7 +23,9 @@ export interface IMongooseMatchPlayerSide extends mongoose.Document {
     configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
     // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
-    receiveFire: (coord: Coord.IMongooseCoord) => boolean // returns true if something has been hit, false if water, exception if it was already hit
+    /** returns true if hit, false if water, exception if it was already hit */
+    receiveFire: (coord: game.Coord) => boolean,
+    areAllShipsHit: () => boolean
 }
 
 const matchPlayerSideSchema = new mongoose.Schema(
@@ -72,50 +75,73 @@ matchPlayerSideSchema.methods.configFleet = function (
         return false;
     }
 
-    //this.FleetConfig = fleetConfig;
-    const bfCells: game_server.ServerSideBattleFieldCell[][] = [];
+    const bfCells: game_server.IServerSideBattleFieldCell[][] = [];
 
     // create empty field
     for (let x = 0; x < matchSettings.BattleFieldWidth; x++) {
         bfCells[x] = [];
         for (let y = 0; y < matchSettings.BattleFieldHeight; y++) {
-            bfCells[x][y] = new game_server.ServerSideBattleFieldCell();
+            bfCells[x][y] = { ShipType: game.ShipType.NoShip, FireReceivedDateTime: null } as game_server.IServerSideBattleFieldCell;
         }
     }
 
     // place ships
     for (let sp of shipPlacements) {
         for (let i = 0; i < sp.Type; i++) {
-            if (sp.Orientation == game.ShipOrientation.Horizontal)
-                bfCells[sp.Coord.X + i][sp.Coord.Y] = new game_server.ServerSideBattleFieldCell(sp.Type);
-            else
-                bfCells[sp.Coord.X][sp.Coord.Y + i] = new game_server.ServerSideBattleFieldCell(sp.Type);
+            let cell = (sp.Orientation == game.Orientation.Horizontal) ? bfCells[sp.Coord.X + i][sp.Coord.Y] : bfCells[sp.Coord.X][sp.Coord.Y + i];
+            (cell as utils_2_8.Mutable<game_server.IServerSideBattleFieldCell>).ShipType = sp.Type;
         }
     }
 
-    //    this.BattleFieldCells = bfCells as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][];
     for (let x = 0; x < bfCells.length; x++) {
         this.BattleFieldCells[x] = [];
         for (let y = 0; y < bfCells[x].length; y++) {
+            // const newCell = ServerSideBattleFieldCell.create(bfCells[x][y]);
+            // this.BattleFieldCells[x][y] = newCell;
             this.BattleFieldCells[x][y] = bfCells[x][y] as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell;
         }
     }
 
-    // this.markModified("BattleFieldCells");
+    this.markModified("BattleFieldCells");
 
     return this.isConfigured(matchSettings);
 };
-matchPlayerSideSchema.methods.receiveFire = function (this: IMongooseMatchPlayerSide, coord: Coord.IMongooseCoord): boolean {
+matchPlayerSideSchema.methods.receiveFire = function (
+    this: IMongooseMatchPlayerSide,
+    coord: game.Coord): boolean {
 
-    const cellStatus = this.BattleFieldCells[coord.X][coord.Y];
+    if (coord == null)
+        throw new Error("Coord cannot be null");
 
-    // this check is here to allow blinded player to fire twice on the same cell, alternative might be to check if the player is blind before calling cell.receiveFire() to prevent cell from throwing an exception
-    if (cellStatus.HasReceivedFire)
+    const cell = this.BattleFieldCells[coord.X][coord.Y];
+    if (cell.FireReceivedDateTime != null)
         throw new Error("This cell has already been shot to!");
 
-    cellStatus.receiveFire();
+    try {
+        cell.FireReceivedDateTime = new Date();
+        this.markModified("BattleFieldCells");
+    }
+    catch (ex) {
+        console.log(ex);
+    }
+    finally {
+        return (cell.ShipType != game.ShipType.NoShip);
+    }
+};
+matchPlayerSideSchema.methods.areAllShipsHit = function (
+    this: IMongooseMatchPlayerSide): boolean {
 
-    return cellStatus.HasReceivedFire;
+    for (let row of this.BattleFieldCells) {
+        for (let cell of row) {
+            // if there is at least one cell which contains a ship
+            // and that ship is not hit, return false
+            if (cell.ShipType != game.ShipType.NoShip
+                && cell.FireReceivedDateTime == null)
+                return false;
+        }
+    }
+
+    return true;
 };
 
 export function getSchema() {

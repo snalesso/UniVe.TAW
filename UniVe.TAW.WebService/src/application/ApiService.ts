@@ -13,8 +13,10 @@ import UsersRoutes from './routing/UsersRoutes';
 import GameRoutes from './routing/GameRoutes';
 
 import * as Match from '../domain/models/mongodb/mongoose/Match';
+import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as net from '../infrastructure/net';
+import * as utils from '../infrastructure/utils';
 
 // TODO: rename into WebService?
 export default class ApiService {
@@ -75,13 +77,23 @@ export default class ApiService {
                 () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    console.log("deleting all matches ...");
+                    // console.log("deleting all matches ...");
+
+                    PendingMatch.getModel().find().then(pms => {
+
+                        for (let pm of pms) {
+                            pm.remove();
+                            console.log("deleted PM (id: " + pm._id.toHexString() + ")");
+                        }
+                    }).catch(error => { console.log("error deleting pending match") });
+
+                    console.log("all pending matches deleted");
 
                     Match.getModel().find().then(matches => {
 
                         for (let m of matches) {
                             m.remove();
-                            console.log("deleted (id: " + m._id.toHexString() + ")");
+                            console.log("deleted M (id: " + m._id.toHexString() + ")");
                         }
                     }).catch(error => { console.log("error deleting match") });
 
@@ -94,8 +106,8 @@ export default class ApiService {
                         "connection",
                         function (client) {
                             client.emit("ciao", { data: 3232 });
-                            console.log("Socket.io client connected");
-                            client.on("disconnection", (data) => console.log("Socket.io client disconnected"));
+                            console.log("Socket.io connection from " + client.id);
+                            client.on("disconnect", (data) => console.log("Socket.io disconnection from " + client.id));
                         });
 
                     this._httpServer.listen(
