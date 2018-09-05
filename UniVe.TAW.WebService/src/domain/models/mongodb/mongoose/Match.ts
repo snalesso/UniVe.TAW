@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 import * as Constants from './Constants';
 import * as MatchPlayerSide from './MatchPlayerSide';
 import * as ShipPlacement from './ShipPlacement';
-import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
+import * as ServerSideBattleFieldCell from './BattleFieldCell';
 import * as User from './User';
 //import * as BattleFieldSettings from './BattleFieldSettings';
 import * as MatchSettings from './MatchSettings';

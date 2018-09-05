@@ -27,6 +27,7 @@ import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlay
 import * as  ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipTypeAvailability } from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipPlacement } from '../../domain/models/mongodb/mongoose/ShipPlacement';
+import * as cors from 'cors';
 
 export default class GameRoutes extends RoutesBase {
 
@@ -40,15 +41,16 @@ export default class GameRoutes extends RoutesBase {
 
         this._router.use(bodyParser.urlencoded({ extended: true }));
         this._router.use(bodyParser.json());
-        this._router.use((req, res, next) => {
-            res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
-            res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-            if (req.method === 'OPTIONS') {
-                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-                return res.status(httpStatusCodes.OK).json({});
-            }
-            next();
-        });
+        this._router.use(cors());
+        // this._router.use((req, res, next) => {
+        //     res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
+        //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        //     if (req.method === 'OPTIONS') {
+        //         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+        //         return res.status(httpStatusCodes.OK).json({});
+        //     }
+        //     next();
+        // });
 
         this._router.get(
             "/canCreateMatch",

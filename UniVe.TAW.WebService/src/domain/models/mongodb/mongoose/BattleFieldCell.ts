@@ -4,9 +4,9 @@ import * as game_server from '../../../../infrastructure/game.server';
 import * as game_client from '../../../../infrastructure/game.client';
 import * as Constants from './Constants';
 
-export type IMongooseServerSideBattleFieldCell = game_server.IServerSideBattleFieldCell & mongoose.Document;
+export type IMongooseBattleFieldCell = game_server.IBattleFieldCell & mongoose.Document;
 
-const serverSideBattleFieldCellSchema = new mongoose.Schema(
+const battleFieldCellSchema = new mongoose.Schema(
     {
         ShipType: {
             required: true,
@@ -19,8 +19,8 @@ const serverSideBattleFieldCellSchema = new mongoose.Schema(
     }, {
         id: false
     });
-serverSideBattleFieldCellSchema.methods.receiveFire = function (
-    this: IMongooseServerSideBattleFieldCell,
+battleFieldCellSchema.methods.receiveFire = function (
+    this: IMongooseBattleFieldCell,
     coord: game.Coord): void {
 
     if (this.FireReceivedDateTime != null)
@@ -30,18 +30,18 @@ serverSideBattleFieldCellSchema.methods.receiveFire = function (
 };
 
 export function getSchema() {
-    return serverSideBattleFieldCellSchema;
+    return battleFieldCellSchema;
 }
 
 let serverSideBattleFieldCellModel;
-export function getModel(): mongoose.Model<IMongooseServerSideBattleFieldCell> {
+export function getModel(): mongoose.Model<IMongooseBattleFieldCell> {
     if (!serverSideBattleFieldCellModel) {
-        serverSideBattleFieldCellModel = mongoose.model(Constants.ModelsNames.ServerSideBattleFieldCell, serverSideBattleFieldCellSchema);
+        serverSideBattleFieldCellModel = mongoose.model(Constants.ModelsNames.ServerSideBattleFieldCell, battleFieldCellSchema);
     }
     return serverSideBattleFieldCellModel;
 }
 
-export function create(data: any): IMongooseServerSideBattleFieldCell {
+export function create(data: any): IMongooseBattleFieldCell {
     let matchModelCtor = getModel();
     let newPendingMatch = new matchModelCtor(data);
 

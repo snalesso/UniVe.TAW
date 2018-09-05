@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 import * as Constants from './Constants';
 import * as Coord from './Coord';
 import * as ShipPlacement from './ShipPlacement';
-import * as ServerSideBattleFieldCell from './ServerSideBattleFieldCell';
+import * as ServerSideBattleFieldCell from './BattleFieldCell';
 //import * as BattleFieldSettings from './BattleFieldSettings';
 import * as MatchSettings from './MatchSettings';
 
@@ -17,7 +17,7 @@ import * as utils_2_8 from '../../../../infrastructure/utils-2.8';
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
     //FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
-    BattleFieldCells: ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell[][], //ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
+    BattleFieldCells: ServerSideBattleFieldCell.IMongooseBattleFieldCell[][], //ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
     // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
     isConfigured: (matchSettings: MatchSettings.IMongooseMatchSettings) => boolean,
     configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
@@ -75,13 +75,13 @@ matchPlayerSideSchema.methods.configFleet = function (
         return false;
     }
 
-    const bfCells: game_server.IServerSideBattleFieldCell[][] = [];
+    const bfCells: game_server.IBattleFieldCell[][] = [];
 
     // create empty field
     for (let x = 0; x < matchSettings.BattleFieldWidth; x++) {
         bfCells[x] = [];
         for (let y = 0; y < matchSettings.BattleFieldHeight; y++) {
-            bfCells[x][y] = { ShipType: game.ShipType.NoShip, FireReceivedDateTime: null } as game_server.IServerSideBattleFieldCell;
+            bfCells[x][y] = { ShipType: game.ShipType.NoShip, FireReceivedDateTime: null } as game_server.IBattleFieldCell;
         }
     }
 
@@ -89,7 +89,7 @@ matchPlayerSideSchema.methods.configFleet = function (
     for (let sp of shipPlacements) {
         for (let i = 0; i < sp.Type; i++) {
             let cell = (sp.Orientation == game.Orientation.Horizontal) ? bfCells[sp.Coord.X + i][sp.Coord.Y] : bfCells[sp.Coord.X][sp.Coord.Y + i];
-            (cell as utils_2_8.Mutable<game_server.IServerSideBattleFieldCell>).ShipType = sp.Type;
+            (cell as utils_2_8.Mutable<game_server.IBattleFieldCell>).ShipType = sp.Type;
         }
     }
 
@@ -98,7 +98,7 @@ matchPlayerSideSchema.methods.configFleet = function (
         for (let y = 0; y < bfCells[x].length; y++) {
             // const newCell = ServerSideBattleFieldCell.create(bfCells[x][y]);
             // this.BattleFieldCells[x][y] = newCell;
-            this.BattleFieldCells[x][y] = bfCells[x][y] as ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell;
+            this.BattleFieldCells[x][y] = bfCells[x][y] as ServerSideBattleFieldCell.IMongooseBattleFieldCell;
         }
     }
 

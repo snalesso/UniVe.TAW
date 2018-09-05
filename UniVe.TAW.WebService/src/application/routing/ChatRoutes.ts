@@ -19,7 +19,7 @@ import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
 import * as cors from 'cors';
 
-export default class UsersRoutes extends RoutesBase {
+export default class ChatRoutes extends RoutesBase {
 
     private readonly _jwtValidator: expressJwt.RequestHandler;
 

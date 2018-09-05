@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
@@ -10,19 +10,22 @@ import * as utils from '../../../../../assets/imported/unive.taw.webservice/infr
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-own-turn-controller',
   templateUrl: './own-turn-controller.component.html',
   styleUrls: ['./own-turn-controller.component.css']
 })
-export class OwnTurnControllerComponent implements OnInit {
+export class OwnTurnControllerComponent implements OnInit, OnDestroy {
 
   private readonly _matchId: string;
 
   private _ownTurnInfo: DTOs.IOwnTurnInfoDto;
   private _firing: boolean = false;
   private _isRebuildingCells: boolean = true;
+
+  private _isSubscribedToMatchUpdated: boolean = false;
 
   constructor(
     private readonly _router: Router,
@@ -32,6 +35,8 @@ export class OwnTurnControllerComponent implements OnInit {
 
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
   }
+
+  public get EnemyUsername(): string { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Username : "Enemy"; }
 
   public get BattleFieldWidth(): number { return (this._ownTurnInfo && this._ownTurnInfo.MatchSettings) ? this._ownTurnInfo.MatchSettings.BattleFieldWidth : 0; }
 
@@ -131,6 +136,16 @@ export class OwnTurnControllerComponent implements OnInit {
           }
           else {
             this._ownTurnInfo = response.Content;
+
+            if (!this._isSubscribedToMatchUpdated) {
+              this._isSubscribedToMatchUpdated = true;
+              this._socketIOService.on(
+                ServiceEventKeys.MatchUpdated,
+                (matchStarted: DTOs.IMatchStartedEventDto) => {
+                  this.updateInfo();
+                });
+            }
+
             this.rebuildGridCells();
           }
         },
@@ -140,22 +155,11 @@ export class OwnTurnControllerComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this._socketIOService.once(
-      ServiceEventKeys.MatchStarted,
-      (matchStarted: DTOs.IMatchStartedEventDto) => {
-        this.updateInfo();
-      });
-
-    this._socketIOService.on(
-      ServiceEventKeys.MatchUpdated,
-      (matchStarted: DTOs.IMatchStartedEventDto) => {
-        this.updateInfo();
-      });
-
     this.updateInfo();
-    // console.log("ngOnInit");
 
-    // TODO: handle no resposne
+  }
 
+  ngOnDestroy(): void {
+    this._socketIOService.removeListener(ServiceEventKeys.MatchUpdated);
   }
 }

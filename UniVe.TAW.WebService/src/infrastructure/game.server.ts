@@ -1,6 +1,6 @@
 import * as game from './game';
 
-export interface IServerSideBattleFieldCell {
+export interface IBattleFieldCell {
 
     readonly ShipType: game.ShipType;
     FireReceivedDateTime: Date;
