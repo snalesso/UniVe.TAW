@@ -92,6 +92,7 @@ export class GameService {
   }
 
   // TODO: rename
+  // TODO: return only bool instead of DTOs.IOwnSideMatchConfigStatus
   public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
     const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/config";
     const options = {
@@ -102,7 +103,7 @@ export class GameService {
 
     //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.post<net.HttpMessage<DTOs.IOwnMatchSideConfigStatus>>(endPoint, fleetConfig, options);
+    return this._http.post<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, fleetConfig, options);
   }
 
   public getMatchConfigStatus(matchId: string) {
@@ -116,7 +117,7 @@ export class GameService {
 
     //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.get<net.HttpMessage<DTOs.IOwnMatchSideConfigStatus>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, options);
   }
 
   public getOwnTurnInfo(matchId: string) {
@@ -153,6 +154,18 @@ export class GameService {
     };
 
     return this._http.post<net.HttpMessage<DTOs.IAttackResultDto>>(endPoint, singleShot, options);
+  }
+
+  public getEnemyTurnInfo(matchId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/matches/" + matchId + "/enemyTurnInfo";
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.get<net.HttpMessage<DTOs.IEnemyTurnInfoDto>>(endPoint, options);
   }
 
 }

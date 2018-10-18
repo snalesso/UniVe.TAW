@@ -11,7 +11,7 @@ import * as Coord from './Coord';
 
 import * as game from '../../../../infrastructure/game';
 //import * as game_client from '../../../../infrastructure/game.client';
-import * as chat from '../../../../infrastructure/chat';
+//import * as chat from '../../../../infrastructure/chat';
 
 export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
@@ -27,7 +27,7 @@ export interface IMongooseMatch extends mongoose.Document {
     // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     areBothConfigured: () => boolean,
     configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
-    /** returns true if hit, false if water, exception if it was already hit */
+    /** returns true if a ship was hit, false if water, exception if it was already hit */
     fire: (firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord) => boolean,
     //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
     getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,

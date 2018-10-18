@@ -39,21 +39,11 @@ export class FleetConfiguratorComponent implements OnInit {
     //this.WhenToggleChanged.subscribe(v => console.log("fc - toggle - " + v));
   }
 
-  private _whenIsConfigNeededChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private _whenIsConfigNeededChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   @Output()
   public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged; }
 
-  private _toggle: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output()
-  public get WhenToggleChanged() { return this._toggle; }
-
-  private _toggleV: boolean = false;
-  public toggle() {
-    this._toggleV = !this._toggleV;
-    this._toggle.emit(this._toggleV);
-  }
-
-  private _ownMatchSideConfigStatus: DTOs.IOwnMatchSideConfigStatus;
+  private _ownMatchSideConfigStatus: DTOs.IOwnSideMatchConfigStatus;
 
   public get BattleFieldWidth(): number {
     if (this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.Settings != null)
@@ -160,12 +150,10 @@ export class FleetConfiguratorComponent implements OnInit {
             else {
               this._ownMatchSideConfigStatus = response.Content;
               this._whenIsConfigNeededChanged.next(this._ownMatchSideConfigStatus.IsConfigNeeded);
-              console.log("_whenIsConfigNeededChanged = " + this._ownMatchSideConfigStatus.IsConfigNeeded);
               this._canSubmitConfig = this._canRandomize = this._ownMatchSideConfigStatus.IsConfigNeeded;
 
               if (!this._ownMatchSideConfigStatus.IsConfigNeeded) {
                 this._whenIsConfigNeededChanged.complete();
-                console.log("_whenIsConfigNeededChanged.complete");
               }
             }
           }
@@ -191,7 +179,7 @@ export class FleetConfiguratorComponent implements OnInit {
     this.updateMatchConfigStatus();
   }
 
-  private updateMatchConfigStatus(maxRetries: number = 1) {
+  private updateMatchConfigStatus() {
 
     // TODO: handle no resposne
     // TODO: get config info only, anche determine at ngOnInit if it's visible or not
@@ -205,7 +193,7 @@ export class FleetConfiguratorComponent implements OnInit {
           }
           else if (!response.Content) {
             // TODO: handle
-            console.log("The server returned a null match dto!");
+            console.log("The server returned null");
           }
           else {
             this._ownMatchSideConfigStatus = response.Content;

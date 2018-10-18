@@ -18,20 +18,3 @@
 // export class Subscription {
 //     public Unsubscribe(): void { }
 // }
-
-export class RawMessage {
-
-    public constructor(
-        public readonly Text: string,
-        public readonly SenderId: string) {
-    }
-}
-
-export class TimeStampedMessage extends RawMessage {
-
-    public constructor(rawMessage: RawMessage) {
-        super(rawMessage.Text, rawMessage.SenderId);
-    }
-
-    public readonly DateTime: Date = new Date();
-}

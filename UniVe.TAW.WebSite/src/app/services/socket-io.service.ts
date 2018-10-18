@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import * as socketIOClient from 'socket.io-client';
-import { Observable, Subscriber } from 'rxjs';
+import * as SocketIOClient from 'socket.io-client';
+import * as EngineIOClient from 'engine.io-client';
+import { Observable, Subscriber, config } from 'rxjs';
 import ServiceConstants from './ServiceConstants';
 import { AuthService } from './auth.service';
 import { tap, catchError, map, share } from 'rxjs/operators';
@@ -10,59 +11,71 @@ import { tap, catchError, map, share } from 'rxjs/operators';
 })
 export class SocketIOService {
 
-  private _socket: SocketIOClient.Socket = socketIOClient(ServiceConstants.ServerAddress);
+  private readonly _sockets: SocketIOClient.Socket[] = [];
 
+  private _socket: SocketIOClient.Socket;
   private _subscribersCounter: number = 0;
 
-  constructor(private readonly _authService: AuthService) { }
+  constructor(private readonly _authService: AuthService) {
 
-  // private getConnection() {
+    //this._authService.WhenTokenChanged.pipe(tap((x) => this._openSockets[0].io.))
+  }
 
-  //   if (!this._socket) {
-  //     this._socket ;
-  //   }
-  //   else {
-  //     if (this._socket.disconnected) {
-  //       this._socket.connect();
-  //     }
-  //   }
+  private getSocket() {
 
-  //   return this._socket;
-  // }
+    if (this._socket != null)
+      return this._socket;
+
+    if (this._authService.IsLogged) {
+      this._socket = SocketIOClient(
+        ServiceConstants.ServerAddress,
+        {
+          transportOptions: {
+            polling: {
+              extraHeaders: {
+                'Authorization': 'Bearer ' + this._authService.Token
+              }
+            }
+          }
+        });
+    }
+
+    return this._socket;
+  }
 
   on(eventName: string, callback: Function) {
-    this._socket.on(eventName, callback);
+    this.getSocket().on(eventName, callback);
   }
 
   once(eventName: string, callback: Function) {
-    this._socket.once(eventName, callback);
+    this.getSocket().once(eventName, callback);
   }
 
   connect() {
-    return this._socket.connect();
+    return this.getSocket().connect();
   }
 
   disconnect(close?: any) {
-    return this._socket.disconnect.apply(this._socket, arguments);
+    return this.getSocket().disconnect.apply(this._socket, arguments);
   }
 
   emit(eventName: string, data?: any, callback?: Function) {
-    return this._socket.emit.apply(this._socket, arguments);
+    return this.getSocket().emit.apply(this._socket, arguments);
   }
 
   removeListener(eventName: string, callback?: Function) {
-    return this._socket.removeListener.apply(this._socket, arguments);
+    return this.getSocket().removeListener.apply(this._socket, arguments);
   }
 
   removeAllListeners(eventName?: string) {
-    return this._socket.removeAllListeners.apply(this._socket, arguments);
+    return this.getSocket().removeAllListeners.apply(this._socket, arguments);
   }
 
   fromEvent<T>(eventName: string): Observable<T> {
 
     this._subscribersCounter++;
     return Observable.create((observer) => {
-      this._socket.on(eventName, (data: T) => {
+      this.getSocket().on(eventName, (data: T) => {
         observer.next(data);
       });
       return () => {

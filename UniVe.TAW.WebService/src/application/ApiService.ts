@@ -17,8 +17,10 @@ import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as net from '../infrastructure/net';
 import * as utils from '../infrastructure/utils';
+import ServiceEventKeys from './services/ServiceEventKeys';
 
 // TODO: rename into WebService?
+// TODO: use cors()
 export default class ApiService {
 
     private readonly _dbUrl = 'mongodb://localhost:27017/univetaw';
@@ -104,10 +106,12 @@ export default class ApiService {
 
                     this._socketIOServer.on(
                         "connection",
-                        function (client) {
-                            client.emit("ciao", { data: 3232 });
-                            console.log("Socket.io connection from " + client.id);
-                            client.on("disconnect", (data) => console.log("Socket.io disconnection from " + client.id));
+                        (clientSocket) => {
+                            clientSocket.emit(ServiceEventKeys.WhoAreYou, (response) => { });
+
+                            clientSocket.emit("ciao", { data: 3232 });
+                            console.log("Socket.io connection from " + clientSocket.id);
+                            clientSocket.on("disconnect", (data) => console.log("Socket.io disconnection from " + clientSocket.id));
                         });
 
                     this._httpServer.listen(

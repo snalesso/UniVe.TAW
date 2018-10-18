@@ -41,7 +41,7 @@ export class AuthService implements OnDestroy {
 
   public get Token() { return localStorage.getItem(this.AccessTokenKey); }
   private readonly _whenTokenChanged: BehaviorSubject<string>;
-  public get Token_Observable() { return this._whenTokenChanged.asObservable(); }
+  public get WhenTokenChanged() { return this._whenTokenChanged.asObservable(); }
 
   public get LoggedUser() { return this._whenLoggedUserChanged.getValue(); }
   private readonly _whenLoggedUserChanged: BehaviorSubject<DTOs.IUserJWTData>;

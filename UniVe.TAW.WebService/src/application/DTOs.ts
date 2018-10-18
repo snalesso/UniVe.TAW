@@ -1,6 +1,8 @@
 import * as enums from "../infrastructure/identity";
 import * as game from "../infrastructure/game";
 import * as game_client from "../infrastructure/game.client";
+import { read } from "fs";
+//import * as chat from "../infrastructure/chat";
 
 export interface ISignupRequestDto {
     Username: string;
@@ -49,9 +51,12 @@ export interface IMatchDto {
 export interface IOwnSideMatchStatus {
     IsConfigNeeded: boolean;
     IsMatchStarted: boolean;
+    //IsMatchEnded: boolean; // TODO: remove, EndDateTime is enough, same for start
+    EndDateTime: Date;
+    DidIWin: boolean;
 }
 
-export interface IOwnMatchSideConfigStatus {
+export interface IOwnSideMatchConfigStatus {
     IsConfigNeeded: boolean;
     Settings: game.IMatchSettings;
 }
@@ -59,16 +64,18 @@ export interface IOwnMatchSideConfigStatus {
 export interface IPlayersTurnInfoDto {
     MatchId: string;
     MatchSettings: game.IMatchSettings;
+    MatchEndedDateTime: Date;
+    OwnsMove: boolean;
 }
 
 export interface IOwnTurnInfoDto extends IPlayersTurnInfoDto {
     Enemy: IUserDto;
     EnemyField: ReadonlyArray<ReadonlyArray<game_client.EnemyBattleFieldCellStatus>>;
-    IsOwnTurn: boolean;
+    //IsOwnTurn: boolean;
 }
 
 export interface IEnemyTurnInfoDto extends IPlayersTurnInfoDto {
-    OwnField: ReadonlyArray<ReadonlyArray<game_client.OwnBattleFieldCellStatus>>;
+    OwnField: ReadonlyArray<ReadonlyArray<game_client.IOwnBattleFieldCell>>;
 }
 
 export interface IMatchSnapshotDto {
@@ -105,18 +112,51 @@ export interface IPlayablesDto {
     JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
 }
 
-export interface IMatchReadyEventDto {
-    MatchId: string;
+export interface IMatchEventDto {
+    readonly MatchId: string;
 }
 
-export interface IMatchStartedEventDto {
-    MatchId: string;
-    InActionPlayerId: string;
+/** When both players joined but someone didn't config his fleet yet **/
+export interface IMatchReadyEventDto extends IMatchEventDto {
+}
+
+/** When both players joined the match and both configured their fleet */
+export interface IMatchStartedEventDto extends IMatchEventDto {
+    //readonly StartDateTime: Date;
+    readonly InActionPlayerId: string;
+}
+
+export interface IMatchEndedEventDto extends IMatchEventDto {
+    readonly EndDateTime: Date;
+    readonly WinnerId: string;
+    readonly IsResigned: boolean;
 }
 
 export interface IAttackResultDto {
     readonly NewEnemyField: ReadonlyArray<ReadonlyArray<game_client.EnemyBattleFieldCellStatus>>;
-    CanFireAgain: boolean;
+    readonly EnemyFieldCellChanges: ReadonlyArray<game_client.IEnemyBattleFieldCell>;
+    readonly StillOwnsMove: boolean;
+    //readonly IsMatchEnded: boolean;
+}
+
+export interface INewMessage {
+    readonly Text: string;
+    readonly SenderId: string;
+    readonly AddresseeId: string;
+}
+
+// export interface DeliveredMessage extends INewMessage {
+//     readonly Timestamp: Date;
+// }
+
+export interface IChatHistoryMessageDto {
+    readonly IsMine: boolean;
+    readonly Text: string;
+    readonly Timestamp: Date;
+}
+
+export interface IYouGotShotEventDto {
+    readonly OwnFieldCellChanges: ReadonlyArray<game_client.IOwnBattleFieldCell>;
 }
 
 // export interface IMatchInfoDto extends IMatchDto {

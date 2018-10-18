@@ -9,15 +9,17 @@ import * as socketio from 'socket.io';
 
 import * as net from '../../infrastructure/net';
 import * as identity from '../../infrastructure/identity';
-import * as utils from '../../infrastructure/utils-2.8';
+import * as utils_2_8 from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
+import * as UserToUserChatMessages from '../../domain/models/mongodb/mongoose/UserToUserChatMessages';
 
 import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
 import * as cors from 'cors';
+import { IMongooseChatMessage } from '../../domain/models/mongodb/mongoose/ChatMessage';
 
 export default class ChatRoutes extends RoutesBase {
 
@@ -32,137 +34,139 @@ export default class ChatRoutes extends RoutesBase {
         this._router.use(bodyParser.urlencoded({ extended: true }));
         this._router.use(bodyParser.json());
         this._router.use(cors());
-        // this._router.use((req, res, next) => {
-        //     res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
-        //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        //     if (req.method === 'OPTIONS') {
-        //         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-        //         return res.status(httpStatusCodes.OK).json({});
-        //     }
-        //     next();
-        // });
 
         this._router.post(
-            '/signup',
+            '/sendMessage',
+            this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<boolean>;
+                let responseData: net.HttpMessage<DTOs.IChatHistoryMessageDto>;
 
-                const signupReq = request.body as DTOs.ISignupRequestDto;
+                const incMsg = request.body as DTOs.INewMessage;
 
-                // TODO: test all branches
-                if (!signupReq) {
-                    response.status(httpStatusCodes.FORBIDDEN);
+                if (!incMsg) {
+                    response.status(httpStatusCodes.BAD_REQUEST);
                 } else {
-                    //let feawfw = signupReq as User.IMongoUser;
-                    let newUserSkel = {} as utils.Mutable<User.IMongooseUser>;
-                    newUserSkel.Username = signupReq.Username.trim();
-                    newUserSkel.CountryId = signupReq.CountryId;
-                    newUserSkel.BirthDate = signupReq.BirthDate;
-                    newUserSkel.Roles = identity.UserRoles.Player;
 
-                    let newUser = User.create(newUserSkel);
-                    newUser.setPassword(signupReq.Password);
-                    newUser.save()
-                        .then(result => {
-                            console.log("user created: " + JSON.stringify(result));
-                            responseData = new net.HttpMessage<boolean>(true);
+
+                    let criteria = {
+                        SenderId: new mongoose.Types.ObjectId(incMsg.SenderId),
+                        AddresseeId: new mongoose.Types.ObjectId(incMsg.AddresseeId)
+                    } as utils_2_8.Mutable<UserToUserChatMessages.IMongooseUserToUserChatMessages>;
+
+                    UserToUserChatMessages.getModel()
+                        .findOne(criteria)
+                        .then(userMessages => {
+                            const loggedMsg = userMessages.logMessage(incMsg.Text);
+                            const loggedMsgDto = {
+                                IsMine: true,
+                                Text: loggedMsg.Text,
+                                Timestamp: loggedMsg.Timestamp
+                            } as DTOs.IChatHistoryMessageDto;
+
+                            responseData = new net.HttpMessage(loggedMsgDto);
                             response
-                                .status(httpStatusCodes.CREATED)
+                                .status(httpStatusCodes.OK)
                                 .json(responseData);
                         })
                         .catch((error: mongodb.MongoError) => {
-                            console.log("user creation failed: " + JSON.stringify(error));
 
-                            const aeuCriteria = {} as utils.Mutable<User.IMongooseUser>;
-                            aeuCriteria.Username = newUser.Username;
-                            User.getModel()
-                                .findOne(aeuCriteria)
-                                .then((takenUser) => {
+                            const u2uCMSkel = criteria;
+                            UserToUserChatMessages
+                                .create(u2uCMSkel)
+                                .save()
+                                .then(userMessages => {
 
-                                    let errMsg: string;
-                                    let statusCode: number;
-                                    switch (error.code) {
-                                        case 11000:
-                                            errMsg = "Username taken";
-                                            statusCode = httpStatusCodes.CONFLICT;
-                                            break;
-                                        default:
-                                            errMsg = "Uknown error";
-                                            statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
-                                            break;
-                                    }
-                                    responseData = new net.HttpMessage<boolean>(false, errMsg);
+                                    const loggedMsg = userMessages.logMessage(incMsg.Text);
+                                    const loggedMsgDto = {
+                                        IsMine: true,
+                                        Text: loggedMsg.Text,
+                                        Timestamp: loggedMsg.Timestamp
+                                    } as DTOs.IChatHistoryMessageDto;
+
+                                    responseData = new net.HttpMessage(loggedMsgDto);
                                     response
-                                        .status(statusCode)
+                                        .status(httpStatusCodes.OK)
+                                        .json(responseData);
+                                })
+                                .catch((error: mongodb.MongoError) => {
+
+                                    responseData = new net.HttpMessage(null, error.message);
+                                    response
+                                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                                         .json(responseData);
                                 });
+
                         });
                 }
             });
 
         this._router.get(
-            "/:" + RoutingParamKeys.UserId,
+            '/history/:' + RoutingParamKeys.UserId,
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                const userId = request.params[RoutingParamKeys.UserId];
-                let responseData: net.HttpMessage<DTOs.IUserDto> = null;
+                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatHistoryMessageDto>>;
 
-                User.getModel()
-                    .findById(userId)
-                    .then((mongoUser) => {
-                        let userDto: DTOs.IUserDto = {
-                            Id: mongoUser.id,
-                            Username: mongoUser.Username,
-                            Age: moment().diff(mongoUser.BirthDate, "years", false),
-                            CountryId: mongoUser.CountryId
-                        };
-                        responseData = new net.HttpMessage<DTOs.IUserDto>(userDto);
+                const userJWTData = (request.user as DTOs.IUserJWTData);
+                const currentUserObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const otherUserObjectId = request.params[RoutingParamKeys.UserId];
+
+                let currentUserMessagesCriteria = {
+                    SenderId: currentUserObjectId,
+                    AddresseeId: otherUserObjectId
+                } as utils_2_8.Mutable<UserToUserChatMessages.IMongooseUserToUserChatMessages>;
+                let otherUserMessagesCriteria = {
+                    SenderId: otherUserObjectId,
+                    AddresseeId: currentUserObjectId
+                } as utils_2_8.Mutable<UserToUserChatMessages.IMongooseUserToUserChatMessages>;
+
+                Promise.all(
+                    [
+                        UserToUserChatMessages.getModel().findOne(currentUserMessagesCriteria).exec(),
+                        UserToUserChatMessages.getModel().findOne(otherUserMessagesCriteria).exec()
+                    ])
+                    .then(messages => {
+                        const [currentUserMessages, otherUserMessages] = messages;
+
+
+                    })
+
+                UserToUserChatMessages.getModel()
+                    .find({ $or: [currentUserMessagesCriteria, otherUserMessagesCriteria] })
+                    .exec()
+                    .then(userMessages => {
+
+                        let fullChat: DTOs.IChatHistoryMessageDto[] = [];
+
+                        for (let u2ucm of userMessages) {
+                            const isMine = u2ucm.SenderId.equals(currentUserObjectId);
+                            for (let m of u2ucm.Messages) {
+                                fullChat.push({
+                                    IsMine: isMine,
+                                    Text: m.Text,
+                                    Timestamp: m.Timestamp
+                                } as DTOs.IChatHistoryMessageDto);
+                            }
+                        }
+
+                        fullChat = fullChat.sort((a, b) => {
+                            if (a.Timestamp < b.Timestamp)
+                                return -1;
+
+                            if (a.Timestamp > b.Timestamp)
+                                return 1;
+
+                            return 0;
+                        });
+
+                        responseData = new net.HttpMessage(fullChat);
                         response
                             .status(httpStatusCodes.OK)
                             .json(responseData);
                     })
                     .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage<DTOs.IUserDto>(null, error.message);
-                        response
-                            .status(httpStatusCodes.OK)
-                            .json(responseData);
                     });
-            });
-
-        // TODO: add authentication and allow delete only to same user
-        this._router.delete(
-            "/:" + RoutingParamKeys.UserId,
-            this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-                const userId = request.params[RoutingParamKeys.UserId];
-                let responseData: net.HttpMessage<boolean> = null;
-
-                User.getModel()
-                    .findByIdAndRemove(
-                        userId,
-                        (error: mongodb.MongoError, deletedUser) => {
-                            if (error) {
-                                responseData = new net.HttpMessage<boolean>(null, error.message);
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            }
-                            else if (!deletedUser) {
-                                responseData = new net.HttpMessage<boolean>(null, "User not found!");
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            }
-                            else {
-                                responseData = new net.HttpMessage<boolean>(true);
-                                response
-                                    .status(httpStatusCodes.OK)
-                                    .json(responseData);
-                            }
-                        });
             });
     }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
@@ -11,6 +11,7 @@ import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
 import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-own-turn-controller',
@@ -26,11 +27,13 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   private _isRebuildingCells: boolean = true;
 
   private _isSubscribedToMatchUpdated: boolean = false;
+  private _mue: string;
 
   constructor(
     private readonly _router: Router,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _gameService: GameService,
+    private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
 
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
@@ -43,7 +46,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   private _gridCells: game_client.IEnemyBattleFieldCell[][];
   public get Cells() { return this._gridCells; }
 
-  private get IsMyTurn(): boolean { return this._ownTurnInfo != null ? this._ownTurnInfo.IsOwnTurn : false; }
+  private get IsMyTurn(): boolean { return this._ownTurnInfo != null ? this._ownTurnInfo.OwnsMove : false; }
 
   public get IsEnabled(): boolean { return this.IsMyTurn && !this._isRebuildingCells && !this._firing; }
 
@@ -76,7 +79,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
           }
           else {
             this._ownTurnInfo.EnemyField = response.Content.NewEnemyField;
-            this._ownTurnInfo.IsOwnTurn = response.Content.CanFireAgain;
+            this._ownTurnInfo.OwnsMove = response.Content.StillOwnsMove;
             this.rebuildGridCells();
           }
 
@@ -139,11 +142,8 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
 
             if (!this._isSubscribedToMatchUpdated) {
               this._isSubscribedToMatchUpdated = true;
-              this._socketIOService.on(
-                ServiceEventKeys.MatchUpdated,
-                (matchStarted: DTOs.IMatchStartedEventDto) => {
-                  this.updateInfo();
-                });
+              this._mue = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
+              this._socketIOService.on(this._mue, (matchStarted: DTOs.IMatchStartedEventDto) => this.updateInfo());
             }
 
             this.rebuildGridCells();
@@ -160,6 +160,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._socketIOService.removeListener(ServiceEventKeys.MatchUpdated);
+    this._socketIOService.removeListener(this._mue);
+    this._isSubscribedToMatchUpdated = false;
   }
 }

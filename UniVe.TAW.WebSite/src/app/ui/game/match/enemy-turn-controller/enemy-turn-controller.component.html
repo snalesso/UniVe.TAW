@@ -1,13 +1,19 @@
-<p>
-  enemy-turn-controller works!
-</p>
+<div class="container-fluid">
 
-<div class="container">
-  <table id="bf-grid" class="bf-grid" style="border: 1px solid black; border-collapse: collapse; margin: 0 0 20px 0; height: 100%; width: 100%;">
-    <tbody>
-      <!-- <tr *ngFor="let row of BattleFieldDummyRows">
-        <td class="bf-grid-cell dropzone" *ngFor="let col of BattleFieldDummyCols">A</td>
-      </tr> -->
-    </tbody>
-  </table>
+  <div class="row justify-content-center">
+    <h1>My field</h1>
+  </div>
+
+  <div class="row justify-content-center">
+    <table id="bf-grid" class="bf-grid" [ngClass]="!IsEnabled ? 'bf-grid-disabled' : ''">
+      <tbody>
+        <tr *ngFor="let row of Cells">
+          <td class="bf-grid-cell" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
+            *ngFor="let cell of row">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
