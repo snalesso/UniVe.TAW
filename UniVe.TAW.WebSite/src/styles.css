@@ -30,3 +30,12 @@
 .bf-grid-cell-disabled {    
     cursor: default !important;
 }
+.chat-text-own {
+    color: royalblue;
+}
+.chat-text-enemy {
+    color: #cc0000;
+}
+.not-clickable{
+    cursor: default !important;
+}

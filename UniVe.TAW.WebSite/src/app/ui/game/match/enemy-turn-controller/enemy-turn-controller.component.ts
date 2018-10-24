@@ -90,6 +90,7 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
 
             if (!this._enemyTurnInfo.MatchEndedDateTime) {
 
+              // "you got shot" subscription
               if (!this._youGotShotEvent) {
                 this._youGotShotEvent = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.YouGotShot);
                 this._socketIOService.on(
@@ -100,13 +101,14 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
                       this._enemyTurnInfo.OwnField[change.Coord.X][change.Coord.Y].Status = change.Status;
                     }
                   });
-
-                this._socketIOService.once(
-                  ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded),
-                  (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
-                    this._enemyTurnInfo.MatchEndedDateTime = matchEndedEvent.EndDateTime;
-                  });
               }
+
+              // match ended subscription
+              this._socketIOService.once(
+                ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded),
+                (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
+                  this._enemyTurnInfo.MatchEndedDateTime = matchEndedEvent.EndDateTime;
+                });
             }
           }
         },

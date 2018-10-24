@@ -26,7 +26,6 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   private _firing: boolean = false;
   private _isRebuildingCells: boolean = true;
 
-  private _isSubscribedToMatchUpdated: boolean = false;
   private _mue: string;
 
   constructor(
@@ -78,9 +77,15 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
             console.log("The server returned null");
           }
           else {
-            this._ownTurnInfo.EnemyField = response.Content.NewEnemyField;
+            //this._ownTurnInfo.EnemyField = response.Content.NewEnemyField;
+            this._isRebuildingCells = true;
+            for (let change of response.Content.EnemyFieldCellChanges) {
+              this._gridCells[change.Coord.X][change.Coord.Y].Status = change.Status;
+            }
+            this._isRebuildingCells = false;
+
             this._ownTurnInfo.OwnsMove = response.Content.StillOwnsMove;
-            this.rebuildGridCells();
+            //this.rebuildGridCells();
           }
 
           this._firing = false;
@@ -140,8 +145,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
           else {
             this._ownTurnInfo = response.Content;
 
-            if (!this._isSubscribedToMatchUpdated) {
-              this._isSubscribedToMatchUpdated = true;
+            if (!this._mue) {
               this._mue = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
               this._socketIOService.on(this._mue, (matchStarted: DTOs.IMatchStartedEventDto) => this.updateInfo());
             }
@@ -160,7 +164,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._socketIOService.removeListener(this._mue);
-    this._isSubscribedToMatchUpdated = false;
+    if (this._mue)
+      this._socketIOService.removeListener(this._mue);
   }
 }

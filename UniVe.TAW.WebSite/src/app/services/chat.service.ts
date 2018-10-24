@@ -26,10 +26,9 @@ export class ChatService {
     private readonly _socketIOService: SocketIOService) {
   }
 
-
   public sendMessage(addresseeId: string, text: string) {
 
-    const endPoint = ServiceConstants.ServerAddress + "/chat/sendMessage/" + addresseeId;
+    const endPoint = ServiceConstants.ServerAddress + "/chat/sendMessage"; // /" + addresseeId;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
@@ -43,6 +42,20 @@ export class ChatService {
     //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<DTOs.IChatHistoryMessageDto>>(endPoint, data, options);
+  }
+
+  public getChatMessagesWith(interlocutorId: string) {
+
+    const endPoint = ServiceConstants.ServerAddress + "/chat/history/" + interlocutorId;
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this._authService.Token)
+    };
+
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+
+    return this._http.get<net.HttpMessage<DTOs.IChatHistoryMessageDto[]>>(endPoint, options);
   }
 
 }

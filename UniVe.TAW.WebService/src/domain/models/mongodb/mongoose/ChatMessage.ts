@@ -27,7 +27,7 @@ export function getSchema() {
 let chatMessageModel;
 export function getModel(): mongoose.Model<IMongooseChatMessage> {
     if (!chatMessageModel) {
-        chatMessageModel = mongoose.model(Constants.ModelsNames.User, chatMessageSchema);
+        chatMessageModel = mongoose.model(Constants.ModelsNames.ChatMessage, chatMessageSchema);
     }
     return chatMessageModel;
 }

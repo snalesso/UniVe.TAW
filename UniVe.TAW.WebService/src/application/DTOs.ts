@@ -49,6 +49,7 @@ export interface IMatchDto {
 }
 
 export interface IOwnSideMatchStatus {
+    EnemyId: string;
     IsConfigNeeded: boolean;
     IsMatchStarted: boolean;
     //IsMatchEnded: boolean; // TODO: remove, EndDateTime is enough, same for start
@@ -141,7 +142,7 @@ export interface IAttackResultDto {
 
 export interface INewMessage {
     readonly Text: string;
-    readonly SenderId: string;
+    //readonly SenderId: string;
     readonly AddresseeId: string;
 }
 

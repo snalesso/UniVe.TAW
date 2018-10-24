@@ -5,10 +5,10 @@
   </div>
 
   <div class="row justify-content-center">
-    <table id="bf-grid" class="bf-grid" [ngClass]="!IsEnabled ? 'bf-grid-disabled' : ''">
+    <table id="bf-grid" class="bf-grid">
       <tbody>
         <tr *ngFor="let row of Cells">
-          <td class="bf-grid-cell" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
+          <td class="bf-grid-cell not-clickable" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
             *ngFor="let cell of row">
           </td>
         </tr>

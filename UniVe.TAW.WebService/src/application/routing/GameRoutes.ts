@@ -42,15 +42,6 @@ export default class GameRoutes extends RoutesBase {
         this._router.use(bodyParser.urlencoded({ extended: true }));
         this._router.use(bodyParser.json());
         this._router.use(cors());
-        // this._router.use((req, res, next) => {
-        //     res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
-        //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        //     if (req.method === 'OPTIONS') {
-        //         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-        //         return res.status(httpStatusCodes.OK).json({});
-        //     }
-        //     next();
-        // });
 
         this._router.get(
             "/canCreateMatch",
@@ -546,10 +537,11 @@ export default class GameRoutes extends RoutesBase {
 
                         if (ownSide) {
 
+                            const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
                             const ownSideMatchStatusDto = {
                                 IsConfigNeeded: !ownSide.isConfigured(match.Settings),
-                                IsMatchStarted: match.StartDateTime != null
-
+                                IsMatchStarted: match.StartDateTime != null,
+                                EnemyId: enemySide.PlayerId.toHexString()
                             } as DTOs.IOwnSideMatchStatus;
 
                             responseData = new net.HttpMessage(ownSideMatchStatusDto);
@@ -700,7 +692,21 @@ export default class GameRoutes extends RoutesBase {
                                 StillOwnsMove: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(userObjectId)
                             } as DTOs.IAttackResultDto;
 
-                            this._socketIOServer.emit(ServiceEventKeys.MatchUpdated);
+                            // TODO: this event forces a FULL reload of the enemy field from server, create an ad hoc event which just tells "enemy hit water, its your turn"
+                            this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
+
+                            this._socketIOServer.emit(
+                                ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.YouGotShot),
+                                {
+                                    OwnFieldCellChanges: enemyCellChanges.map(change => ({
+                                        Coord: change.Coord,
+                                        Status:
+                                            (change.Status == game_client.EnemyBattleFieldCellStatus.Unknown
+                                                || change.Status == game_client.EnemyBattleFieldCellStatus.Ship)
+                                                ? game_client.OwnBattleFieldCellStatus.Untouched
+                                                : game_client.OwnBattleFieldCellStatus.Hit
+                                    } as game_client.IOwnBattleFieldCell))
+                                } as DTOs.IYouGotShotEventDto);
 
                             responseData = new net.HttpMessage(attackResultDto);
                             response.status(httpStatusCodes.OK).json(responseData);
@@ -760,7 +766,7 @@ export default class GameRoutes extends RoutesBase {
 
                                 ownClientCells[x] = [];
 
-                                for (let y = 0; y < ownSide.BattleFieldCells[x].length; x++) {
+                                for (let y = 0; y < ownSide.BattleFieldCells[x].length; y++) {
 
                                     ownClientCells[x].push({
                                         Coord: {
@@ -768,7 +774,7 @@ export default class GameRoutes extends RoutesBase {
                                             Y: y
                                         },
                                         ShipType: ownSide.BattleFieldCells[x][y].ShipType,
-                                        Status: (!ownSide.BattleFieldCells[x][y].FireReceivedDateTime)
+                                        Status: (ownSide.BattleFieldCells[x][y].FireReceivedDateTime)
                                             ? game_client.OwnBattleFieldCellStatus.Hit
                                             : game_client.OwnBattleFieldCellStatus.Untouched
                                     } as game_client.IOwnBattleFieldCell);

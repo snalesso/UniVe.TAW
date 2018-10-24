@@ -11,6 +11,7 @@ import { AuthService } from '../../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
+import { retry } from 'rxjs/operators';
 
 @Component({
   selector: 'app-match',
@@ -41,6 +42,8 @@ export class MatchComponent implements OnInit, OnDestroy {
   public get IsMatchSetupVisible() { return this._matchStatus != null && this._matchStatus.IsConfigNeeded; }
 
   public get AreTurnControllersVisible() { return this._matchStatus != null && this._matchStatus.IsMatchStarted; }
+
+  public get AddresseeId(): string { return this._matchStatus ? this._matchStatus.EnemyId : null; }
 
   private errorHandler(error: http.HttpErrorResponse) {
     // TODO: handle

@@ -4,6 +4,7 @@ import * as moment from 'moment';
 import * as Constants from './Constants';
 
 import * as identity from '../../../../infrastructure/identity';
+import * as ChatMessage from './ChatMessage';
 
 // TODO: trim username spaces
 
@@ -18,7 +19,12 @@ export interface IMongooseUser extends mongoose.Document {
     Digest: string, // TODO: make readonly?
     setPassword: (pwd: string) => void,
     validatePassword: (pwd: string) => boolean,
-    getAge: () => number
+    getAge: () => number,
+    SentMessages:
+    //any
+    Map<String, ChatMessage.IMongooseChatMessage[]>
+    ,
+    logMessage: (addresseeId: mongoose.Types.ObjectId, text: string) => ChatMessage.IMongooseChatMessage
 }
 
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
@@ -55,6 +61,11 @@ const userSchema = new mongoose.Schema({
     Digest: {
         type: mongoose.Schema.Types.String,
         required: true
+    },
+    SentMessages: {
+        type: Map,
+        of: [ChatMessage.getSchema()],
+        //default: {}
     }
 });
 
@@ -75,6 +86,32 @@ userSchema.methods.validatePassword = function (pwd: string): boolean {
 userSchema.methods.getAge = function (): number {
     return this.BirthDate != null ? moment().diff(this.BirthDate, "years", false) : -1;
 }
+userSchema.methods.logMessage = function (
+    this: IMongooseUser,
+    addresseeId: mongoose.Types.ObjectId,
+    text: string): ChatMessage.IMongooseChatMessage {
+
+    try {
+        if (this.SentMessages == null)
+            this.SentMessages = new Map<String, ChatMessage.IMongooseChatMessage[]>();
+
+        const msg = ChatMessage.create({ Text: text } as ChatMessage.IMongooseChatMessage);
+        const addresseeHexId = addresseeId.toHexString();
+
+        if (!this.SentMessages.has(addresseeHexId)) {
+            this.SentMessages.set(addresseeHexId, [msg]);
+        }
+        else {
+            this.SentMessages.get(addresseeHexId).push(msg);
+        }
+        this.markModified("SentMessages");
+
+        return msg;
+    }
+    catch (ex) {
+        return null;
+    }
+};
 
 //export function GetSchema() { return userSchema; }
 
