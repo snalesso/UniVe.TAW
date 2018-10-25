@@ -27,7 +27,7 @@
     "@types/gulp": "^3.8.36",
     "@types/http-status-codes": "^1.2.0",
     "@types/jsonwebtoken": "^7.2.8",
-    "@types/mongoose": "^5.2.0",
+    "@types/mongoose": "^5.2.20",
     "@types/node": "^9.6.23",
     "@types/socket.io": "^1.4.38",
     "chalk": "^2.4.1",

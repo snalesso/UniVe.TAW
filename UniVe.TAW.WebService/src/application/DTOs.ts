@@ -163,3 +163,16 @@ export interface IYouGotShotEventDto {
 // export interface IMatchInfoDto extends IMatchDto {
 //     Settings: IMatchSettingsDto;
 // }
+
+export interface IUserProfile extends IUserDto {
+    WinsCount: number;
+    LossesCount: number;
+}
+
+export interface IUserRanking {
+    Id: string;
+    Username: string;
+    WinsCount: number;
+    LossesCount: number;
+    WinRatio: number;
+}

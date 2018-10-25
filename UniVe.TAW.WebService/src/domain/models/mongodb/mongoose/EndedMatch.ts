@@ -12,7 +12,6 @@ import * as Coord from './Coord';
 import * as game from '../../../../infrastructure/game';
 //import * as game_client from '../../../../infrastructure/game.client';
 //import * as chat from '../../../../infrastructure/chat';
-import { read } from 'fs';
 
 export interface IMongooseEndedMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
@@ -34,7 +33,6 @@ const endedMatchSchema = new mongoose.Schema({
     CreationDateTime: {
         type: mongoose.Schema.Types.Date,
         required: true,
-        default: Date.now
     },
     StartDateTime: {
         type: mongoose.Schema.Types.Date,
@@ -63,8 +61,8 @@ const endedMatchSchema = new mongoose.Schema({
     },
     WinnerId: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: Constants.ModelsNames.User,
+        required: true,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: mongoose.Types.ObjectId): boolean {
         //         // TODO: check for it to work
@@ -100,7 +98,7 @@ const endedMatchSchema = new mongoose.Schema({
 let endedMatchModel;
 export function getModel(): mongoose.Model<IMongooseEndedMatch> {
     if (!endedMatchModel) {
-        endedMatchModel = mongoose.model(Constants.ModelsNames.Match, endedMatchSchema);
+        endedMatchModel = mongoose.model(Constants.ModelsNames.EndedMatch, endedMatchSchema);
     }
     return endedMatchModel;
 }

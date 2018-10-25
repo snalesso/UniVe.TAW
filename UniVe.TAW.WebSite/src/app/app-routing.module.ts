@@ -13,6 +13,7 @@ import RoutingParamKeys from '../assets/imported/unive.taw.webservice/applicatio
 import { MatchComponent } from './ui/game/match/match/match.component';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import ServiceConstants from './services/ServiceConstants';
+import { RankingsComponent } from './ui/game/rankings/rankings.component';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
@@ -20,7 +21,8 @@ const routes: Routes = [
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
   { path: ViewsRoutingKeys.MatchFinder, component: JoinableMatchesComponent },
   //{ path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.FleetConfigurator], [RoutingParamKeys.MatchId]), component: FleetConfiguratorComponent },
-  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.MatchId]), component: MatchComponent },
+  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.matchId]), component: MatchComponent },
+  { path: ViewsRoutingKeys.Rankings, component: RankingsComponent },
 ];
 
 @NgModule({

@@ -16,6 +16,7 @@ import RoutingParamKeys from './RoutingParamKeys';
 import ServiceEventKeys from '../services/ServiceEventKeys';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
+import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as DTOs from '../DTOs';
@@ -155,7 +156,7 @@ export default class GameRoutes extends RoutesBase {
         );
 
         this._router.post(
-            "/closePendingMatch" + "/:" + RoutingParamKeys.PendingMatchId,
+            "/closePendingMatch" + "/:" + RoutingParamKeys.pendingMatchId,
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -171,7 +172,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const pendingMatchCriteria = {
                     PlayerId: userObjectId,
-                    _id: new mongoose.Types.ObjectId(request.params[RoutingParamKeys.PendingMatchId])
+                    _id: new mongoose.Types.ObjectId(request.params[RoutingParamKeys.pendingMatchId])
                 } as utils_2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
                 PendingMatch
@@ -213,13 +214,13 @@ export default class GameRoutes extends RoutesBase {
 
         // TODO: ensure can't join a match if already playing
         this._router.post(
-            "/joinPendingMatch/:" + RoutingParamKeys.PendingMatchId,
+            "/joinPendingMatch/:" + RoutingParamKeys.pendingMatchId,
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
                 let responseData: net.HttpMessage<string> = null;
 
-                const pendingMatchId = request.params[RoutingParamKeys.PendingMatchId];
+                const pendingMatchId = request.params[RoutingParamKeys.pendingMatchId];
 
                 if (!pendingMatchId) {
                     responseData = new net.HttpMessage(null, "Unable to find requested match");
@@ -337,13 +338,13 @@ export default class GameRoutes extends RoutesBase {
         // );
 
         this._router.get(
-            "/:" + RoutingParamKeys.MatchId,
+            "/:" + RoutingParamKeys.matchId,
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
                 let responseData: net.HttpMessage<DTOs.IMatchDto> = null;
 
-                const matchId = request.params[RoutingParamKeys.MatchId];
+                const matchId = request.params[RoutingParamKeys.matchId];
 
                 Match.getModel()
                     .findById(matchId)
@@ -379,7 +380,7 @@ export default class GameRoutes extends RoutesBase {
         );
 
         this._router.get(
-            "/:" + RoutingParamKeys.MatchId + "/config",
+            "/:" + RoutingParamKeys.matchId + "/config",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -387,7 +388,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchHexId = request.params[RoutingParamKeys.MatchId];
+                const matchHexId = request.params[RoutingParamKeys.matchId];
                 const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
 
                 Match.getModel()
@@ -432,7 +433,7 @@ export default class GameRoutes extends RoutesBase {
 
         // TODO: validare la config che arriva!!!
         this._router.post(
-            "/:" + RoutingParamKeys.MatchId + "/config",
+            "/:" + RoutingParamKeys.matchId + "/config",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -440,7 +441,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchHexId = request.params[RoutingParamKeys.MatchId];
+                const matchHexId = request.params[RoutingParamKeys.matchId];
                 const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
 
                 Match.getModel()
@@ -513,7 +514,7 @@ export default class GameRoutes extends RoutesBase {
         );
 
         this._router.get(
-            "/:" + RoutingParamKeys.MatchId + "/ownSideMatchStatus",
+            "/:" + RoutingParamKeys.matchId + "/ownSideMatchStatus",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -521,7 +522,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.MatchId]);
+                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 Match.getModel()
                     .findById(matchObjectId)
@@ -562,7 +563,7 @@ export default class GameRoutes extends RoutesBase {
             });
 
         this._router.get(
-            "/:" + RoutingParamKeys.MatchId + "/ownTurnInfo",
+            "/:" + RoutingParamKeys.matchId + "/ownTurnInfo",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -570,7 +571,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.MatchId]);
+                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 const userModel = User.getModel();
 
@@ -642,7 +643,7 @@ export default class GameRoutes extends RoutesBase {
             });
 
         this._router.post(
-            "/:" + RoutingParamKeys.MatchId + "/singleShot",
+            "/:" + RoutingParamKeys.matchId + "/singleShot",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -650,7 +651,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.MatchId]);
+                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
                 const singleShotAction = request.body as game.ISingleShotMatchAction;
 
                 Match.getModel()
@@ -708,6 +709,25 @@ export default class GameRoutes extends RoutesBase {
                                     } as game_client.IOwnBattleFieldCell))
                                 } as DTOs.IYouGotShotEventDto);
 
+                            // ------------ handle match ended -----------------
+
+                            const newEndedMatch = {
+                                CreationDateTime: match.CreationDateTime,
+                                StartDateTime: match.StartDateTime,
+                                EndDateTime: match.EndDateTime,
+                                FirstPlayerSide: match.FirstPlayerSide,
+                                SecondPlayerSide: match.SecondPlayerSide,
+                                WinnerId: match.InActionPlayerId,
+                                Settings: match.Settings
+                            } as utils_2_8.Mutable<EndedMatch.IMongooseEndedMatch>;
+
+                            EndedMatch.getModel()
+                                .create(newEndedMatch)
+                                .then(newEndedMatch => {
+
+                                })
+                                .catch((error: mongodb.MongoError) => { });
+
                             responseData = new net.HttpMessage(attackResultDto);
                             response.status(httpStatusCodes.OK).json(responseData);
                         }
@@ -727,7 +747,7 @@ export default class GameRoutes extends RoutesBase {
             });
 
         this._router.get(
-            "/:" + RoutingParamKeys.MatchId + "/enemyTurnInfo",
+            "/:" + RoutingParamKeys.matchId + "/enemyTurnInfo",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
@@ -735,7 +755,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const userJWTData = (request.user as DTOs.IUserJWTData);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.MatchId]);
+                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 const userModel = User.getModel();
 

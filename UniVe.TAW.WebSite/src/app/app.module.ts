@@ -16,6 +16,8 @@ import { EnemyTurnControllerComponent } from './ui/game/match/enemy-turn-control
 import { OwnTurnControllerComponent } from './ui/game/match/own-turn-controller/own-turn-controller.component';
 import { MatchChatComponent } from './ui/game/match/match-chat/match-chat.component';
 import { MatchComponent } from './ui/game/match/match/match.component';
+import { ProfileComponent } from './ui/identity/profile/profile.component';
+import { RankingsComponent } from './ui/game/rankings/rankings.component';
 
 // services
 //import { AuthService } from './auth.service';
@@ -34,6 +36,8 @@ import { MatchComponent } from './ui/game/match/match/match.component';
     OwnTurnControllerComponent,
     MatchChatComponent,
     MatchComponent,
+    ProfileComponent,
+    RankingsComponent,
   ],
   imports: [
     BrowserModule,

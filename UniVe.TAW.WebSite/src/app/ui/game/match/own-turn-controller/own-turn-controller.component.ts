@@ -35,7 +35,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
 
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
   public get EnemyUsername(): string { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Username : "Enemy"; }

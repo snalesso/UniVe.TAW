@@ -62,6 +62,7 @@ export function getModel(): mongoose.Model<IMongooseUserToUserChatMessages> {
     if (!userToUserChatMessagesModel) {
         userToUserChatMessagesModel = mongoose.model(Constants.ModelsNames.UserToUserChatMessages, userToUserChatMessagesSchema);
     }
+
     return userToUserChatMessagesModel;
 }
 

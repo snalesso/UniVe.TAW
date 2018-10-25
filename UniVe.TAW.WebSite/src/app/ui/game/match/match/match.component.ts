@@ -33,7 +33,7 @@ export class MatchComponent implements OnInit, OnDestroy {
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
 
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
 
     if (!this._matchId)
       this._router.navigate([ViewsRoutingKeys.Root]);

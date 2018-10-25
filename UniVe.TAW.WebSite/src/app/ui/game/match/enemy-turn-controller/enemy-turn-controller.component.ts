@@ -34,7 +34,7 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
 
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
   public get BattleFieldWidth(): number { return (this._enemyTurnInfo && this._enemyTurnInfo.MatchSettings) ? this._enemyTurnInfo.MatchSettings.BattleFieldWidth : 0; }

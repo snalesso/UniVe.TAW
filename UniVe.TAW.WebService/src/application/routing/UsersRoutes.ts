@@ -12,6 +12,7 @@ import * as identity from '../../infrastructure/identity';
 import * as utils from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
+import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 
 import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
@@ -32,15 +33,6 @@ export default class UsersRoutes extends RoutesBase {
         this._router.use(bodyParser.urlencoded({ extended: true }));
         this._router.use(bodyParser.json());
         this._router.use(cors());
-        // this._router.use((req, res, next) => {
-        //     res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
-        //     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        //     if (req.method === 'OPTIONS') {
-        //         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-        //         return res.status(httpStatusCodes.OK).json({});
-        //     }
-        //     next();
-        // });
 
         this._router.post(
             '/signup',
@@ -101,12 +93,167 @@ export default class UsersRoutes extends RoutesBase {
                 }
             });
 
+        // this._router.get(
+        //     '/cazzo',
+        //     this._jwtValidator,
+        //     (request: express.Request, response: express.Response, next: express.NextFunction) => {
+        //         const userJWTData = (request.user as DTOs.IUserJWTData);
+        //         response.json("diocane " + userJWTData.Username);
+        //     });
+
+        // TODO: add authentication and allow delete only to same user
+        // this._router.delete(
+        //     "/:" + RoutingParamKeys.userId,
+        //     this._jwtValidator,
+        //     (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+        //         const userId = request.params[RoutingParamKeys.userId];
+        //         let responseData: net.HttpMessage<boolean> = null;
+
+        //         User.getModel()
+        //             .findByIdAndRemove(
+        //                 userId,
+        //                 (error: mongodb.MongoError, deletedUser) => {
+        //                     if (error) {
+        //                         responseData = new net.HttpMessage<boolean>(null, error.message);
+        //                         response
+        //                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+        //                             .json(responseData);
+        //                     }
+        //                     else if (!deletedUser) {
+        //                         responseData = new net.HttpMessage<boolean>(null, "User not found!");
+        //                         response
+        //                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+        //                             .json(responseData);
+        //                     }
+        //                     else {
+        //                         responseData = new net.HttpMessage<boolean>(true);
+        //                         response
+        //                             .status(httpStatusCodes.OK)
+        //                             .json(responseData);
+        //                     }
+        //                 });
+        //     });
+
         this._router.get(
-            "/:" + RoutingParamKeys.UserId,
+            "/profile/:" + RoutingParamKeys.userId,
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                const userId = request.params[RoutingParamKeys.UserId];
+                const userHexId = request.params[RoutingParamKeys.userId];
+                const userObjectId = new mongoose.Types.ObjectId(userHexId);
+                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
+
+                User.getModel()
+                    .findById(userHexId)
+                    .then((mongoUser) => {
+
+                        EndedMatch.getModel()
+                            .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
+                            .then(userEndedMatches => {
+
+                                let profileDto: DTOs.IUserProfile = {
+                                    Id: mongoUser.id,
+                                    Username: mongoUser.Username,
+                                    Age: moment().diff(mongoUser.BirthDate, "years", false),
+                                    CountryId: mongoUser.CountryId,
+                                    WinsCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => em.WinnerId.equals(userObjectId)).length : 0,
+                                    LossesCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => !em.WinnerId.equals(userObjectId)).length : 0
+                                };
+
+                                responseData = new net.HttpMessage<DTOs.IUserProfile>(profileDto);
+                                response
+                                    .status(httpStatusCodes.OK)
+                                    .json(responseData);
+                            });
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        responseData = new net.HttpMessage<DTOs.IUserProfile>(null, error.message);
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(responseData);
+                    });
+            });
+
+        this._router.get(
+            '/rankings',//:' + RoutingParamKeys.userId,
+            this._jwtValidator,
+            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                const userJWTData = (request.user as DTOs.IUserJWTData);
+                //const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                let responseData: net.HttpMessage<DTOs.IUserRanking[]> = null;
+
+                Promise
+                    .all([
+                        User.getModel().find().exec(),
+                        EndedMatch.getModel().find().exec()
+                    ])
+                    .then(queries => {
+                        const [users, endedMatches] = queries;
+
+                        let rankings: DTOs.IUserRanking[] = [];
+
+                        for (let user of users) {
+
+                            let userRanking: DTOs.IUserRanking = {
+                                Id: user._id.toHexString(),
+                                Username: user.Username,
+                                WinsCount: 0,
+                                LossesCount: 0,
+                                WinRatio: 0
+                            };
+
+                            for (let em of endedMatches) {
+                                if (em.FirstPlayerSide.PlayerId.equals(user._id) || em.SecondPlayerSide.PlayerId.equals(user._id)) {
+                                    if (em.WinnerId.equals(user._id)) {
+                                        userRanking.WinsCount++;
+                                    }
+                                    else {
+                                        userRanking.LossesCount++;
+                                    }
+                                }
+                            }
+
+                            if (userRanking.WinsCount > 0 && userRanking.LossesCount > 0)
+                                userRanking.WinRatio = userRanking.WinsCount / (userRanking.WinsCount + userRanking.LossesCount);
+
+                            rankings.push(userRanking);
+                        }
+
+                        rankings = rankings.sort((a, b) => {
+                            if (a.WinRatio > b.WinRatio)
+                                return -1;
+                            if (a.WinRatio < b.WinRatio)
+                                return 1;
+                            else {
+                                if (a.WinsCount > b.WinsCount)
+                                    return -1;
+                                if (a.WinsCount < b.WinsCount)
+                                    return 1;
+                                return a.Username.localeCompare(b.Username);
+                            }
+                        });
+
+                        responseData = new net.HttpMessage(rankings);
+                        response
+                            .status(httpStatusCodes.OK)
+                            .json(responseData);
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        responseData = new net.HttpMessage(null, error.message);
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(responseData);
+                    });
+            });
+
+        this._router.get(
+            '/:' + RoutingParamKeys.userId,
+            this._jwtValidator,
+            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                const userId = request.params[RoutingParamKeys.userId];
                 let responseData: net.HttpMessage<DTOs.IUserDto> = null;
 
                 User.getModel()
@@ -131,38 +278,6 @@ export default class UsersRoutes extends RoutesBase {
                     });
             });
 
-        // TODO: add authentication and allow delete only to same user
-        this._router.delete(
-            "/:" + RoutingParamKeys.UserId,
-            this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-                const userId = request.params[RoutingParamKeys.UserId];
-                let responseData: net.HttpMessage<boolean> = null;
-
-                User.getModel()
-                    .findByIdAndRemove(
-                        userId,
-                        (error: mongodb.MongoError, deletedUser) => {
-                            if (error) {
-                                responseData = new net.HttpMessage<boolean>(null, error.message);
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            }
-                            else if (!deletedUser) {
-                                responseData = new net.HttpMessage<boolean>(null, "User not found!");
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            }
-                            else {
-                                responseData = new net.HttpMessage<boolean>(true);
-                                response
-                                    .status(httpStatusCodes.OK)
-                                    .json(responseData);
-                            }
-                        });
-            });
+        // DONT NOT ADD ROUTES WHICH DONT BEGIN WITH "/:" AFTER THIS ONE +++++++++++++++++++++++++++++++++++++
     }
 }

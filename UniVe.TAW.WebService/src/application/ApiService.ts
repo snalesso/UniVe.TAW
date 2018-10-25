@@ -7,6 +7,7 @@ import * as httpStatusCodes from 'http-status-codes';
 import * as expressJwt from 'express-jwt';
 import * as socketIO from 'socket.io';
 import chalk from 'chalk';
+import * as cors from 'cors';
 
 import AuthRoutes from './routing/AuthRoutes';
 import UsersRoutes from './routing/UsersRoutes';
@@ -148,15 +149,8 @@ export default class ApiService {
 
         this._expressApp.use(bodyParser.urlencoded({ extended: true }));
         this._expressApp.use(bodyParser.json());
-        this._expressApp.use((req, res, next) => {
-            res.setHeader('Access-Control-Allow-Origin', '*'); // 'http://localhost:' + this.Port);
-            res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-            if (req.method === 'OPTIONS') {
-                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-                return res.status(httpStatusCodes.OK).json({});
-            }
-            next();
-        });
+        this._expressApp.use(cors());
+
         // handles express-jwt invalid tokens
         this._expressApp.use((error: expressJwt.UnauthorizedError, request: express.Request, response: express.Response, next: express.NextFunction) => {
             console.log(chalk.red("UnauthorizedError (JWT): ") + JSON.stringify(error.message));
@@ -179,9 +173,17 @@ export default class ApiService {
     private ConfigRoutes() {
         console.log("Configuring routes ...");
 
+        this._expressApp.get(
+            '/diocane',
+            (request: express.Request, response: express.Response) => {
+                response
+                    .status(httpStatusCodes.OK)
+                    .json("diocane");
+            });
+
         this._expressApp.use('/users', this._usersRoutes.Router);
         this._expressApp.use('/auth', this._authRoutes.Router);
         this._expressApp.use('/matches', this._gameRoutes.Router); // TODO: rename to /game?
-        this._expressApp.use('/chat', this._chatRoutes.Router); // TODO: rename to /game?
+        this._expressApp.use('/chat', this._chatRoutes.Router);
     }
 }

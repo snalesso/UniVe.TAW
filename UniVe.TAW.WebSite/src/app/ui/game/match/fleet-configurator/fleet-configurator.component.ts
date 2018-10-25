@@ -35,7 +35,7 @@ export class FleetConfiguratorComponent implements OnInit {
     private readonly _gameService: GameService,
     private readonly _authService: AuthService) {
 
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.MatchId);
+    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
     //this.WhenToggleChanged.subscribe(v => console.log("fc - toggle - " + v));
   }
 

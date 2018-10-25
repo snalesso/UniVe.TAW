@@ -111,7 +111,7 @@ export default class ChatRoutes extends RoutesBase {
             });
 
         this._router.get(
-            '/history/:' + RoutingParamKeys.UserId,
+            '/history/:' + RoutingParamKeys.userId,
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
@@ -119,7 +119,7 @@ export default class ChatRoutes extends RoutesBase {
 
                 const currentUserJWTData = (request.user as DTOs.IUserJWTData);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
-                const otherUserHexId = request.params[RoutingParamKeys.UserId];
+                const otherUserHexId = request.params[RoutingParamKeys.userId];
                 const otherUserObjectId = new mongoose.Types.ObjectId(otherUserHexId);
 
                 // let currentUserMessagesCriteria = {
