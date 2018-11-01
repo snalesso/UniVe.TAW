@@ -20,7 +20,9 @@ import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 
 import * as net from '../infrastructure/net';
 import * as utils from '../infrastructure/utils';
+
 import ServiceEventKeys from './services/ServiceEventKeys';
+import FakeDataGenerator from './services/FakeDataGenerator';
 
 // TODO: rename into WebService?
 // TODO: use cors()
@@ -56,7 +58,7 @@ export default class ApiService {
         this._chatRoutes = new ChatRoutes(this._socketIOServer);
     }
 
-    public Start() {
+    public async Start() {
 
         // TODO: get rid of magic string
         console.log("ApiService starting ...");
@@ -81,31 +83,42 @@ export default class ApiService {
         mongoose
             .connect(this._dbUrl, { useNewUrlParser: true })
             .then(
-                () => {
+                async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    // console.log("deleting all pending matches ...");
+                    console.log("deleting all pending matches ...");
 
-                    // PendingMatch.getModel().find().then(pms => {
+                    await PendingMatch.getModel().find().then(async pms => {
 
-                    //     for (let pm of pms) {
-                    //         pm.remove();
-                    //         console.log("deleted PM (id: " + pm._id.toHexString() + ")");
-                    //     }
-                    // }).catch(error => { console.log("error deleting pending match") });
+                        for (let pm of pms) {
+                            await pm.remove();
+                            console.log("deleted PM (id: " + pm._id.toHexString() + ")");
+                        }
+                    }).catch(error => { console.log("error deleting pending match") });
 
-                    // console.log("all pending matches deleted");
-                    // console.log("deleting all matches ...");
+                    console.log("all pending matches deleted");
+                    console.log("deleting all matches ...");
 
-                    // Match.getModel().find().then(matches => {
+                    await Match.getModel().find().then(async matches => {
 
-                    //     for (let m of matches) {
-                    //         m.remove();
-                    //         console.log("deleted M (id: " + m._id.toHexString() + ")");
-                    //     }
-                    // }).catch(error => { console.log("error deleting match") });
+                        for (let m of matches) {
+                            await m.remove();
+                            console.log("deleted M (id: " + m._id.toHexString() + ")");
+                        }
+                    }).catch(error => { console.log("error deleting match") });
 
-                    // console.log("all matches deleted");
+                    console.log("all matches deleted");
+                    console.log("deleting all users ...");
+
+                    await User.getModel().find().then(async users => {
+
+                        for (let u of users) {
+                            await u.remove();
+                            console.log("deleted U (id: " + u._id.toHexString() + ")");
+                        }
+                    }).catch(error => { console.log("error deleting user") });
+
+                    console.log("all users deleted");
 
                     // User.getModel().find().then(users => {
                     //     try {
@@ -121,6 +134,26 @@ export default class ApiService {
                     //         console.log(ex);
                     //     }
                     // })
+
+                    console.log("generating fake data ...");
+
+                    await FakeDataGenerator.generateFakeData([
+                        "Daedalus",
+                        "Dio",
+                        "Gesoo",
+                        "ValeYellow46",
+                        "FythacS03",
+                        "Jimboo",
+                        "Paperino",
+                        "DonGiuseppe",
+                        "LaMaDonna",
+                        "Pippo",
+                        "Pluto",
+                        "Topolino",
+                        "Ashkecium"
+                    ], 200);
+
+                    console.log("fake data generated");
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

@@ -215,8 +215,10 @@ export default class UsersRoutes extends RoutesBase {
                                 }
                             }
 
-                            if (userRanking.WinsCount > 0 && userRanking.LossesCount > 0)
+                            if (userRanking.WinsCount > 0 && userRanking.LossesCount > 0) {
                                 userRanking.WinRatio = userRanking.WinsCount / (userRanking.WinsCount + userRanking.LossesCount);
+                                userRanking.WinRatio = Math.round(userRanking.WinRatio * 100);
+                            }
 
                             rankings.push(userRanking);
                         }

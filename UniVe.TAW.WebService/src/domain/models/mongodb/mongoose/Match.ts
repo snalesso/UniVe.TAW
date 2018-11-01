@@ -10,6 +10,7 @@ import * as MatchSettings from './MatchSettings';
 import * as Coord from './Coord';
 
 import * as game from '../../../../infrastructure/game';
+import * as utils from '../../../../infrastructure/utils';
 //import * as game_client from '../../../../infrastructure/game.client';
 //import * as chat from '../../../../infrastructure/chat';
 
@@ -216,6 +217,17 @@ matchSchema.methods.configFleet = function (
         throw new Error("Fleet config does not comply with match settings!");
 
     const wasFleetConfigSuccessful = sideToConfig.configFleet(this.Settings as MatchSettings.IMongooseMatchSettings, shipPlacements);
+
+    if (this.areBothConfigured() && !this.StartDateTime) {
+        this.StartDateTime = new Date();
+        const rb = utils.getRandomBoolean();
+        if (rb == true) {
+            this.InActionPlayerId = this.FirstPlayerSide.PlayerId;
+        }
+        else {
+            this.InActionPlayerId = this.SecondPlayerSide.PlayerId;
+        }
+    }
 
     return wasFleetConfigSuccessful;
 };

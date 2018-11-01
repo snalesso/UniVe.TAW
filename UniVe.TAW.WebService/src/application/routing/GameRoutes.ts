@@ -460,25 +460,14 @@ export default class GameRoutes extends RoutesBase {
                         }
 
                         const wasConfigSuccessful = match.configFleet(userObjectId, request.body as IMongooseShipPlacement[]);
+                        match.save();
 
-                        if (match.areBothConfigured() && !match.StartDateTime) {
-                            match.StartDateTime = new Date();
-                            const rb = utils.getRandomBoolean();
-                            if (rb == true) {
-                                match.InActionPlayerId = match.FirstPlayerSide.PlayerId;
-                            }
-                            else {
-                                match.InActionPlayerId = match.SecondPlayerSide.PlayerId;
-                            }
-                            match.save();
+                        if (wasConfigSuccessful && match.StartDateTime) {
                             const matchStartedEventKey = ServiceEventKeys.matchEventForUser(userJWTData.Id, matchHexId, ServiceEventKeys.MatchStarted);
                             this._socketIOServer.emit(matchStartedEventKey, {
                                 MatchId: match._id.toHexString(),
                                 InActionPlayerId: match.InActionPlayerId.toHexString()
                             } as DTOs.IMatchStartedEventDto);
-
-                        } else {
-                            match.save();
                         }
 
                         const ownSideMatchConfigStatus = {
