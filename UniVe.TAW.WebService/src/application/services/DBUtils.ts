@@ -19,14 +19,52 @@ import * as ShipTypeAvailability from '../../domain/models/mongodb/mongoose/Ship
 import * as ShipPlacement from '../../domain/models/mongodb/mongoose/ShipPlacement';
 import { Country, UserRoles } from '../../infrastructure/identity';
 import moment = require('moment');
-import { isAwaitExpression } from 'typescript';
 
-export default class FakeDataGenerator {
+export default class DBUtils {
 
     public constructor() {
     }
 
+    public static async deleteEverything() {
+
+        console.log("deleting all pending matches ...");
+
+        await PendingMatch.getModel().find().then(async pms => {
+
+            for (let pm of pms) {
+                await pm.remove();
+                console.log("deleted PM (id: " + pm._id.toHexString() + ")");
+            }
+        }).catch(error => { console.log("error deleting pending match") });
+
+        console.log("all pending matches deleted");
+        console.log("deleting all matches ...");
+
+        await Match.getModel().find().then(async matches => {
+
+            for (let m of matches) {
+                await m.remove();
+                console.log("deleted M (id: " + m._id.toHexString() + ")");
+            }
+        }).catch(error => { console.log("error deleting match") });
+
+        console.log("all matches deleted");
+        console.log("deleting all users ...");
+
+        await User.getModel().find().then(async users => {
+
+            for (let u of users) {
+                await u.remove();
+                console.log("deleted U (id: " + u._id.toHexString() + ")");
+            }
+        }).catch(error => { console.log("error deleting user") });
+
+        console.log("all users deleted");
+    }
+
     public static async generateFakeData(usernames: string[], matchesCount: number) {
+
+        console.log("generating fake data ...");
 
         // generates users
 
@@ -88,15 +126,15 @@ export default class FakeDataGenerator {
             await newMatch.save();
             matches.push(newMatch);
 
-            const p1fc = FakeDataGenerator.getRandomizedFleet(newMatch.FirstPlayerSide, newMatch.Settings);
-            const p2fc = FakeDataGenerator.getRandomizedFleet(newMatch.FirstPlayerSide, newMatch.Settings);
+            const p1fc = DBUtils.getRandomizedFleet(newMatch.FirstPlayerSide, newMatch.Settings);
+            const p2fc = DBUtils.getRandomizedFleet(newMatch.FirstPlayerSide, newMatch.Settings);
             newMatch.configFleet(newMatch.FirstPlayerSide.PlayerId, p1fc);
             newMatch.configFleet(newMatch.SecondPlayerSide.PlayerId, p2fc);
 
             if (newMatch.areBothConfigured()) {
 
-                const p1coords = FakeDataGenerator.generateCoordsList(newMatch.Settings.BattleFieldWidth, newMatch.Settings.BattleFieldHeight);
-                const p2coords = FakeDataGenerator.generateCoordsList(newMatch.Settings.BattleFieldWidth, newMatch.Settings.BattleFieldHeight);
+                const p1coords = DBUtils.generateCoordsList(newMatch.Settings.BattleFieldWidth, newMatch.Settings.BattleFieldHeight);
+                const p2coords = DBUtils.generateCoordsList(newMatch.Settings.BattleFieldWidth, newMatch.Settings.BattleFieldHeight);
 
                 while (!newMatch.EndDateTime) {
                     const coordsList = newMatch.InActionPlayerId.equals(newMatch.FirstPlayerSide.PlayerId) ? p1coords : p2coords;
@@ -126,6 +164,8 @@ export default class FakeDataGenerator {
             await m.remove();
             await endedMatch.save();
         }
+
+        console.log("fake data generated");
     }
 
     public static generateCoordsList(width: number, height: number) {

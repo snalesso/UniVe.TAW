@@ -22,7 +22,7 @@ import * as net from '../infrastructure/net';
 import * as utils from '../infrastructure/utils';
 
 import ServiceEventKeys from './services/ServiceEventKeys';
-import FakeDataGenerator from './services/FakeDataGenerator';
+import DBUtils from './services/DBUtils';
 
 // TODO: rename into WebService?
 // TODO: use cors()
@@ -86,58 +86,7 @@ export default class ApiService {
                 async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    console.log("deleting all pending matches ...");
-
-                    await PendingMatch.getModel().find().then(async pms => {
-
-                        for (let pm of pms) {
-                            await pm.remove();
-                            console.log("deleted PM (id: " + pm._id.toHexString() + ")");
-                        }
-                    }).catch(error => { console.log("error deleting pending match") });
-
-                    console.log("all pending matches deleted");
-                    console.log("deleting all matches ...");
-
-                    await Match.getModel().find().then(async matches => {
-
-                        for (let m of matches) {
-                            await m.remove();
-                            console.log("deleted M (id: " + m._id.toHexString() + ")");
-                        }
-                    }).catch(error => { console.log("error deleting match") });
-
-                    console.log("all matches deleted");
-                    console.log("deleting all users ...");
-
-                    await User.getModel().find().then(async users => {
-
-                        for (let u of users) {
-                            await u.remove();
-                            console.log("deleted U (id: " + u._id.toHexString() + ")");
-                        }
-                    }).catch(error => { console.log("error deleting user") });
-
-                    console.log("all users deleted");
-
-                    // User.getModel().find().then(users => {
-                    //     try {
-                    //         for (let u of users) {
-                    //             if (u.SentMessages) {
-                    //                 u.SentMessages.clear();
-                    //                 u.markModified("SentMessages");
-                    //                 u.save();
-                    //             }
-                    //         }
-                    //     }
-                    //     catch (ex) {
-                    //         console.log(ex);
-                    //     }
-                    // })
-
-                    console.log("generating fake data ...");
-
-                    await FakeDataGenerator.generateFakeData([
+                    await DBUtils.generateFakeData([
                         "Daedalus",
                         "Dio",
                         "Gesoo",
@@ -152,8 +101,6 @@ export default class ApiService {
                         "Topolino",
                         "Ashkecium"
                     ], 200);
-
-                    console.log("fake data generated");
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();
