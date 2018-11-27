@@ -18,8 +18,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class LoginComponent implements OnInit {
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router) {
+    private readonly _authService: AuthService,
+    private readonly _router: Router) {
   }
 
   private _loginRequest: DTOs.ILoginCredentials = { Username: "Daedalus", Password: "aaa" };
@@ -36,14 +36,14 @@ export class LoginComponent implements OnInit {
 
   public sendLoginRequest() {
     // TODO: handle no response when server is down
-    this.authService.login(this.LoginRequest)
+    this._authService.login(this.LoginRequest)
       .subscribe(
         response => {
           if (response.HasError) {
             this._responseError = response.ErrorMessage;
           }
           else if (response.Content) {
-            this.router.navigate([ViewsRoutingKeys.MatchFinder]);
+            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
           }
         },
         (error: HttpErrorResponse) => {
@@ -65,8 +65,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     // if already logged in re-route to avaiable matches
-    if (this.authService.Token) {
-      this.router.navigate([ViewsRoutingKeys.MatchFinder]);
+    if (this._authService.Token) {
+      this._router.navigate([ViewsRoutingKeys.MatchFinder]);
     }
   }
 

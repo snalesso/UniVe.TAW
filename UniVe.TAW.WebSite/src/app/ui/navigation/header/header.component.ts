@@ -19,23 +19,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private readonly _subscriptions: Subscription[] = [];
 
   constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router) {
+    private readonly _authService: AuthService,
+    private readonly _router: Router) {
 
-    this._userData = this.authService.LoggedUser;
-    this._subscriptions.push(this.authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
+    this._userData = this._authService.LoggedUser;
+    this._subscriptions.push(this._authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
   }
 
   private _userData: DTOs.IUserJWTData;
   public get Username() { return this._userData != null ? this._userData.Username : null; }
 
-  private _isLogged: boolean;
-  public get IsLogged() { return this.authService.IsLogged; }
+  public get IsLogged() { return this._authService.IsLogged; }
 
   public logout() {
     this._userData = null;
-    this.authService.logout();
-    this.router.navigate([ViewsRoutingKeys.Login]);
+    this._authService.logout();
+    this._router.navigate([ViewsRoutingKeys.Login]);
   }
 
   ngOnInit(): void {

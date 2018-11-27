@@ -1,0 +1,21 @@
+<div class="container">
+
+  <div class="row">
+    <div class="col">
+
+      <h3>Rankings</h3>
+
+      <div class="card w-100" *ngFor="let ur of UserRankings; index as i">
+        <div class="card-body">
+          <h5 class="card-title">
+            <span>#{{i+1}} </span>
+            <a href="/users/{{ur.Id}}">{{ur.Username}}</a>
+          </h5>
+          <p class="card-text">{{ur.WinRatio}}% ({{ur.WinsCount}}/{{ur.LossesCount}})</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

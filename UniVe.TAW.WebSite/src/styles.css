@@ -39,3 +39,9 @@
 .not-clickable{
     cursor: default !important;
 }
+.winner-text{
+    color: #00964b !important;
+}
+.loser-text{
+    color: #cc0000 !important;
+}

@@ -1,8 +1,8 @@
-<div class="container-fluid">
+<div class="container">
 
   <div class="row justify-content-center" *ngIf="HasPendingMatchOpen">
 
-    <h1>Waiting for a challenger ...!</h1>
+    <!-- <h1>Waiting for a challenger ...!</h1> -->
 
     <button class="btn btn-warning btn-block" [disabled]="IsBudy || !HasPendingMatchOpen" (click)="closePendingMatch()">Stop
       waiting</button>
@@ -25,7 +25,8 @@
     <div class="card w-100" *ngFor="let jm of JoinableMatches">
       <div class="card-body">
         <h5 class="card-title">{{jm.Creator.Username}}</h5>
-        <p class="card-text">{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from {{getCountryName(jm.Creator.CountryId)}}</p>
+        <p class="card-text">{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from
+          {{getCountryName(jm.Creator.CountryId)}}</p>
         <button class="btn btn-success" [disabled]="IsBudy" (click)="joinMatch(jm.Id)">Challenge!</button>
       </div>
     </div>

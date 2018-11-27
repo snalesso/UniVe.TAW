@@ -86,21 +86,23 @@ export default class ApiService {
                 async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    await DBUtils.generateFakeData([
-                        "Daedalus",
-                        "Dio",
-                        "Gesoo",
-                        "ValeYellow46",
-                        "FythacS03",
-                        "Jimboo",
-                        "Paperino",
-                        "DonGiuseppe",
-                        "LaMaDonna",
-                        "Pippo",
-                        "Pluto",
-                        "Topolino",
-                        "Ashkecium"
-                    ], 200);
+                    // await DBUtils.deleteEverything();
+
+                    // await DBUtils.generateFakeData([
+                    //     "Daedalus",
+                    //     "Dio",
+                    //     "Gesoo",
+                    //     "ValeYellow46",
+                    //     "FythacS03",
+                    //     "Jimboo",
+                    //     "Paperino",
+                    //     "DonGiuseppe",
+                    //     "LaMaDonna",
+                    //     "Pippo",
+                    //     "Pluto",
+                    //     "Topolino",
+                    //     "Ashkecium"
+                    // ], 200);
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

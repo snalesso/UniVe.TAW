@@ -88,7 +88,8 @@ export default class GameRoutes extends RoutesBase {
                     statusCode = httpStatusCodes.OK;
                     let jwtPayload: DTOs.IUserJWTData = {
                         Id: user.id,
-                        Username: user.Username
+                        Username: user.Username,
+                        BannedUtil: user.BannedUntil
                     };
                     let token = jwt.sign(
                         jwtPayload,

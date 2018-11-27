@@ -1,19 +1,15 @@
-<div class="container-fluid">
+<div class="row justify-content-center">
+  <h1>My field</h1>
+</div>
 
-  <div class="row justify-content-center">
-    <h1>My field</h1>
-  </div>
-
-  <div class="row justify-content-center">
-    <table id="bf-grid" class="bf-grid">
-      <tbody>
-        <tr *ngFor="let row of Cells">
-          <td class="bf-grid-cell not-clickable" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
-            *ngFor="let cell of row">
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+<div class="row justify-content-center">
+  <table id="bf-grid" class="bf-grid">
+    <tbody>
+      <tr *ngFor="let row of Cells">
+        <td class="bf-grid-cell not-clickable" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
+          *ngFor="let cell of row">
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

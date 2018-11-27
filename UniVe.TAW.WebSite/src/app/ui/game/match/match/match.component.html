@@ -1,7 +1,17 @@
-<div class="container-fluid">
+<div class="container">
 
   <div class="row justify-content-center" *ngIf="IsMatchSetupVisible">
     <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="IsWaitingForEnemyToConfig">
+    <h4>Waiting for emeny to line-up ...</h4>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="IsMatchEnded">
+
+    <h3 [ngClass]="DidIWin ? 'winner-text' : 'loser-text'">YOU {{DidIWin ? "WON" : "LOST"}}</h3>
+
   </div>
 
   <div class="row justify-content-center" *ngIf="AreTurnControllersVisible">
@@ -14,7 +24,7 @@
       <app-own-turn-controller></app-own-turn-controller>
     </div>
 
-    <div class="col-lg-12">
+    <div class="col">
       <br>
       <app-match-chat [InterlocutorId]="AddresseeId"></app-match-chat>
     </div>

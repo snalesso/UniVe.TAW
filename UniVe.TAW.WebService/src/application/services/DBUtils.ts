@@ -49,6 +49,17 @@ export default class DBUtils {
         }).catch(error => { console.log("error deleting match") });
 
         console.log("all matches deleted");
+        console.log("deleting all endedmatches ...");
+
+        await EndedMatch.getModel().find().then(async endedMatches => {
+
+            for (let emm of endedMatches) {
+                await emm.remove();
+                console.log("deleted EM (id: " + emm._id.toHexString() + ")");
+            }
+        }).catch(error => { console.log("error deleting match") });
+
+        console.log("all endedmatches deleted");
         console.log("deleting all users ...");
 
         await User.getModel().find().then(async users => {
@@ -62,6 +73,7 @@ export default class DBUtils {
         console.log("all users deleted");
     }
 
+    /** First is Admin, next 3 Moderators, all others Players */
     public static async generateFakeData(usernames: string[], matchesCount: number) {
 
         console.log("generating fake data ...");
@@ -73,13 +85,18 @@ export default class DBUtils {
             .map(n => Number.parseInt(n))
             .filter(n => !Number.isNaN(n))
 
-        for (const un of usernames) {
+        for (let ui = 0; ui < usernames.length; ui++) {
+            const un = usernames[ui];
             const newUser = await User.create(
                 {
                     Username: un,
                     CountryId: countries[utils.getRandomInt(0, countries.length - 1)],
                     BirthDate: moment().add(utils.getRandomInt(10, 80) * -1, "years").toDate(),
-                    Roles: UserRoles.Player
+                    Roles: (ui == 0) ?
+                        UserRoles.Admin
+                        : (ui <= 3)
+                            ? UserRoles.Moderator
+                            : UserRoles.Player
                 } as User.IMongooseUser);
 
             newUser.setPassword("aaa");
@@ -163,6 +180,31 @@ export default class DBUtils {
             const endedMatch = await EndedMatch.getModel().create(em);
             await m.remove();
             await endedMatch.save();
+        }
+
+        // fake chats
+
+        const fakeChatMessages = [
+            "hey! :D",
+            "heeyyyyy",
+            "come va?",
+            "bene bene, tu?",
+            "tappost, giochi?",
+            "yessss!! :D"
+        ];
+
+        for (let u1i = 0; u1i < users.length - 1; u1i++) {
+            for (let u2i = u1i + 1; u2i < users.length; u2i++) {
+                if (!users[u1i]._id.equals(users[u2i]._id)) {
+                    let intUsers = [users[u1i], users[u2i]];
+                    for (let mi = 0; mi < fakeChatMessages.length; mi++) {
+                        intUsers[mi % 2].logMessage(intUsers[(mi + 1) % 2]._id, fakeChatMessages[mi]);
+                    }
+
+                    await users[u1i].save();
+                    await users[u2i].save();
+                }
+            }
         }
 
         console.log("fake data generated");

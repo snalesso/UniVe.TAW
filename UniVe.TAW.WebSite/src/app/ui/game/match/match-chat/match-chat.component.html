@@ -1,16 +1,12 @@
-<div class="container-fluid">
-
-  <div class="input-group">
-    <input type="text" class="form-control" aria-label="Your message" [(ngModel)]="MessageText" (keydown.enter)="sendMessage()">
-    <div class="input-group-append">
-      <button class="btn btn-success" type="button" (click)="sendMessage()" [disabled]="!CanSendMessage">Send</button>
-    </div>
+<div class="input-group">
+  <input type="text" class="form-control" aria-label="Your message" [(ngModel)]="MessageText" (keydown.enter)="sendMessage()">
+  <div class="input-group-append">
+    <button class="btn btn-success" type="button" (click)="sendMessage()" [disabled]="!CanSendMessage">Send</button>
   </div>
+</div>
 
-  <div>
-    <p *ngFor="let message of ChatMessages" [ngClass]="message.IsMine ? 'chat-text-own' : 'chat-text-enemy'">[{{message.Timestamp
-      | date: 'dd/MM/yy HH:mm:ss'}}]
-      {{message.Text}}</p>
-  </div>
-
+<div>
+  <p *ngFor="let message of ChatMessages" [ngClass]="message.IsMine ? 'chat-text-own' : 'chat-text-enemy'">[{{message.Timestamp
+    | date: 'dd/MM/yy HH:mm:ss'}}]
+    {{message.Text}}</p>
 </div>

@@ -58,4 +58,29 @@ export class ChatService {
     return this._http.get<net.HttpMessage<DTOs.IChatHistoryMessageDto[]>>(endPoint, options);
   }
 
+  public getChatsHistory() {
+
+    const endPoint = ServiceConstants.ServerAddress + "/chat/history";
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this._authService.Token)
+    };
+
+    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
+
+    return this._http.get<net.HttpMessage<DTOs.IChatHistoryHeaderDto[]>>(endPoint, options);
+  }
+
+  public getTalkableUsers() {
+    const endPoint = ServiceConstants.ServerAddress + "/chat/talkables";
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this._authService.Token)
+    };
+
+    return this._http.get<net.HttpMessage<ReadonlyArray<DTOs.ISimpleUserDto>>>(endPoint, options);
+  }
+
 }

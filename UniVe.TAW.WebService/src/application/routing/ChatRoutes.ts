@@ -111,6 +111,98 @@ export default class ChatRoutes extends RoutesBase {
             });
 
         this._router.get(
+            '/history',
+            this._jwtValidator,
+            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatHistoryHeaderDto>>;
+
+                const currentUserJWTData = (request.user as DTOs.IUserJWTData);
+                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
+
+                User.getModel()
+                    .find()
+                    .then(users => {
+
+                        let chatHeaderDtos = new Array<DTOs.IChatHistoryHeaderDto>();
+                        const chatsMap = new Map<string, DTOs.IChatHistoryHeaderDto>();
+
+                        for (let user of users) {
+
+                            if (!user._id.equals(currentUserObjectId)) {
+                                const msgs = user.SentMessages ? user.SentMessages.get(currentUserJWTData.Id) : null;
+                                const lastMsg = (msgs && msgs.length > 0) ? msgs[msgs.length - 1] : null;
+
+                                if (lastMsg
+                                    && (!chatsMap.has(user._id.toHexString())
+                                        || chatsMap.get(user._id.toHexString()).LastMessage.Timestamp < lastMsg.Timestamp)) {
+                                    chatsMap.set(
+                                        user._id.toHexString(),
+                                        {
+                                            Interlocutor: {
+                                                Id: user._id.toHexString(),
+                                                Username: user.Username
+                                            },
+                                            LastMessage: {
+                                                IsMine: false,
+                                                Timestamp: lastMsg.Timestamp,
+                                                Text: lastMsg.Text
+                                            }
+                                        } as DTOs.IChatHistoryHeaderDto);
+                                }
+                            }
+                            else {
+                                user.SentMessages.forEach((messages, interlocutorId) => {
+                                    const lastMsg = messages[messages.length - 1];
+                                    if (lastMsg
+                                        && (!chatsMap.has(interlocutorId as string)
+                                            || chatsMap.get(interlocutorId as string).LastMessage.Timestamp < lastMsg.Timestamp)) {
+                                        chatsMap.set(
+                                            interlocutorId as string,
+                                            {
+                                                Interlocutor: {
+                                                    Id: interlocutorId as string,
+                                                    Username: users.filter(u => u._id.toHexString() == interlocutorId)[0].Username
+                                                },
+                                                LastMessage: {
+                                                    IsMine: true,
+                                                    Timestamp: lastMsg.Timestamp,
+                                                    Text: lastMsg.Text
+                                                }
+                                            } as DTOs.IChatHistoryHeaderDto);
+                                    }
+                                });
+                            }
+                        }
+
+                        // sort by latest first
+                        for (let ch of chatsMap.values()) {
+                            chatHeaderDtos.push(ch);
+                        }
+
+                        chatHeaderDtos = chatHeaderDtos.sort((a, b) => {
+                            if (a.LastMessage.Timestamp > b.LastMessage.Timestamp)
+                                return -1;
+
+                            if (a.LastMessage.Timestamp < b.LastMessage.Timestamp)
+                                return 1;
+
+                            return 0;
+                        });
+
+                        responseData = new net.HttpMessage(chatHeaderDtos);
+                        response
+                            .status(httpStatusCodes.OK)
+                            .json(responseData);
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        responseData = new net.HttpMessage(null, error.message);
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                    });
+            });
+
+        this._router.get(
             '/history/:' + RoutingParamKeys.userId,
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
@@ -240,6 +332,35 @@ export default class ChatRoutes extends RoutesBase {
                         responseData = new net.HttpMessage(null, error.message);
                         response
                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                    });
+            });
+
+        this._router.get(
+            '/talkables',
+            this._jwtValidator,
+            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                const currUserHexId = request.params[RoutingParamKeys.userId];
+                const currUserObjectId = new mongoose.Types.ObjectId(currUserHexId);
+                let responseData: net.HttpMessage<DTOs.ISimpleUserDto[]> = null;
+
+                User.getModel()
+                    .find({ _id: { $ne: currUserObjectId } })
+                    .then((mongoUsers) => {
+                        let userDtos = mongoUsers.map(user => ({
+                            Id: user.id,
+                            Username: user.Username
+                        } as DTOs.ISimpleUserDto));
+                        responseData = new net.HttpMessage(userDtos);
+                        response
+                            .status(httpStatusCodes.OK)
+                            .json(responseData);
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        responseData = new net.HttpMessage(null, error.message);
+                        response
+                            .status(httpStatusCodes.OK)
+                            .json(responseData);
                     });
             });
     }

@@ -1,7 +1,7 @@
 import * as enums from "../infrastructure/identity";
 import * as game from "../infrastructure/game";
 import * as game_client from "../infrastructure/game.client";
-import { read } from "fs";
+import * as identity from "../infrastructure/identity";
 //import * as chat from "../infrastructure/chat";
 
 export interface ISignupRequestDto {
@@ -16,6 +16,13 @@ export interface IUserDto {
     Username: string;
     Age: number;
     CountryId: enums.Country;
+    BannedUntil: Date;
+    Roles: enums.UserRoles;
+}
+
+export interface ISimpleUserDto {
+    Id: string;
+    Username: string;
 }
 
 export interface ILoginCredentials {
@@ -26,6 +33,7 @@ export interface ILoginCredentials {
 export interface IUserJWTData {
     Id: string;
     Username: string;
+    BannedUtil: Date;
 }
 
 // export interface IMatchCreationRequestDto {
@@ -156,6 +164,11 @@ export interface IChatHistoryMessageDto {
     readonly Timestamp: Date;
 }
 
+export interface IChatHistoryHeaderDto {
+    readonly Interlocutor: ISimpleUserDto;
+    readonly LastMessage: IChatHistoryMessageDto;
+}
+
 export interface IYouGotShotEventDto {
     readonly OwnFieldCellChanges: ReadonlyArray<game_client.IOwnBattleFieldCell>;
 }
@@ -175,4 +188,38 @@ export interface IUserRanking {
     WinsCount: number;
     LossesCount: number;
     WinRatio: number;
+}
+
+export interface IUserBanRequest {
+    UserId: string;
+    BanDurationHours: number;
+}
+
+export interface IUserPowers {
+    readonly Roles: enums.UserRoles;
+    readonly CanTemporarilyBan: boolean;
+    readonly CanPermaBan: boolean;
+    readonly CanPromote: boolean;
+    readonly CanPlay: boolean;
+    readonly CanChat: boolean;
+}
+
+export interface IEndedMatchDto {
+    readonly Id: string;
+    readonly FirstPlayerSide: IEndedMatchPlayerSideDto;
+    readonly SecondPlayerId: IEndedMatchPlayerSideDto;
+    readonly Winner: ISimpleUserDto;
+}
+
+export interface IEndedMatchPlayerSideDto {
+    readonly PlayerId: string;
+    readonly FieldCells: ReadonlyArray<game_client.IOwnBattleFieldCell>;
+}
+
+export interface IEndedMatchSummaryDto {
+    readonly Id: string;
+    readonly EndDateTime: Date;
+    readonly FirstPlayer: ISimpleUserDto;
+    readonly SecondPlayer: ISimpleUserDto;
+    readonly WinnerId: string;
 }

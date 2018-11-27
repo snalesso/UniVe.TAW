@@ -4,8 +4,6 @@
 
     <a class="navbar-brand" href="/">Battleship</a>
 
-    <span class="navbar-text" *ngIf="IsLogged">{{Username}}</span>
-
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
       aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -14,12 +12,27 @@
     <div class="collapse navbar-collapse" id="navbarNav">
 
       <ul class="navbar-nav">
+
+        <li class="nav-item">
+          <a class="nav-link" href="./match-finder" *ngIf="IsLogged">Play</a>
+        </li>
+
         <li class="nav-item">
           <a class="nav-link" href="./rankings">Rankings</a>
         </li>
-        <li class="nav-item" *ngIf="IsLogged">
-          <a class="nav-link" href="javascript:void(0)" (click)="logout()">Logout</a>
+
+        <li class="nav-item dropdown" *ngIf="IsLogged">
+          <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="navbarDropdownMenuLink" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">{{Username}}</a>
+
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="./users/self">Profile</a>
+            <!-- <a class="dropdown-item" href="./users/self/match-history">Match history</a> -->
+            <a class="dropdown-item" href="javascript:void(0)" (click)="logout()">Logout</a>
+          </div>
+
         </li>
+
       </ul>
 
     </div>

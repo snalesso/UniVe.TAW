@@ -35,7 +35,9 @@ export class DummyGameService { // TODO: delete
             Id: "Match creator id #" + i,
             Username: "Creator of match #" + i,
             CountryId: utils.getRandomInt(0, countriesCount),
-            Age: utils.getRandomInt(3, 100)
+            Age: utils.getRandomInt(3, 100),
+            Roles: identity.UserRoles.Admin,
+            BannedUntil: null
           }
         });
     }

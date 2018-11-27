@@ -463,11 +463,18 @@ export default class GameRoutes extends RoutesBase {
                         match.save();
 
                         if (wasConfigSuccessful && match.StartDateTime) {
-                            const matchStartedEventKey = ServiceEventKeys.matchEventForUser(userJWTData.Id, matchHexId, ServiceEventKeys.MatchStarted);
-                            this._socketIOServer.emit(matchStartedEventKey, {
-                                MatchId: match._id.toHexString(),
-                                InActionPlayerId: match.InActionPlayerId.toHexString()
-                            } as DTOs.IMatchStartedEventDto);
+                            this._socketIOServer.emit(
+                                ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
+                                {
+                                    MatchId: match._id.toHexString(),
+                                    InActionPlayerId: match.InActionPlayerId.toHexString()
+                                } as DTOs.IMatchStartedEventDto);
+                            this._socketIOServer.emit(
+                                ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
+                                {
+                                    MatchId: match._id.toHexString(),
+                                    InActionPlayerId: match.InActionPlayerId.toHexString()
+                                } as DTOs.IMatchStartedEventDto);
                         }
 
                         const ownSideMatchConfigStatus = {
@@ -645,7 +652,7 @@ export default class GameRoutes extends RoutesBase {
 
                 Match.getModel()
                     .findById(matchObjectId)
-                    .then(match => {
+                    .then(async match => {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
@@ -700,25 +707,46 @@ export default class GameRoutes extends RoutesBase {
 
                             // ------------ handle match ended -----------------
 
-                            const newEndedMatch = {
-                                CreationDateTime: match.CreationDateTime,
-                                StartDateTime: match.StartDateTime,
-                                EndDateTime: match.EndDateTime,
-                                FirstPlayerSide: match.FirstPlayerSide,
-                                SecondPlayerSide: match.SecondPlayerSide,
-                                WinnerId: match.InActionPlayerId,
-                                Settings: match.Settings
-                            } as utils_2_8.Mutable<EndedMatch.IMongooseEndedMatch>;
+                            if (match.EndDateTime) {
 
-                            EndedMatch.getModel()
-                                .create(newEndedMatch)
-                                .then(newEndedMatch => {
+                                const newEndedMatch = {
+                                    CreationDateTime: match.CreationDateTime,
+                                    StartDateTime: match.StartDateTime,
+                                    EndDateTime: match.EndDateTime,
+                                    FirstPlayerSide: match.FirstPlayerSide,
+                                    SecondPlayerSide: match.SecondPlayerSide,
+                                    WinnerId: match.InActionPlayerId,
+                                    Settings: match.Settings
+                                } as utils_2_8.Mutable<EndedMatch.IMongooseEndedMatch>;
 
-                                })
-                                .catch((error: mongodb.MongoError) => { });
+                                let endedMatch = await EndedMatch
+                                    .create(newEndedMatch)
+                                    .save();
+                                let removedMatch = await match.remove();
+                                // .then(newEndedMatch => {
+                                //     match.remove();
+                                // })
+                                //.catch((error: mongodb.MongoError) => { });
 
-                            responseData = new net.HttpMessage(attackResultDto);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                                const mee = {
+                                    MatchId: endedMatch._id.toHexString(),
+                                    EndDateTime: endedMatch.EndDateTime,
+                                    WinnerId: endedMatch.WinnerId.toHexString(),
+                                    IsResigned: false
+                                } as DTOs.IMatchEndedEventDto;
+
+                                this._socketIOServer.emit(
+                                    ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded),
+                                    mee
+                                );
+                                this._socketIOServer.emit(
+                                    ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded),
+                                    mee);
+                            }
+                            else {
+                                responseData = new net.HttpMessage(attackResultDto);
+                                response.status(httpStatusCodes.OK).json(responseData);
+                            }
                         }
                         catch (ex) {
                             console.log(chalk.red(ex));

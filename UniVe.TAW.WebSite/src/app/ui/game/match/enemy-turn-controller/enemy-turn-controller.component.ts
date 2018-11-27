@@ -50,6 +50,9 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
 
   private get IsEnemyTurn(): boolean { return this._enemyTurnInfo != null ? this._enemyTurnInfo.OwnsMove : false; }
 
+  // private _winnerId: string;
+  // public get WinnerId(): string { return this._winnerId; }
+
   public getCellStatusUIClass(cell: game_client.IOwnBattleFieldCell): string {
 
     let uiClass = "unknown";
@@ -103,12 +106,13 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
                   });
               }
 
-              // match ended subscription
-              this._socketIOService.once(
-                ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded),
-                (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
-                  this._enemyTurnInfo.MatchEndedDateTime = matchEndedEvent.EndDateTime;
-                });
+              // // match ended subscription
+              // this._socketIOService.once(
+              //   ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded),
+              //   (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
+              //     this._enemyTurnInfo.MatchEndedDateTime = matchEndedEvent.EndDateTime;
+              //     this._winnerId = matchEndedEvent.WinnerId;
+              //   });
             }
           }
         },

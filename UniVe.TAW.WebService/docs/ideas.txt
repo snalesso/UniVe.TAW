@@ -26,3 +26,6 @@
 - resa
 
 - SOUNDZ
+
+- match history: nessun colpo a vuoto = PERFECT
+- profilo: tag ADMIN, MOD, ecc.

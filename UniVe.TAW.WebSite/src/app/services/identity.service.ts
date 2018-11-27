@@ -48,25 +48,50 @@ export class IdentityService {
     return this._http.get<net.HttpMessage<DTOs.IUserRanking[]>>(endPoint, options);
   }
 
-  public getDiocane() {
-    const endPoint = ServiceConstants.ServerAddress + "/users/diocane";
+  public getUserPowers(userId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/powers";
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    return this._http.get<net.HttpMessage<string>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IUserPowers>>(endPoint, options);
   }
 
-  public getCazzo() {
-    const endPoint = ServiceConstants.ServerAddress + "/users/cazzo";
+  public getMatchHistory(userId: string = this._authService.LoggedUser.Id) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/matchHistory";
     const options = {
-      headers: new ng_http.HttpHeaders()
-        .set('Content-Type', 'application/json')
-      //.set('Authorization', 'Bearer ' + this._authService.Token)
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
     };
 
-    return this._http.get<net.HttpMessage<string>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IEndedMatchSummaryDto[]>>(endPoint, options);
+  }
+
+  public ban(userId: string, banDurationHours: number) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/ban";
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.post<net.HttpMessage<Date>>(endPoint, { BanDurationHours: banDurationHours, UserId: userId } as DTOs.IUserBanRequest, options);
+  }
+
+  public unban(userId: string, banDurationHours: number) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/ban";
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.post<net.HttpMessage<Date>>(endPoint, { BanDurationHours: 0, UserId: userId } as DTOs.IUserBanRequest, options);
   }
 }

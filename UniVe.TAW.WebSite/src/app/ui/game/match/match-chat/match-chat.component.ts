@@ -38,33 +38,7 @@ export class MatchChatComponent implements OnInit {
 
   public get CanSendMessage(): boolean { return (this.MessageText != null && this.MessageText.length > 0) && !this.IsSendingMessage; }
 
-  private _chatMessages: DTOs.IChatHistoryMessageDto[] = [
-    {
-      Timestamp: new Date(),
-      Text: "Ciao!!",
-      IsMine: true
-    },
-    {
-      Timestamp: new Date(),
-      Text: "Come va?",
-      IsMine: true
-    },
-    {
-      Timestamp: new Date(),
-      Text: "Tutto bene, tu?? :D",
-      IsMine: false
-    },
-    {
-      Timestamp: new Date(),
-      Text: "ben dai, prova a battermi! :D",
-      IsMine: true
-    },
-    {
-      Timestamp: new Date(),
-      Text: "vedrai come le prendi! hahahah",
-      IsMine: false
-    }
-  ];
+  private _chatMessages: DTOs.IChatHistoryMessageDto[] = [];
   public get ChatMessages() { return this._chatMessages; }
 
   public sendMessage(/*text: string*/) {

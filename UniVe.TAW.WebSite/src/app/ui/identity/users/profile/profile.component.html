@@ -1,0 +1,57 @@
+<div class="container">
+
+  <div *ngIf="Profile">
+
+    <div class="row">
+      <div class="col">
+
+        <h1>{{Profile.Username}} <span class="badge badge-secondary">{{["Player", "Mod", "Admin"][Profile.Roles - 1]}}</span></h1>
+        <p *ngIf="Profile.BannedUntil" class="loser-text"> (BANNED UNTIL: {{Profile.BannedUntil | date:
+          'dd/MM/yyyy HH:mm:ss'}})</p>
+
+      </div>
+    </div>
+
+    <div class="row" *ngIf="CanBeModerated">
+      <div class="col">
+
+        <form class="form-inline" *ngIf="!Profile.BannedUntil && (Powers.CanTemporarilyBan || Powers.CanPermaBan)">
+          <label class="my-1 mr-2" for="BanOptionSelect">Ban for ...</label>
+          <select class="form-control my-1 mr-sm-2" [(ngModel)]="SelectedBanOption" id="BanOptionSelect" name="banOption">
+            <option *ngFor="let bo of BanOptions" [ngValue]="bo">{{bo.Text}}</option>
+          </select>
+          <button type="button" class="btn btn-danger" (click)="ban(SelectedBanOption.BanHours)" [disabled]="!SelectedBanOption">BAN</button>
+          <!-- <p *ngIf="SelectedBanOption">{{SelectedBanOption.Text}}</p> -->
+        </form>
+
+        <button type="button" class="btn btn-danger" *ngIf="Profile.BannedUntil" (click)="unban()">UNBAN</button>
+
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+
+        <h3>Stats</h3>
+
+        <p>
+          <span class="winner-text">{{Profile.WinsCount}}W</span>
+          <span> / </span>
+          <span class="loser-text">{{Profile.LossesCount}}L</span>
+          <span> ({{WindPercent}}%)</span>
+        </p>
+
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+
+        <app-match-history></app-match-history>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

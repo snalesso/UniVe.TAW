@@ -1,0 +1,17 @@
+<h3>Match history
+  <small class="text-muted">(last 20 matches)</small>
+</h3>
+
+<div class="card w-100" *ngFor="let ems of EndedMatchSummaries">
+  <div class="card-body">
+    <h5 class="card-title">
+      <span [ngClass]="ems.WinnerId == UserId ? 'winner-text' : 'loser-text'">{{ems.WinnerId == UserId ? "WON" :
+        "LOST"}}</span>
+      <!-- <a href="/users/{{ems.FirstPlayer.Id}}" [ngClass]="ems.WinnerId == ems.FirstPlayer.Id ? 'winner-text' : 'loser-text'">{{ems.FirstPlayer.Username}}</a> -->
+      <span> VS </span>
+      <a href="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}">{{UserId
+        == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</a>
+    </h5>
+    <p class="card-text">{{ems.EndDateTime | date: 'dd/MM/yy HH:mm:ss'}}</p>
+  </div>
+</div>

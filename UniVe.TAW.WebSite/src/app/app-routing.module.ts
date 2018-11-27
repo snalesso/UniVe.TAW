@@ -8,21 +8,37 @@ import { JoinableMatchesComponent } from './ui/game/match-finder/match-finder.co
 import { FleetConfiguratorComponent } from './ui/game/match/fleet-configurator/fleet-configurator.component';
 import { OwnTurnControllerComponent } from './ui/game/match/own-turn-controller/own-turn-controller.component';
 import ViewsRoutingKeys from './ui/ViewsRoutingKeys';
-import RoutingHelper from './RoutingHelper';
+import { RoutingHelper, RouteParam, RouteStep } from './Routing';
 import RoutingParamKeys from '../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import { MatchComponent } from './ui/game/match/match/match.component';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import ServiceConstants from './services/ServiceConstants';
-import { RankingsComponent } from './ui/game/rankings/rankings.component';
+import { RankingsComponent } from './ui/identity/rankings/rankings.component';
+import { MatchHistoryComponent } from './ui/identity/users/match-history/match-history.component';
+import { viewClassName } from '@angular/compiler';
+import { Profile } from 'selenium-webdriver/firefox';
+import { ProfileComponent } from './ui/identity/users/profile/profile.component';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
   { path: ViewsRoutingKeys.Signup, component: SignupComponent },
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
   { path: ViewsRoutingKeys.MatchFinder, component: JoinableMatchesComponent },
-  //{ path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.FleetConfigurator], [RoutingParamKeys.MatchId]), component: FleetConfiguratorComponent },
   { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.matchId]), component: MatchComponent },
+  // {
+  //   path: RoutingHelper.buildRoute([
+  //     new RouteStep(ViewsRoutingKeys.Users),
+  //     new RouteParam(RoutingParamKeys.userId),
+  //     new RouteStep(ViewsRoutingKeys.MatchHistory)
+  //   ]), component: MatchHistoryComponent, pathMatch: "full"
+  // },
   { path: ViewsRoutingKeys.Rankings, component: RankingsComponent },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Users),
+      new RouteParam(RoutingParamKeys.userId)
+    ]), component: ProfileComponent, pathMatch: "full"
+  }
 ];
 
 @NgModule({

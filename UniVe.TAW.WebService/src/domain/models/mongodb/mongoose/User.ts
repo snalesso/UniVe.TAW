@@ -17,13 +17,11 @@ export interface IMongooseUser extends mongoose.Document {
     Roles: identity.UserRoles,
     Salt: string, // TODO: make readonly?
     Digest: string, // TODO: make readonly?
+    SentMessages: Map<String, ChatMessage.IMongooseChatMessage[]>,
+    BannedUntil: Date,
     setPassword: (pwd: string) => void,
     validatePassword: (pwd: string) => boolean,
     getAge: () => number,
-    SentMessages:
-    //any
-    Map<String, ChatMessage.IMongooseChatMessage[]>
-    ,
     logMessage: (addresseeId: mongoose.Types.ObjectId, text: string) => ChatMessage.IMongooseChatMessage
 }
 
@@ -65,8 +63,12 @@ const userSchema = new mongoose.Schema({
     SentMessages: {
         type: Map,
         of: [ChatMessage.getSchema()],
-        //default: {}
-    }
+        default: new Map()
+    },
+    BannedUntil: {
+        type: mongoose.Schema.Types.Date,
+        required: false
+    },
 });
 
 // TODO: userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });

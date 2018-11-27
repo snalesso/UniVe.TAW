@@ -12,6 +12,7 @@ import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
 import { retry } from 'rxjs/operators';
+import { TouchSequence } from 'selenium-webdriver';
 
 @Component({
   selector: 'app-match',
@@ -39,16 +40,22 @@ export class MatchComponent implements OnInit, OnDestroy {
       this._router.navigate([ViewsRoutingKeys.Root]);
   }
 
+  public get IsWaitingForEnemyToConfig() { return this._matchStatus != null && !this._matchStatus.IsConfigNeeded && !this._matchStatus.IsMatchStarted; }
+
   public get IsMatchSetupVisible() { return this._matchStatus != null && this._matchStatus.IsConfigNeeded; }
 
   public get AreTurnControllersVisible() { return this._matchStatus != null && this._matchStatus.IsMatchStarted; }
 
   public get AddresseeId(): string { return this._matchStatus ? this._matchStatus.EnemyId : null; }
 
-  private errorHandler(error: http.HttpErrorResponse) {
-    // TODO: handle
-    console.log(error);
-  }
+  public get IsMatchEnded(): boolean { return this._matchStatus ? this._matchStatus.EndDateTime != null : undefined; }
+
+  public get DidIWin(): boolean { return (this._matchStatus && this._matchStatus.EndDateTime != null) ? this._matchStatus.DidIWin : false; }
+
+  // private errorHandler(error: http.HttpErrorResponse) {
+  //   // TODO: handle
+  //   console.log(error);
+  // }
 
   public handleWhenIsConfigNeededChanged(value: boolean) {
     this._matchStatus.IsConfigNeeded = value;
@@ -103,18 +110,23 @@ export class MatchComponent implements OnInit, OnDestroy {
               //   (matchUpdatedEvent: DTOs.IMatchUpdatedEventDto) => {
               //     this._matchStatus.IsMatchStarted = true;
               //   });
-
+              this._matchStatus.DidIWin = true;
               this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
               this._socketIOService.once(
-                this._matchStartedEventKey,
+                this._matchEndedEventKey,
                 (event: DTOs.IMatchEndedEventDto) => {
-                  this._matchStatus.EndDateTime = event.EndDateTime;
-                  this._matchStatus.DidIWin = (event.WinnerId && event.WinnerId == this._authService.LoggedUser.Id);
+                  if (this._matchStatus) {
+                    this._matchStatus.EndDateTime = event.EndDateTime;
+                    this._matchStatus.DidIWin = (event.WinnerId && event.WinnerId == this._authService.LoggedUser.Id);
+                    alert("YOU " + (this.DidIWin ? "WON" : "LOST") + "!");
+                  }
                 });
             }
           }
         },
-        this.errorHandler);
+        (error: http.HttpErrorResponse) => {
+          this._router.navigate(["/match-finder"]);
+        });
 
   }
 
