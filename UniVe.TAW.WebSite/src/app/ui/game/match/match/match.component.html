@@ -8,10 +8,14 @@
     <h4>Waiting for emeny to line-up ...</h4>
   </div>
 
-  <div class="row justify-content-center" *ngIf="IsMatchEnded">
+  <div class="row" *ngIf="IsMatchEnded">
+    <div class="col">
 
-    <h3 [ngClass]="DidIWin ? 'winner-text' : 'loser-text'">YOU {{DidIWin ? "WON" : "LOST"}}</h3>
+      <div class="alert alert-{{DidIWin ? 'success': 'danger'}} w-100 text-center" role="alert">
+        <strong>YOU {{DidIWin ? 'WON': 'LOST'}}! <a href="/match-finder">Play again!</a></strong>
+      </div>
 
+    </div>
   </div>
 
   <div class="row justify-content-center" *ngIf="AreTurnControllersVisible">

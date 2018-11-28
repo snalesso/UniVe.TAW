@@ -5,6 +5,7 @@ import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DT
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
 import * as game from '../../assets/imported/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../assets/imported/unive.taw.webservice/infrastructure/game.client';
+import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import ServiceConstants from './ServiceConstants';
 
 //import * as $ from 'jquery';
@@ -93,5 +94,17 @@ export class IdentityService {
     };
 
     return this._http.post<net.HttpMessage<Date>>(endPoint, { BanDurationHours: 0, UserId: userId } as DTOs.IUserBanRequest, options);
+  }
+
+  public assignRoles(userId: string, newRole: identity.UserRoles) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/role";
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.post<net.HttpMessage<identity.UserRoles>>(endPoint, { NewRole: newRole, UserId: userId } as DTOs.IRoleAssignmentRequestDto, options);
   }
 }

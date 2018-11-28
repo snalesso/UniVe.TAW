@@ -9,9 +9,11 @@ import * as socketio from 'socket.io';
 
 import * as net from '../../infrastructure/net';
 import * as identity from '../../infrastructure/identity';
-import * as utils from '../../infrastructure/utils-2.8';
+import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
+import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
+import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 
 import * as DTOs from '../DTOs';
@@ -49,7 +51,7 @@ export default class UsersRoutes extends RoutesBase {
                     response.status(httpStatusCodes.FORBIDDEN);
                 } else {
                     //let feawfw = signupReq as User.IMongoUser;
-                    let newUserSkel = {} as utils.Mutable<User.IMongooseUser>;
+                    let newUserSkel = {} as utilsV2_8.Mutable<User.IMongooseUser>;
                     newUserSkel.Username = signupReq.Username.trim();
                     newUserSkel.CountryId = signupReq.CountryId;
                     newUserSkel.BirthDate = signupReq.BirthDate;
@@ -68,7 +70,7 @@ export default class UsersRoutes extends RoutesBase {
                         .catch((error: mongodb.MongoError) => {
                             console.log("user creation failed: " + JSON.stringify(error));
 
-                            const aeuCriteria = {} as utils.Mutable<User.IMongooseUser>;
+                            const aeuCriteria = {} as utilsV2_8.Mutable<User.IMongooseUser>;
                             aeuCriteria.Username = newUser.Username;
                             User.getModel()
                                 .findOne(aeuCriteria)
@@ -313,7 +315,7 @@ export default class UsersRoutes extends RoutesBase {
                             Roles: user.Roles,
                             CanChat: !user.BannedUntil,
                             CanPlay: !user.BannedUntil,
-                            CanPromote: user.Roles == identity.UserRoles.Admin,
+                            CanAssignRoles: user.Roles == identity.UserRoles.Admin,
                             CanPermaBan: user.Roles == identity.UserRoles.Admin,
                             CanTemporarilyBan:
                                 (user.Roles == identity.UserRoles.Admin
@@ -370,10 +372,92 @@ export default class UsersRoutes extends RoutesBase {
                     response
                         .status(httpStatusCodes.OK)
                         .json(responseData);
+
+                    // find pending/playing matches and delete them
+
+                    const pendingMatches = await PendingMatch.getModel()
+                        .find({ PlayerId: new mongoose.Types.ObjectId(userToBan._id.toHexString()) } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>)
+                        .exec();
+
+                    for (let pm of pendingMatches) {
+                        await pm.remove();
+                    }
+
+                    this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+
+                    const userModel = User.getModel();
+                    const playingMatches = await Match.getModel()
+                        .find({
+                            $or: [
+                                { "FirstPlayerSide.PlayerId": new mongoose.Types.ObjectId(userToBan._id.toHexString()) },
+                                { "SecondPlayerSide.PlayerId": new mongoose.Types.ObjectId(userToBan._id.toHexString()) }
+                            ]
+                        })
+                        .populate({ path: "FirstPlayerSide.PlayerId", model: userModel })
+                        .populate({ path: "SecondPlayerSide.PlayerId", model: userModel })
+                        .exec();
+
+                    for (let pm of playingMatches) {
+                        await pm.remove();
+
+                        const fp = pm.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
+                        const sp = pm.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
+                        this._socketIOServer.emit(
+                            ServiceEventKeys.matchEventForUser(
+                                fp._id.equals(userToBan._id) ? sp._id.toHexString() : fp._id.toHexString(),
+                                pm._id.toHexString(),
+                                ServiceEventKeys.MatchCanceled));
+                    }
+
                 } else {
                     responseData = new net.HttpMessage(null, "You have no power here");
                     response
                         .status(httpStatusCodes.UNAUTHORIZED)
+                        .json(responseData);
+                }
+            });
+
+        this._router.post(
+            '/:' + RoutingParamKeys.userId + '/role',
+            this._jwtValidator,
+            async (request: express.Request, response: express.Response) => {
+
+                const jwtUser = (request.user as DTOs.IUserJWTData);
+
+                let responseData: net.HttpMessage<identity.UserRoles>;
+
+                const userToAssignRolesHexId = request.params[RoutingParamKeys.userId];
+                const newRoleAssignment = request.body as DTOs.IRoleAssignmentRequestDto;
+
+                const currUser = await User.getModel().findById(jwtUser.Id).exec();
+                const userToAssignRoles = await User.getModel().findById(userToAssignRolesHexId).exec();
+
+                // admin can do anything
+                // mods can operate on simple players only
+                if (currUser.Roles != identity.UserRoles.Admin) {
+                    responseData = new net.HttpMessage(null, "You have no power here");
+                    response
+                        .status(httpStatusCodes.UNAUTHORIZED)
+                        .json(responseData);
+                    return;
+                }
+                else if (userToAssignRoles.Roles == newRoleAssignment.NewRole) {
+                    responseData = new net.HttpMessage(null, "Target user is already on the same role");
+                    response
+                        .status(httpStatusCodes.BAD_REQUEST)
+                        .json(responseData);
+                    return;
+                }
+                else {
+                    userToAssignRoles.Roles = newRoleAssignment.NewRole;
+
+                    userToAssignRoles.save();
+
+                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToAssignRoles.id, ServiceEventKeys.RolesUpdated), userToAssignRoles.Roles);
+
+                    responseData = new net.HttpMessage(userToAssignRoles.Roles);
+                    response
+                        .status(httpStatusCodes.OK)
                         .json(responseData);
                 }
             });

@@ -8,8 +8,10 @@ export default class ServiceEventKeys {
     public static readonly MatchUpdated = "MatchUpdated";
     public static readonly YouGotShot = "YouGotShot";
     public static readonly MatchEnded = "MatchEnded";
+    public static readonly MatchCanceled = "MatchCanceled";
     public static readonly YouGotANewMessage = "YouGotANewMessage";
     public static readonly BanUpdated = "BanUpdated";
+    public static readonly RolesUpdated = "RolesUpdated";
 
     public static matchEventForUser(subscribingUserId: string, matchId: string, matchEvent: string) {
         return "uid=" + subscribingUserId + "&mid=" + matchId + "&mek=" + matchEvent;

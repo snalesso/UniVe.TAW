@@ -10,7 +10,7 @@ import * as net from '../../infrastructure/net';
 import * as game from '../../infrastructure/game';
 import * as game_client from '../../infrastructure/game.client';
 import * as utils from '../../infrastructure/utils';
-import * as utils_2_8 from '../../infrastructure/utils-2.8';
+import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
 import ServiceEventKeys from '../services/ServiceEventKeys';
@@ -110,7 +110,7 @@ export default class GameRoutes extends RoutesBase {
 
                 const pendingMatchCriteria = {
                     PlayerId: userObjectId
-                } as utils_2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
+                } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
                 this.hasOpenMatches(userObjectId)
                     .then((hasOpenMatches) => {
@@ -173,7 +173,7 @@ export default class GameRoutes extends RoutesBase {
                 const pendingMatchCriteria = {
                     PlayerId: userObjectId,
                     _id: new mongoose.Types.ObjectId(request.params[RoutingParamKeys.pendingMatchId])
-                } as utils_2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
+                } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
                 PendingMatch
                     .getModel()
@@ -705,6 +705,9 @@ export default class GameRoutes extends RoutesBase {
                                     } as game_client.IOwnBattleFieldCell))
                                 } as DTOs.IYouGotShotEventDto);
 
+                            responseData = new net.HttpMessage(attackResultDto);
+                            response.status(httpStatusCodes.OK).json(responseData);
+
                             // ------------ handle match ended -----------------
 
                             if (match.EndDateTime) {
@@ -717,7 +720,7 @@ export default class GameRoutes extends RoutesBase {
                                     SecondPlayerSide: match.SecondPlayerSide,
                                     WinnerId: match.InActionPlayerId,
                                     Settings: match.Settings
-                                } as utils_2_8.Mutable<EndedMatch.IMongooseEndedMatch>;
+                                } as utilsV2_8.Mutable<EndedMatch.IMongooseEndedMatch>;
 
                                 let endedMatch = await EndedMatch
                                     .create(newEndedMatch)
@@ -742,10 +745,6 @@ export default class GameRoutes extends RoutesBase {
                                 this._socketIOServer.emit(
                                     ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded),
                                     mee);
-                            }
-                            else {
-                                responseData = new net.HttpMessage(attackResultDto);
-                                response.status(httpStatusCodes.OK).json(responseData);
                             }
                         }
                         catch (ex) {
@@ -947,12 +946,12 @@ export default class GameRoutes extends RoutesBase {
             FirstPlayerSide: {
                 PlayerId: userId
             }
-        } as utils_2_8.Mutable<Match.IMongooseMatch>;
+        } as utilsV2_8.Mutable<Match.IMongooseMatch>;
         const matchCriteria2 = {
             SecondPlayerSide: {
                 PlayerId: userId
             }
-        } as utils_2_8.Mutable<Match.IMongooseMatch>;
+        } as utilsV2_8.Mutable<Match.IMongooseMatch>;
 
         return Match.getModel()
             .findOne({ $or: [{ "FirstPlayerSide.PlayerId": userId }, { "SecondPlayerSide.PlayerId": userId }] })
@@ -993,7 +992,7 @@ export default class GameRoutes extends RoutesBase {
 
         const criteria = {
             PlayerId: userId
-        } as utils_2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
+        } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
         return PendingMatch.getModel()
             .findOne(criteria)
@@ -1010,7 +1009,7 @@ export default class GameRoutes extends RoutesBase {
     // TODO: review if it works with id filtering
     private hasOpenMatches(userId: mongoose.Types.ObjectId): Promise<boolean> {
 
-        const pendingMatchCriteria = { PlayerId: userId } as utils_2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
+        const pendingMatchCriteria = { PlayerId: userId } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
         return this.getUsersPendingMatch(userId)
             .then((existingPendingMatch) => {

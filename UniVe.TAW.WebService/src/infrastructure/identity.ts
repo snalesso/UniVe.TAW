@@ -1,8 +1,7 @@
 // FLAGS
 export enum UserRoles {
-    Player = 1 << 0,
-    Moderator = 1 << 1, // TODO: can ban, bans are automatically incremental
-
+    Player = 1, //1 << 0,
+    Moderator = 2, //1 << 1,
     Admin = Player | Moderator // ~(~0 << 2) // all
 }
 

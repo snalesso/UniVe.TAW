@@ -11,8 +11,6 @@ import { AuthService } from '../../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
-import { retry } from 'rxjs/operators';
-import { TouchSequence } from 'selenium-webdriver';
 
 @Component({
   selector: 'app-match',
@@ -118,10 +116,18 @@ export class MatchComponent implements OnInit, OnDestroy {
                   if (this._matchStatus) {
                     this._matchStatus.EndDateTime = event.EndDateTime;
                     this._matchStatus.DidIWin = (event.WinnerId && event.WinnerId == this._authService.LoggedUser.Id);
-                    alert("YOU " + (this.DidIWin ? "WON" : "LOST") + "!");
+                    //alert("YOU " + (this.DidIWin ? "WON" : "LOST") + "!");
                   }
                 });
             }
+
+            this._socketIOService.once(
+              ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled),
+              (event: any) => {
+                alert("This match has been canceled!");
+                this._router.navigate(["/match-finder"]);
+              }
+            );
           }
         },
         (error: http.HttpErrorResponse) => {

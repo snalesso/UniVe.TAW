@@ -20,6 +20,8 @@ import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
 import * as cors from 'cors';
 
+import * as moment from 'moment';
+
 export default class GameRoutes extends RoutesBase {
 
     private readonly _jwtValidator: expressJwt.RequestHandler;
@@ -75,17 +77,25 @@ export default class GameRoutes extends RoutesBase {
 
                 const user = request.user as User.IMongooseUser;
 
-                let statusCode: number;
                 let errMsg: string;
                 let responseData: net.HttpMessage<string>;
 
                 if (!user) {
+
                     console.log(chalk.red("Login failed!"));
-                    statusCode = httpStatusCodes.UNAUTHORIZED;
-                    responseData = new net.HttpMessage<string>(null, "Invalid credentials");
+
+                    responseData = new net.HttpMessage(null, "Invalid credentials");
+                    response
+                        .status(httpStatusCodes.UNAUTHORIZED)
+                        .json(responseData);
+                }
+                else if (user.BannedUntil) {
+                    responseData = new net.HttpMessage(null, "You are banned until " + moment(user.BannedUntil).format("dd/MM/yyyy HH:mm:ss"));
+                    response
+                        .status(httpStatusCodes.UNAUTHORIZED)
+                        .json(responseData);
                 }
                 else {
-                    statusCode = httpStatusCodes.OK;
                     let jwtPayload: DTOs.IUserJWTData = {
                         Id: user.id,
                         Username: user.Username,
@@ -97,13 +107,14 @@ export default class GameRoutes extends RoutesBase {
                         {
                             expiresIn: "7 days" // 60 * 60 * 24 * 7 // 1 week
                         });
-                    console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user.id + ", token: " + token + ")");
-                    responseData = new net.HttpMessage<string>(token);
-                }
 
-                response
-                    .status(statusCode)
-                    .json(responseData);
+                    console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user.id + ", token: " + token + ")");
+
+                    responseData = new net.HttpMessage<string>(token);
+                    response
+                        .status(httpStatusCodes.OK)
+                        .json(responseData);
+                }
             });
 
         // TODO: check logged in

@@ -13,6 +13,8 @@ import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
 import BanOption from './BanOption';
+import * as identity from '../../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
+import UserRole from './UserRole';
 
 @Component({
   selector: 'app-profile',
@@ -39,22 +41,8 @@ export class ProfileComponent implements OnInit {
       : paramUserId;
   }
 
-  public get Powers() { return this._userPowers; }
-
-  public get IsItMe() { return this._userId == this._authService.LoggedUser.Id; }
-
-  public get CanBeModerated() {
-    return !this.IsItMe
-      && (this._userPowers.Roles > this._userProfile.Roles)
-      && this._userPowers
-      && (this._userPowers.CanPromote
-        || this._userPowers.CanTemporarilyBan
-        || this._userPowers.CanPermaBan);
-  }
-
-  public get Profile() { return this._userProfile; }
-
-  public get WindPercent() { return this.Profile ? Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100) : null; }
+  public SelectedBanOption: BanOption;
+  public SelectedUserRole: UserRole;
 
   private _banOptions: BanOption[] = [];
   public get BanOptions(): BanOption[] {
@@ -63,14 +51,45 @@ export class ProfileComponent implements OnInit {
       : null;
   }
 
-  public SelectedBanOption: BanOption;
+  private readonly _userRoles: UserRole[] = [{ Name: "Mod", Value: identity.UserRoles.Moderator }, { Name: "Player", Value: identity.UserRoles.Player }];
+  public get UserRoles() { return this._userRoles; }
+
+  public get Powers() { return this._userPowers; }
+
+  public get IsItMe() { return this._userId == this._authService.LoggedUser.Id; }
+
+  public get CanBeModerated() {
+    return !this.IsItMe
+      && this._userPowers
+      && (this._userPowers.Roles > this._userProfile.Roles)
+      && (this._userPowers.CanAssignRoles
+        || this._userPowers.CanTemporarilyBan
+        || this._userPowers.CanPermaBan);
+  }
+
+  public get CanPromote() {
+    return !this.IsItMe
+      && this._userPowers
+      && (this._userPowers.Roles >= identity.UserRoles.Admin)
+      && (this.Profile.Roles < identity.UserRoles.Admin)
+      && this._userPowers.CanAssignRoles;
+  }
+
+  public get CanAssignRoles() {
+    return this._userPowers
+      && this._userPowers.Roles == identity.UserRoles.Admin
+      && this._userProfile.Roles < identity.UserRoles.Admin;
+  }
+
+  public get Profile() { return this._userProfile; }
+
+  public get WindPercent() { return this.Profile ? Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100) : null; }
 
   public ban(hours: number) {
     this._identityService.ban(this._userId, hours)
       .subscribe(
         response => {
           this._userProfile.BannedUntil = response.Content;
-          //this._userProfile.BannedUntil = new Date(2018, 12, 24, 23, 59, 59, 999);
         },
         (error: ngHttp.HttpErrorResponse) => { });
   }
@@ -79,13 +98,24 @@ export class ProfileComponent implements OnInit {
     this.ban(0);
   }
 
+  public assignRole(userRole: identity.UserRoles) {
+
+    this._identityService.assignRoles(this._userId, userRole)
+      .subscribe(
+        response => {
+          this._userProfile.Roles = response.Content;
+        },
+        (error: ngHttp.HttpErrorResponse) => { });
+  }
+
   ngOnInit() {
 
     this._identityService.getUserProfile(this._userId)
       .subscribe(
         response => {
           this._userProfile = response.Content;
-          //this._userProfile.BannedUntil = new Date(2018, 12, 24, 23, 59, 59, 999);
+          const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
+          this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
         },
         (error: ngHttp.HttpErrorResponse) => { });
 

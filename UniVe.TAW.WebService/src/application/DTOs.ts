@@ -199,7 +199,7 @@ export interface IUserPowers {
     readonly Roles: enums.UserRoles;
     readonly CanTemporarilyBan: boolean;
     readonly CanPermaBan: boolean;
-    readonly CanPromote: boolean;
+    readonly CanAssignRoles: boolean;
     readonly CanPlay: boolean;
     readonly CanChat: boolean;
 }
@@ -222,4 +222,9 @@ export interface IEndedMatchSummaryDto {
     readonly FirstPlayer: ISimpleUserDto;
     readonly SecondPlayer: ISimpleUserDto;
     readonly WinnerId: string;
+}
+
+export interface IRoleAssignmentRequestDto {
+    readonly UserId: string;
+    readonly NewRole: identity.UserRoles;
 }
