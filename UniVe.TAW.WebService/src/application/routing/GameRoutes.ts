@@ -321,22 +321,6 @@ export default class GameRoutes extends RoutesBase {
             }
         );
 
-        // // TODO: complete, check everything workd as expected 
-        // this._router.get(
-        //     "/newMatchSettings",
-        //     this._jwtValidator,
-        //     (request: express.Request, response: express.Response) => {
-
-        //         const dnms = null; // new game.MatchSettings();
-        //         const responseData = new net.HttpMessage(game.MatchSettingsFactory.createDefaultSettings());
-
-        //         response
-        //             //.type("application/json")
-        //             .status(httpStatusCodes.OK)
-        //             .send(responseData);
-        //     }
-        // );
-
         this._router.get(
             "/:" + RoutingParamKeys.matchId,
             this._jwtValidator,
@@ -584,11 +568,6 @@ export default class GameRoutes extends RoutesBase {
                         }
 
                         const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
-                        // const enemySide = (match.FirstPlayerSide.PlayerId as any as User.IMongooseUser)._id.equals(userObjectId)
-                        //     ? match.FirstPlayerSide
-                        //     : ((match.SecondPlayerSide.PlayerId as any as User.IMongooseUser)._id.equals(userObjectId)
-                        //         ? match.SecondPlayerSide
-                        //         : null);
 
                         if (enemySide) {
 
@@ -726,10 +705,6 @@ export default class GameRoutes extends RoutesBase {
                                     .create(newEndedMatch)
                                     .save();
                                 let removedMatch = await match.remove();
-                                // .then(newEndedMatch => {
-                                //     match.remove();
-                                // })
-                                //.catch((error: mongodb.MongoError) => { });
 
                                 const mee = {
                                     MatchId: endedMatch._id.toHexString(),
@@ -788,11 +763,6 @@ export default class GameRoutes extends RoutesBase {
                         }
 
                         const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
-                        // const enemySide = (match.FirstPlayerSide.PlayerId as any as User.IMongooseUser)._id.equals(userObjectId)
-                        //     ? match.FirstPlayerSide
-                        //     : ((match.SecondPlayerSide.PlayerId as any as User.IMongooseUser)._id.equals(userObjectId)
-                        //         ? match.SecondPlayerSide
-                        //         : null);
 
                         if (ownSide) {
 
@@ -851,34 +821,9 @@ export default class GameRoutes extends RoutesBase {
 
     }
 
-    private getCanUserInterveneInMatch(playerId: mongoose.Types.ObjectId, matchId: mongoose.Types.ObjectId) {
-        if (playerId == null || matchId == null)
-            throw new Error("playerId & matchId cannot be null");
-
-        return Match.getModel().findById(matchId)
-            .then(match => {
-                return match && (match.FirstPlayerSide.PlayerId === playerId || match.SecondPlayerSide.PlayerId === playerId);
-            })
-            .catch((error: mongodb.MongoError) => {
-                console.log(chalk.red("error looking for specified match with specified player"));
-                throw new Error("error looking for specified match with specified player");
-            });
-    }
-
     private getPlayables(userId: mongoose.Types.ObjectId) {
 
         const playables = {} as DTOs.IPlayablesDto;
-
-        // Match.getModel().find().then(matches => {
-        //     const x = matches.map(m => {
-        //         return {
-        //             matchId: m._id,
-        //             first: m.FirstPlayerSide.PlayerId,
-        //             second: m.SecondPlayerSide.PlayerId,
-        //             cazzo: m.FirstPlayerSide.PlayerId.equals(userId) || m.SecondPlayerSide.PlayerId.equals(userId)
-        //         };
-        //     });
-        // });
 
         return this.getUsersPendingMatch(userId)
             .then(pendingMatch => {
@@ -961,25 +906,6 @@ export default class GameRoutes extends RoutesBase {
             .then((playingMatch) => {
 
                 return playingMatch;
-                // if (playingMatch == null)
-                //     return null;
-
-                // const enemySide = playingMatch.getEnemyMatchPlayerSide(userId);
-
-                // return {
-                //     Id: playingMatch.id.toHexString(),
-                //     Enemy: {
-                //         Id: enemySide.PlayerId.toHexString(),
-
-                //         // TODO: complete
-
-                //         //Username: enemySide.PlayerId.Username
-                //         // Country
-                //         //Age: enemySide.Plauer
-
-                //     } as DTOs.IUserDto
-
-                // } as DTOs.IPlayingMatchDto;
             })
             .catch((error) => {
                 // TODO: handle

@@ -97,48 +97,6 @@ export default class UsersRoutes extends RoutesBase {
                 }
             });
 
-        // this._router.get(
-        //     '/cazzo',
-        //     this._jwtValidator,
-        //     (request: express.Request, response: express.Response, next: express.NextFunction) => {
-        //         const userJWTData = (request.user as DTOs.IUserJWTData);
-        //         response.json("diocane " + userJWTData.Username);
-        //     });
-
-        // TODO: add authentication and allow delete only to same user
-        // this._router.delete(
-        //     "/:" + RoutingParamKeys.userId,
-        //     this._jwtValidator,
-        //     (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-        //         const userId = request.params[RoutingParamKeys.userId];
-        //         let responseData: net.HttpMessage<boolean> = null;
-
-        //         User.getModel()
-        //             .findByIdAndRemove(
-        //                 userId,
-        //                 (error: mongodb.MongoError, deletedUser) => {
-        //                     if (error) {
-        //                         responseData = new net.HttpMessage<boolean>(null, error.message);
-        //                         response
-        //                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-        //                             .json(responseData);
-        //                     }
-        //                     else if (!deletedUser) {
-        //                         responseData = new net.HttpMessage<boolean>(null, "User not found!");
-        //                         response
-        //                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-        //                             .json(responseData);
-        //                     }
-        //                     else {
-        //                         responseData = new net.HttpMessage<boolean>(true);
-        //                         response
-        //                             .status(httpStatusCodes.OK)
-        //                             .json(responseData);
-        //                     }
-        //                 });
-        //     });
-
         this._router.get(
             '/rankings',//:' + RoutingParamKeys.userId,
             //this._jwtValidator,
@@ -619,33 +577,5 @@ export default class UsersRoutes extends RoutesBase {
                             .json(responseData);
                     });
             });
-
-        // this._router.get(
-        //     '/:' + RoutingParamKeys.userId + '/simple',
-        //     this._jwtValidator,
-        //     (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-        //         const userId = request.params[RoutingParamKeys.userId];
-        //         let responseData: net.HttpMessage<DTOs.ISimpleUserDto> = null;
-
-        //         User.getModel()
-        //             .findById(userId)
-        //             .then((mongoUser) => {
-        //                 let userDto: DTOs.ISimpleUserDto = {
-        //                     Id: mongoUser.id,
-        //                     Username: mongoUser.Username
-        //                 };
-        //                 responseData = new net.HttpMessage(userDto);
-        //                 response
-        //                     .status(httpStatusCodes.OK)
-        //                     .json(responseData);
-        //             })
-        //             .catch((error: mongodb.MongoError) => {
-        //                 responseData = new net.HttpMessage(null, error.message);
-        //                 response
-        //                     .status(httpStatusCodes.OK)
-        //                     .json(responseData);
-        //             });
-        //     });
     }
 }

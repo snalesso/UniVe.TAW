@@ -39,7 +39,7 @@ export class IdentityService {
   }
 
   public getRankings() {
-    const endPoint = ServiceConstants.ServerAddress + "/users/rankings";// /" + this._authService.LoggedUser.Id;
+    const endPoint = ServiceConstants.ServerAddress + "/users/rankings";
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
@@ -97,7 +97,7 @@ export class IdentityService {
     return this._http.post<net.HttpMessage<Date>>(endPoint, { BanDurationHours: 0, UserId: userId } as DTOs.IUserBanRequest, options);
   }
 
-  public assignRoles(userId: string, newRole: identity.UserRoles) {
+  public assignRole(userId: string, newRole: identity.UserRoles) {
     const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/role";
     const options = {
       headers: new ng_http.HttpHeaders({

@@ -28,7 +28,7 @@ export class ChatService {
 
   public sendMessage(addresseeId: string, text: string) {
 
-    const endPoint = ServiceConstants.ServerAddress + "/chat/sendMessage"; // /" + addresseeId;
+    const endPoint = ServiceConstants.ServerAddress + "/chat/" + addresseeId;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
@@ -39,48 +39,31 @@ export class ChatService {
       AddresseeId: addresseeId
     } as DTOs.INewMessage
 
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
-
     return this._http.post<net.HttpMessage<DTOs.IChatMessageDto>>(endPoint, data, options);
   }
 
-  public getChatMessagesWith(interlocutorId: string) {
+  public getChatHistoryWith(interlocutorId: string) {
 
-    const endPoint = ServiceConstants.ServerAddress + "/chat/history/" + interlocutorId;
+    const endPoint = ServiceConstants.ServerAddress + "/chat/" + interlocutorId;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
-
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<DTOs.IChatMessageDto[]>>(endPoint, options);
   }
 
-  public getChatsHistory() {
+  public getChatHistory() {
 
-    const endPoint = ServiceConstants.ServerAddress + "/chat/history";
+    const endPoint = ServiceConstants.ServerAddress + "/chat";
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
-
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<DTOs.IChatDto[]>>(endPoint, options);
-  }
-
-  public getTalkableUsers() {
-    const endPoint = ServiceConstants.ServerAddress + "/chat/talkables";
-    const options = {
-      headers: new ng_http.HttpHeaders()
-        .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this._authService.Token)
-    };
-
-    return this._http.get<net.HttpMessage<ReadonlyArray<DTOs.ISimpleUserDto>>>(endPoint, options);
   }
 
 }

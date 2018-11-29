@@ -113,7 +113,7 @@ export class ProfileComponent implements OnInit {
 
   public assignRole(userRole: identity.UserRoles) {
 
-    this._identityService.assignRoles(this._userId, userRole)
+    this._identityService.assignRole(this._userId, userRole)
       .subscribe(
         response => {
           this._userProfile.Roles = response.Content;

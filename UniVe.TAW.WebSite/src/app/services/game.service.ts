@@ -34,8 +34,6 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
-
     return this._http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
   }
 
@@ -46,8 +44,6 @@ export class GameService {
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
-
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
@@ -60,8 +56,6 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
-
     return this._http.post<net.HttpMessage<boolean>>(endPoint, null, options);
   }
 
@@ -73,8 +67,6 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
-
     return this._http.get<net.HttpMessage<game.IMatchSettings>>(endPoint, options);
   }
 
@@ -85,8 +77,6 @@ export class GameService {
         .set('Content-Type', 'application/json')
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
-
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
     return this._http.post<net.HttpMessage<string>>(endPoint, null, options);
   }
@@ -101,8 +91,6 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
-
     return this._http.post<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, fleetConfig, options);
   }
 
@@ -114,8 +102,6 @@ export class GameService {
         'Authorization': 'Bearer ' + this._authService.Token
       })
     };
-
-    //console.log(this._authService.LoggedUser.Username + " GET " + endPoint + " with token " + this._authService.Token);
 
     return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, options);
   }

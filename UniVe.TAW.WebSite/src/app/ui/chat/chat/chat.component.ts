@@ -43,7 +43,7 @@ export class ChatComponent implements OnInit {
   ngOnInit() {
 
     if (this._authService.IsLogged) {
-      const x = this._chatService.getChatsHistory()
+      const x = this._chatService.getChatHistory()
         .subscribe(
           response => {
             this._chats = response.Content;

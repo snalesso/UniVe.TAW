@@ -40,7 +40,7 @@ export class MatchChatComponent implements OnInit {
 
   ngOnInit() {
 
-    this._chatService.getChatMessagesWith(this.InterlocutorId)
+    this._chatService.getChatHistoryWith(this.InterlocutorId)
       .subscribe(
         response => {
 
