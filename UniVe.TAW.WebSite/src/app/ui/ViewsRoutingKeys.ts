@@ -9,4 +9,5 @@ export default class ViewsRoutingKeys {
     public static readonly MatchHistory = 'match-history';
     public static readonly Rankings = 'rankings';
     public static readonly Users = 'users';
+    public static readonly Chat = 'chat';
 }

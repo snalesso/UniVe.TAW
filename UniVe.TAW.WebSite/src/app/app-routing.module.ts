@@ -18,13 +18,21 @@ import { MatchHistoryComponent } from './ui/identity/users/match-history/match-h
 import { viewClassName } from '@angular/compiler';
 import { Profile } from 'selenium-webdriver/firefox';
 import { ProfileComponent } from './ui/identity/users/profile/profile.component';
+import { ChatListComponent } from './ui/chat/chat-list/chat-list.component';
+import { ChatComponent } from './ui/chat/chat/chat.component';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
   { path: ViewsRoutingKeys.Signup, component: SignupComponent },
   { path: ViewsRoutingKeys.Login, component: LoginComponent },
   { path: ViewsRoutingKeys.MatchFinder, component: JoinableMatchesComponent },
-  { path: RoutingHelper.buildRoutePath([ViewsRoutingKeys.Match], [RoutingParamKeys.matchId]), component: MatchComponent },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Match),
+      new RouteParam(RoutingParamKeys.matchId)
+    ]),
+    component: MatchComponent
+  },
   // {
   //   path: RoutingHelper.buildRoute([
   //     new RouteStep(ViewsRoutingKeys.Users),
@@ -37,7 +45,14 @@ const routes: Routes = [
     path: RoutingHelper.buildRoute([
       new RouteStep(ViewsRoutingKeys.Users),
       new RouteParam(RoutingParamKeys.userId)
-    ]), component: ProfileComponent, pathMatch: "full"
+    ]),
+    component: ProfileComponent
+  },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Chat)
+    ]),
+    component: ChatComponent
   }
 ];
 

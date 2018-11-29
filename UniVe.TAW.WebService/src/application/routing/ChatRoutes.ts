@@ -39,167 +39,190 @@ export default class ChatRoutes extends RoutesBase {
         this._router.post(
             '/sendMessage',
             this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+            async (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<DTOs.IChatHistoryMessageDto>;
+                let responseData: net.HttpMessage<DTOs.IChatMessageDto>;
 
                 const currentUserJWTData = (request.user as DTOs.IUserJWTData);
-                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
+                const senderUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
                 const incMsg = request.body as DTOs.INewMessage;
 
                 if (!incMsg) {
-                    response.status(httpStatusCodes.BAD_REQUEST);
-                } else {
+                    responseData = new net.HttpMessage(null, "Invalid messages format");
+                    response.status(httpStatusCodes.BAD_REQUEST).json(responseData);
+                    return;
 
-                    // let criteria = {
-                    //     SenderId: new mongoose.Types.ObjectId(incMsg.SenderId),
-                    //     AddresseeId: new mongoose.Types.ObjectId(incMsg.AddresseeId)
-                    // } as utils_2_8.Mutable<UserToUserChatMessages.IMongooseUserToUserChatMessages>;
+                }
 
-                    User.getModel()
-                        .findById(currentUserObjectId)
-                        .then(user => {
+                const senderUser = await User.getModel().findById(senderUserObjectId).exec();
 
-                            try {
+                try {
 
-                                if (user) {
+                    if (!senderUser) {
+                        responseData = new net.HttpMessage(null, "Sender user not found");
+                        response
+                            .status(httpStatusCodes.BAD_REQUEST)
+                            .json(responseData);
+                        return;
+                    }
 
-                                    let loggedMsg = user.logMessage(new mongoose.Types.ObjectId(incMsg.AddresseeId), incMsg.Text);
-                                    if (loggedMsg) {
-                                        user.save();
+                    const loggedMsg = senderUser.logMessage(new mongoose.Types.ObjectId(incMsg.AddresseeId), incMsg.Text);
 
-                                        const senderMessageDto = {
-                                            IsMine: true,
-                                            Text: loggedMsg.Text,
-                                            Timestamp: loggedMsg.Timestamp
-                                        } as DTOs.IChatHistoryMessageDto;
+                    if (!loggedMsg) {
+                        responseData = new net.HttpMessage(null, "Message logging failed");
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(responseData);
+                        return;
+                    }
 
-                                        const addresseeMessageDto = {
-                                            IsMine: false,
-                                            Text: loggedMsg.Text,
-                                            Timestamp: loggedMsg.Timestamp
-                                        } as DTOs.IChatHistoryMessageDto;
+                    await senderUser.save();
 
-                                        this._socketIOServer.emit(ServiceEventKeys.chatEventForUser(incMsg.AddresseeId, ServiceEventKeys.YouGotANewMessage), addresseeMessageDto);
+                    const senderMessageDto = {
+                        IsMine: true,
+                        Text: loggedMsg.Text,
+                        Timestamp: loggedMsg.Timestamp
+                    } as DTOs.IChatMessageDto;
 
-                                        responseData = new net.HttpMessage(senderMessageDto);
-                                        response
-                                            .status(httpStatusCodes.OK)
-                                            .json(responseData);
-                                    }
-                                    else {
-                                        response
-                                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
-                                    }
-                                }
-                                else {
-                                    response
-                                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
-                                }
-                            }
-                            catch (ex) {
-                                console.log(ex);
-                            }
-                        })
-                        .catch((error: mongodb.MongoError) => {
+                    const addresseeMessageDto = {
+                        IsMine: false,
+                        Text: loggedMsg.Text,
+                        Timestamp: loggedMsg.Timestamp
+                    } as DTOs.IChatMessageDto;
 
-                            responseData = new net.HttpMessage(null, error.message);
-                            response
-                                .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
-                        });
+                    responseData = new net.HttpMessage(senderMessageDto);
+                    response
+                        .status(httpStatusCodes.OK)
+                        .json(responseData);
+
+                    this._socketIOServer.emit(ServiceEventKeys.chatEventForUser(incMsg.AddresseeId, ServiceEventKeys.YouGotANewMessage), addresseeMessageDto);
+                }
+                catch (ex) {
+                    console.log(ex);
+
+                    responseData = new net.HttpMessage(null, "Exception caught: " + ex);
+                    response
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
                 }
             });
 
         this._router.get(
             '/history',
             this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+            async (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatHistoryHeaderDto>>;
+                let responseData: net.HttpMessage<DTOs.IChatDto[]>;
 
                 const currentUserJWTData = (request.user as DTOs.IUserJWTData);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
 
-                User.getModel()
-                    .find()
-                    .then(users => {
+                const users = await User.getModel().find().exec();
 
-                        let chatHeaderDtos = new Array<DTOs.IChatHistoryHeaderDto>();
-                        const chatsMap = new Map<string, DTOs.IChatHistoryHeaderDto>();
+                let chatDtos = new Array<DTOs.IChatDto>();
+                const chatsMap = new Map<string, DTOs.IChatDto>();
 
-                        for (let user of users) {
+                for (let user of users) {
 
-                            if (!user._id.equals(currentUserObjectId)) {
-                                const msgs = user.SentMessages ? user.SentMessages.get(currentUserJWTData.Id) : null;
-                                const lastMsg = (msgs && msgs.length > 0) ? msgs[msgs.length - 1] : null;
+                    if (!user._id.equals(currentUserObjectId)) {
+                        const msgs = (user.SentMessages != null
+                            ? user.SentMessages.get(currentUserJWTData.Id)
+                            : null);
+                        const msgDtos = (msgs != null ? msgs : [])
+                            .map(msg => ({
+                                IsMine: false,
+                                Text: msg.Text,
+                                Timestamp: msg.Timestamp
+                            } as DTOs.IChatMessageDto));
 
-                                if (lastMsg
-                                    && (!chatsMap.has(user._id.toHexString())
-                                        || chatsMap.get(user._id.toHexString()).LastMessage.Timestamp < lastMsg.Timestamp)) {
-                                    chatsMap.set(
-                                        user._id.toHexString(),
-                                        {
-                                            Interlocutor: {
-                                                Id: user._id.toHexString(),
-                                                Username: user.Username
-                                            },
-                                            LastMessage: {
-                                                IsMine: false,
-                                                Timestamp: lastMsg.Timestamp,
-                                                Text: lastMsg.Text
-                                            }
-                                        } as DTOs.IChatHistoryHeaderDto);
-                                }
+                        if (!chatsMap.has(user._id.toHexString())) {
+                            chatsMap.set(
+                                user._id.toHexString(),
+                                {
+                                    Interlocutor: {
+                                        Id: user._id.toHexString(),
+                                        Username: user.Username
+                                    },
+                                    Messages: msgDtos
+                                } as DTOs.IChatDto);
+                        }
+                        else {
+                            chatsMap.get(user._id.toHexString()).Messages.push(...msgDtos);
+                        }
+                    }
+                    else {
+                        // logged user
+                        user.SentMessages.forEach((messages, interlocutorId) => {
+
+                            const msgDtos = (messages != null
+                                ? messages
+                                : [])
+                                .map(msg => ({
+                                    IsMine: true,
+                                    Text: msg.Text,
+                                    Timestamp: msg.Timestamp
+                                } as DTOs.IChatMessageDto));
+
+                            if (!chatsMap.has(interlocutorId as string)) {
+
+                                const usUsers = users.filter(u => u._id.toHexString() == interlocutorId);
+                                const username = usUsers[0].Username;
+
+                                chatsMap.set(
+                                    interlocutorId as string,
+                                    {
+                                        Interlocutor: {
+                                            Id: interlocutorId as string,
+                                            Username: username
+                                        },
+                                        Messages: msgDtos
+                                    } as DTOs.IChatDto);
                             }
                             else {
-                                user.SentMessages.forEach((messages, interlocutorId) => {
-                                    const lastMsg = messages[messages.length - 1];
-                                    if (lastMsg
-                                        && (!chatsMap.has(interlocutorId as string)
-                                            || chatsMap.get(interlocutorId as string).LastMessage.Timestamp < lastMsg.Timestamp)) {
-                                        chatsMap.set(
-                                            interlocutorId as string,
-                                            {
-                                                Interlocutor: {
-                                                    Id: interlocutorId as string,
-                                                    Username: users.filter(u => u._id.toHexString() == interlocutorId)[0].Username
-                                                },
-                                                LastMessage: {
-                                                    IsMine: true,
-                                                    Timestamp: lastMsg.Timestamp,
-                                                    Text: lastMsg.Text
-                                                }
-                                            } as DTOs.IChatHistoryHeaderDto);
-                                    }
-                                });
+                                chatsMap.get(interlocutorId as string).Messages.push(...msgDtos);
                             }
-                        }
-
-                        // sort by latest first
-                        for (let ch of chatsMap.values()) {
-                            chatHeaderDtos.push(ch);
-                        }
-
-                        chatHeaderDtos = chatHeaderDtos.sort((a, b) => {
-                            if (a.LastMessage.Timestamp > b.LastMessage.Timestamp)
-                                return -1;
-
-                            if (a.LastMessage.Timestamp < b.LastMessage.Timestamp)
-                                return 1;
-
-                            return 0;
                         });
+                    }
+                }
 
-                        responseData = new net.HttpMessage(chatHeaderDtos);
-                        response
-                            .status(httpStatusCodes.OK)
-                            .json(responseData);
+                // sort from oldest to newest
+                for (let ch of chatsMap.values()) {
+                    ch.Messages = ch.Messages.sort((a, b) => {
+                        if (a.Timestamp < b.Timestamp)
+                            return -1;
+
+                        if (a.Timestamp > b.Timestamp)
+                            return 1;
+
+                        return 0;
                     })
-                    .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage(null, error.message);
-                        response
-                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
-                    });
+                    chatDtos.push(ch);
+                }
+
+                // // sort chats from oldest to newest
+                // chatDtos = chatDtos.sort((a, b) => {
+                //     if (a.Messages[a.Messages.length - 1] < b.Messages[b.Messages.length - 1])
+                //         return -1;
+
+                //     if (a.Messages[a.Messages.length - 1] > b.Messages[b.Messages.length - 1])
+                //         return 1;
+
+                //     return 0;
+                // });
+
+                // sort chats by interlocutor username
+                chatDtos = chatDtos.sort((a, b) => a.Interlocutor.Username.localeCompare(b.Interlocutor.Username));
+
+                responseData = new net.HttpMessage(chatDtos);
+                response
+                    .status(httpStatusCodes.OK)
+                    .json(responseData);
+                // })
+                // .catch((error: mongodb.MongoError) => {
+                //     responseData = new net.HttpMessage(null, error.message);
+                //     response
+                //         .status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                // });
             });
 
         this._router.get(
@@ -207,7 +230,7 @@ export default class ChatRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatHistoryMessageDto>>;
+                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatMessageDto>>;
 
                 const currentUserJWTData = (request.user as DTOs.IUserJWTData);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
@@ -252,7 +275,7 @@ export default class ChatRoutes extends RoutesBase {
                     .then(users => {
                         const [currentUser, otherUser] = users;
 
-                        let messageDtos = new Array<DTOs.IChatHistoryMessageDto>();
+                        let messageDtos = new Array<DTOs.IChatMessageDto>();
                         if (currentUser.SentMessages) {
                             const cum = currentUser.SentMessages.get(otherUserHexId);
                             if (cum) {
@@ -261,7 +284,7 @@ export default class ChatRoutes extends RoutesBase {
                                         Text: m.Text,
                                         Timestamp: m.Timestamp,
                                         IsMine: true
-                                    } as DTOs.IChatHistoryMessageDto)
+                                    } as DTOs.IChatMessageDto)
                                 }
                             }
                         }
@@ -273,17 +296,17 @@ export default class ChatRoutes extends RoutesBase {
                                         Text: m.Text,
                                         Timestamp: m.Timestamp,
                                         IsMine: false
-                                    } as DTOs.IChatHistoryMessageDto)
+                                    } as DTOs.IChatMessageDto)
                                 }
                             }
                         }
 
                         // sort by latest first
                         messageDtos = messageDtos.sort((a, b) => {
-                            if (a.Timestamp > b.Timestamp)
+                            if (a.Timestamp < b.Timestamp)
                                 return -1;
 
-                            if (a.Timestamp < b.Timestamp)
+                            if (a.Timestamp > b.Timestamp)
                                 return 1;
 
                             return 0;
@@ -346,11 +369,14 @@ export default class ChatRoutes extends RoutesBase {
 
                 User.getModel()
                     .find({ _id: { $ne: currUserObjectId } })
-                    .then((mongoUsers) => {
-                        let userDtos = mongoUsers.map(user => ({
+                    .then((users) => {
+                        let userDtos = users.map(user => ({
                             Id: user.id,
                             Username: user.Username
                         } as DTOs.ISimpleUserDto));
+
+                        userDtos = userDtos.sort((a, b) => a.Username.localeCompare(b.Username));
+
                         responseData = new net.HttpMessage(userDtos);
                         response
                             .status(httpStatusCodes.OK)

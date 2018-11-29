@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../services/game.service';
 import * as game from '../../../../assets/imported/unive.taw.webservice/infrastructure/game';
@@ -10,58 +10,45 @@ import * as utils from '../../../../assets/imported/unive.taw.webservice/infrast
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
-import { Subscription } from 'rxjs';
+import { Subscription, BehaviorSubject, Observable, AsyncSubject, Subject } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { IdentityService } from 'src/app/services/identity.service';
 import { ChatService } from 'src/app/services/chat.service';
 
 @Component({
-  selector: 'app-chat-list',
-  templateUrl: './chat-list.component.html',
-  styleUrls: ['./chat-list.component.css']
+  selector: 'app-talkables',
+  templateUrl: './talkables.component.html',
+  styleUrls: ['./talkables.component.css']
 })
-export class ChatListComponent implements OnInit {
-
-  private _chatHeaders: DTOs.IChatHistoryHeaderDto[] = [];
+export class TalkablesComponent implements OnInit {
 
   constructor(
-    //private readonly _router: Router,
-    //private readonly _activatedRoute: ActivatedRoute,
     private readonly _authService: AuthService,
-    //private readonly _gameService: GameService,
     private readonly _chatService: ChatService,
-    private readonly _socketIOService: ngxSocketIO.Socket,
-    //private readonly _identityService: IdentityService
   ) { }
 
-  public get ChatHeaders() { return this._chatHeaders; }
+  private _talkableUsers: ReadonlyArray<DTOs.ISimpleUserDto>;
+  public get TalkableUsers() { return this._talkableUsers; }
 
-  private _chats: DTOs.IChatDto[];
-  public get Chats(): DTOs.IChatDto[] { return this._chats; }
+  private _whenTalkableUserClicked: Subject<DTOs.ISimpleUserDto> = new Subject<DTOs.ISimpleUserDto>();
+  @Output()
+  public get WhenTalkableUserClicked(): Observable<DTOs.ISimpleUserDto> { return this._whenTalkableUserClicked; }
 
-  public SelectedChat: DTOs.IChatDto;
-
-  public openChat(playerId: string) {
-    alert(playerId);
+  public onTalkableUserClicked(talkableUser: DTOs.ISimpleUserDto) {
+    if (talkableUser)
+      this._whenTalkableUserClicked.next(talkableUser);
   }
 
   ngOnInit() {
 
     if (this._authService.IsLogged) {
-
-      this._chatService.getChatsHistory()
+      const x = this._chatService.getTalkableUsers()
         .subscribe(
           response => {
-
-            //this._chatHeaders = response.Content;
-
-            // this._socketIOService.on(
-            //   ServiceEventKeys.chatEventForUser(this._authService.LoggedUser.Id, ServiceEventKeys.YouGotANewMessage),
-            //   (newMessage: DTOs.IChatHistoryHeaderDto) => {
-            //     this._chatHeaders.unshift(newMessage);
-            //   });
+            this._talkableUsers = response.Content;
           },
           (error: ngHttp.HttpErrorResponse) => { });
     }
   }
+
 }

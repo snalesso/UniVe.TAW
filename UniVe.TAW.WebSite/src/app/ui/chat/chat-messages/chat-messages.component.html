@@ -1,0 +1,3 @@
+<p *ngFor="let message of SortedMessages" [ngClass]="message.IsMine ? 'chat-text-own text-right' : 'chat-text-enemy text-left'">[{{message.Timestamp
+  | date: 'dd/MM/yy HH:mm:ss'}}]
+  {{message.Text}}</p>

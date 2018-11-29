@@ -1,0 +1,25 @@
+<div class="container">
+  <div class="row h-100">
+
+    <div class="col-md-3">
+      <app-chat-list-entry *ngFor="let chat of Chats" [IsSelected]="chat == SelectedChat" [Chat]="chat" (click)="OpenChat(chat)"></app-chat-list-entry>
+    </div>
+
+    <div class="col" *ngIf="SelectedChat">
+
+      <div class="row ">
+        <div class="col">
+          <app-chat-messages [Messages]="SelectedChat.Messages" [Reverse]="false"></app-chat-messages>
+        </div>
+      </div>
+
+      <div class="row align-items-end">
+        <div class="col">
+          <app-chat-form [InterlocutorId]="SelectedChat.Interlocutor.Id" (WhenMessageIsSent)="handleWhenChatFormMessageIsSent($event)"></app-chat-form>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

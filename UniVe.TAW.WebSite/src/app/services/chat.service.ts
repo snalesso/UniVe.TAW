@@ -41,7 +41,7 @@ export class ChatService {
 
     //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.post<net.HttpMessage<DTOs.IChatHistoryMessageDto>>(endPoint, data, options);
+    return this._http.post<net.HttpMessage<DTOs.IChatMessageDto>>(endPoint, data, options);
   }
 
   public getChatMessagesWith(interlocutorId: string) {
@@ -55,7 +55,7 @@ export class ChatService {
 
     //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.get<net.HttpMessage<DTOs.IChatHistoryMessageDto[]>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IChatMessageDto[]>>(endPoint, options);
   }
 
   public getChatsHistory() {
@@ -69,7 +69,7 @@ export class ChatService {
 
     //console.log(this._authService.LoggedUser.Username + " POST " + endPoint + " with token " + this._authService.Token);
 
-    return this._http.get<net.HttpMessage<DTOs.IChatHistoryHeaderDto[]>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IChatDto[]>>(endPoint, options);
   }
 
   public getTalkableUsers() {

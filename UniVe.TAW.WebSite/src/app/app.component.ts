@@ -31,6 +31,14 @@ export class AppComponent {
         });
 
       this._socketIOService.once(
+        ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted),
+        () => {
+          this._authService.logout();
+          this._router.navigate(["/"]);
+          alert("Your account has been deleted!");
+        });
+
+      this._socketIOService.once(
         ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated),
         (newRole: identity.UserRoles) => {
           location.reload();

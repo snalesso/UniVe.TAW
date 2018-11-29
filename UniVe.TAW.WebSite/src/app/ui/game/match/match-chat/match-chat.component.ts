@@ -38,7 +38,7 @@ export class MatchChatComponent implements OnInit {
 
   public get CanSendMessage(): boolean { return (this.MessageText != null && this.MessageText.length > 0) && !this.IsSendingMessage; }
 
-  private _chatMessages: DTOs.IChatHistoryMessageDto[] = [];
+  private _chatMessages: DTOs.IChatMessageDto[] = [];
   public get ChatMessages() { return this._chatMessages; }
 
   public sendMessage(/*text: string*/) {
@@ -72,7 +72,7 @@ export class MatchChatComponent implements OnInit {
 
           this._socketIOService.on(
             ServiceEventKeys.chatEventForUser(this._authService.LoggedUser.Id, ServiceEventKeys.YouGotANewMessage),
-            (newMessage: DTOs.IChatHistoryMessageDto) => {
+            (newMessage: DTOs.IChatMessageDto) => {
               this._chatMessages.unshift(newMessage);
             });
         },

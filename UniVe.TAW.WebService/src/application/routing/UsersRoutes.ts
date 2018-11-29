@@ -277,11 +277,58 @@ export default class UsersRoutes extends RoutesBase {
                         .status(httpStatusCodes.NOT_FOUND)
                         .json(responseData);
                 } else {
-                    const removeResult = await user.remove();
 
-                    responseData = new net.HttpMessage(removeResult != null, removeResult != null ? null : "Something went wrong during user deletion :(");
+                    const deletedUser = await user.remove();
+
+                    if (!deletedUser) {
+                        responseData = new net.HttpMessage(false, "User deletion failed");
+                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                            .json(responseData);
+                        return;
+                    }
+
+                    // immediately incapacitate user
+                    this._socketIOServer.emit(ServiceEventKeys.userEvent(deletedUser._id.toHexString(), ServiceEventKeys.UserDeleted));
+
+                    // delete matches
+
+                    const pendingMatches = await PendingMatch.getModel()
+                        .find({ PlayerId: new mongoose.Types.ObjectId(deletedUser._id.toHexString()) } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>)
+                        .exec();
+
+                    for (let pm of pendingMatches) {
+                        await pm.remove();
+                    }
+
+                    this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+
+                    const userModel = User.getModel();
+                    const playingMatches = await Match.getModel()
+                        .find({
+                            $or: [
+                                { "FirstPlayerSide.PlayerId": new mongoose.Types.ObjectId(deletedUser._id.toHexString()) },
+                                { "SecondPlayerSide.PlayerId": new mongoose.Types.ObjectId(deletedUser._id.toHexString()) }
+                            ]
+                        })
+                        .populate({ path: "FirstPlayerSide.PlayerId", model: userModel })
+                        .populate({ path: "SecondPlayerSide.PlayerId", model: userModel })
+                        .exec();
+
+                    for (let pm of playingMatches) {
+                        await pm.remove();
+
+                        const fp = pm.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
+                        const sp = pm.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
+                        this._socketIOServer.emit(
+                            ServiceEventKeys.matchEventForUser(
+                                fp != null ? fp._id.toHexString() : sp._id.toHexString(),
+                                pm._id.toHexString(),
+                                ServiceEventKeys.MatchCanceled));
+                    }
+
+                    responseData = new net.HttpMessage(true);
                     response
-                        .status(removeResult != null ? httpStatusCodes.OK : httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .status(httpStatusCodes.OK)
                         .json(responseData);
                 }
             });

@@ -158,7 +158,7 @@ export interface INewMessage {
 //     readonly Timestamp: Date;
 // }
 
-export interface IChatHistoryMessageDto {
+export interface IChatMessageDto {
     readonly IsMine: boolean;
     readonly Text: string;
     readonly Timestamp: Date;
@@ -166,7 +166,12 @@ export interface IChatHistoryMessageDto {
 
 export interface IChatHistoryHeaderDto {
     readonly Interlocutor: ISimpleUserDto;
-    readonly LastMessage: IChatHistoryMessageDto;
+    readonly LastMessage: IChatMessageDto;
+}
+
+export interface IChatDto {
+    readonly Interlocutor: ISimpleUserDto;
+    Messages: IChatMessageDto[];
 }
 
 export interface IYouGotShotEventDto {

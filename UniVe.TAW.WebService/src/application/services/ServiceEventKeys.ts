@@ -12,6 +12,7 @@ export default class ServiceEventKeys {
     public static readonly YouGotANewMessage = "YouGotANewMessage";
     public static readonly BanUpdated = "BanUpdated";
     public static readonly RolesUpdated = "RolesUpdated";
+    public static readonly UserDeleted = "UserDeleted";
 
     public static matchEventForUser(subscribingUserId: string, matchId: string, matchEvent: string) {
         return "uid=" + subscribingUserId + "&mid=" + matchId + "&mek=" + matchEvent;

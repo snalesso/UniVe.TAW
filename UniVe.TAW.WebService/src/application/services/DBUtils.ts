@@ -37,48 +37,50 @@ export default class DBUtils {
             }
         }).catch(error => { console.log("error deleting pending match") });
 
-        console.log("all pending matches deleted");
+        //console.log("all pending matches deleted");
         console.log("deleting all matches ...");
 
         await Match.getModel().find().then(async matches => {
 
             for (let m of matches) {
                 await m.remove();
-                console.log("deleted M (id: " + m._id.toHexString() + ")");
+                //console.log("deleted M (id: " + m._id.toHexString() + ")");
             }
         }).catch(error => { console.log("error deleting match") });
 
-        console.log("all matches deleted");
+        //console.log("all matches deleted");
         console.log("deleting all endedmatches ...");
 
         await EndedMatch.getModel().find().then(async endedMatches => {
 
             for (let emm of endedMatches) {
                 await emm.remove();
-                console.log("deleted EM (id: " + emm._id.toHexString() + ")");
+                //console.log("deleted EM (id: " + emm._id.toHexString() + ")");
             }
         }).catch(error => { console.log("error deleting match") });
 
-        console.log("all endedmatches deleted");
+        //console.log("all endedmatches deleted");
         console.log("deleting all users ...");
 
         await User.getModel().find().then(async users => {
 
             for (let u of users) {
                 await u.remove();
-                console.log("deleted U (id: " + u._id.toHexString() + ")");
+                //console.log("deleted U (id: " + u._id.toHexString() + ")");
             }
         }).catch(error => { console.log("error deleting user") });
 
-        console.log("all users deleted");
+        //console.log("all users deleted");
     }
 
     /** First is Admin, next 3 Moderators, all others Players */
-    public static async generateFakeData(usernames: string[], matchesCount: number) {
+    public static async generateFakeData(usernames: string[], matchesCount: number, generateFakeChats: boolean) {
 
         console.log("generating fake data ...");
 
         // generates users
+
+        console.log("generating fake users ...");
 
         const users: User.IMongooseUser[] = [];
         const countries = Object.keys(Country)
@@ -106,6 +108,8 @@ export default class DBUtils {
         }
 
         // generates matches
+
+        console.log("generating fake matches ...");
 
         const matches: Match.IMongooseMatch[] = [];
 
@@ -182,30 +186,37 @@ export default class DBUtils {
             await endedMatch.save();
         }
 
+
         // fake chats
 
-        // const fakeChatMessages = [
-        //     "hey! :D",
-        //     "heeyyyyy",
-        //     "come va?",
-        //     "bene bene, tu?",
-        //     "tappost, giochi?",
-        //     "yessss!! :D"
-        // ];
+        if (generateFakeChats) {
 
-        // for (let u1i = 0; u1i < users.length - 1; u1i++) {
-        //     for (let u2i = u1i + 1; u2i < users.length; u2i++) {
-        //         if (!users[u1i]._id.equals(users[u2i]._id)) {
-        //             let intUsers = [users[u1i], users[u2i]];
-        //             for (let mi = 0; mi < fakeChatMessages.length; mi++) {
-        //                 intUsers[mi % 2].logMessage(intUsers[(mi + 1) % 2]._id, fakeChatMessages[mi]);
-        //             }
+            console.log("generating fake chats ...");
 
-        //             await users[u1i].save();
-        //             await users[u2i].save();
-        //         }
-        //     }
-        // }
+            const fakeChatMessages = [
+                "hey! :D",
+                "heeyyyyy",
+                "come va?",
+                "bene bene, tu?",
+                "tappost, giochi?",
+                "yessss!! :D"
+            ];
+
+            for (let u1i = 0; u1i < users.length - 1; u1i++) {
+                for (let u2i = u1i + 1; u2i < users.length; u2i++) {
+                    if (!users[u1i]._id.equals(users[u2i]._id)) {
+                        let intUsers = [users[u1i], users[u2i]];
+                        for (let mi = 0; mi < fakeChatMessages.length; mi++) {
+                            intUsers[mi % 2].logMessage(intUsers[(mi + 1) % 2]._id, fakeChatMessages[mi]);
+                            await utils.sleep(1);
+                        }
+
+                        await users[u1i].save();
+                        await users[u2i].save();
+                    }
+                }
+            }
+        }
 
         console.log("fake data generated");
     }

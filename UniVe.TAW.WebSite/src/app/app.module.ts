@@ -21,6 +21,11 @@ import { RankingsComponent } from './ui/identity/rankings/rankings.component';
 import { ChatListComponent } from './ui/chat/chat-list/chat-list.component';
 import { ModPanelComponent } from './ui/identity/mod-panel/mod-panel.component';
 import { MatchHistoryComponent } from './ui/identity/users/match-history/match-history.component';
+import { ChatComponent } from './ui/chat/chat/chat.component';
+import { TalkablesComponent } from './ui/chat/talkables/talkables.component';
+import { ChatFormComponent } from './ui/chat/chat-form/chat-form.component';
+import { ChatMessagesComponent } from './ui/chat/chat-messages/chat-messages.component';
+import { ChatListEntryComponent } from './ui/chat/chat-list-entry/chat-list-entry.component';
 
 // services
 //import { AuthService } from './auth.service';
@@ -44,6 +49,11 @@ import { MatchHistoryComponent } from './ui/identity/users/match-history/match-h
     ChatListComponent,
     ModPanelComponent,
     MatchHistoryComponent,
+    ChatComponent,
+    TalkablesComponent,
+    ChatFormComponent,
+    ChatMessagesComponent,
+    ChatListEntryComponent,
   ],
   imports: [
     BrowserModule,

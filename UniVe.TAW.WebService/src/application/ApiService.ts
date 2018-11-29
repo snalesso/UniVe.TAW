@@ -88,24 +88,27 @@ export default class ApiService {
 
                     // await DBUtils.deleteEverything();
 
-                    // await DBUtils.generateFakeData([
-                    //     "Daedalus",
-                    //     "Horus",
-                    //     "Osiride",
-                    //     "Anubi",
-                    //     "Pippo",
-                    //     "Pluto",
-                    //     "Puffetta",
-                    //     "Paperino",
-                    //     "Minnie",
-                    //     "Topolino",
-                    //     "Bambee",
-                    //     "Cenerentola",
-                    //     "Troll1",
-                    //     "Troll2",
-                    //     "Canaglia",
-                    //     "Farabutto"
-                    // ], 200);
+                    // await DBUtils.generateFakeData(
+                    //     [
+                    //         "Daedalus",
+                    //         "Horus",
+                    //         "Osiride",
+                    //         "Anubi",
+                    //         "Pippo",
+                    //         "Pluto",
+                    //         "Puffetta",
+                    //         "Paperino",
+                    //         "Minnie",
+                    //         "Topolino",
+                    //         "Bambee",
+                    //         "Cenerentola",
+                    //         "TrollKing",
+                    //         "TheDouchebagOne",
+                    //         "Canaglia",
+                    //         "Farabutto"
+                    //     ],
+                    //     200,
+                    //     false);
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

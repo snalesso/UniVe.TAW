@@ -38,7 +38,9 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  public get EnemyUsername(): string { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Username : "Enemy"; }
+  public get EnemyId() { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Id : null; }
+
+  public get EnemyUsername(): string { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Username : null; }
 
   public get BattleFieldWidth(): number { return (this._ownTurnInfo && this._ownTurnInfo.MatchSettings) ? this._ownTurnInfo.MatchSettings.BattleFieldWidth : 0; }
 

@@ -1,3 +1,5 @@
+import * as moment from 'moment';
+
 // export type MutableHelper<T, TNames extends string> = { [P in TNames]: (T & { [name: string]: never })[P] };
 // export type Mutable<T> = MutableHelper<T, Extract<keyof T, string>>;
 
@@ -18,4 +20,15 @@ export function getRandomInt(min, max): number {
 
 export function getRandomBoolean(): boolean {
     return Math.random() >= 0.5;
+}
+
+export function wait(milliseconds: number) {
+    const end = moment().add(moment.duration(milliseconds).asMilliseconds());
+    while (moment() >= end) {
+        // spin
+    }
+}
+
+export function sleep(milliseconds: number) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
