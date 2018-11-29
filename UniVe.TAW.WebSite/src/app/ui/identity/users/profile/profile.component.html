@@ -2,29 +2,10 @@
 
   <div *ngIf="Profile">
 
-    <div class="row">
+    <div class="row mb-2">
       <div class="col">
 
         <h1>{{Profile.Username}} <span class="badge badge-info">{{["Player", "Mod", "Admin"][Profile.Roles - 1]}}</span></h1>
-        <p *ngIf="Profile.BannedUntil" class="loser-text"> (BANNED UNTIL: {{Profile.BannedUntil | date:
-          'dd/MM/yyyy HH:mm:ss'}})</p>
-
-      </div>
-    </div>
-
-    <div class="row" *ngIf="CanBeModerated">
-      <div class="col">
-
-        <form class="form-inline" *ngIf="!Profile.BannedUntil && (Powers.CanTemporarilyBan || Powers.CanPermaBan)">
-          <label class="my-1 mr-2" for="BanOptionSelect">Ban for ...</label>
-          <select class="form-control my-1 mr-sm-2" [(ngModel)]="SelectedBanOption" id="BanOptionSelect" name="banOption">
-            <option *ngFor="let bo of BanOptions" [ngValue]="bo">{{bo.Text}}</option>
-          </select>
-          <button type="button" class="btn btn-danger" (click)="ban(SelectedBanOption.BanHours)" [disabled]="!SelectedBanOption">BAN</button>
-          <!-- <p *ngIf="SelectedBanOption">{{SelectedBanOption.Text}}</p> -->
-        </form>
-
-        <button type="button" class="btn btn-danger" *ngIf="Profile.BannedUntil" (click)="unban()">UNBAN</button>
 
       </div>
     </div>
@@ -37,14 +18,50 @@
           <select class="form-control my-1 mr-sm-2" [(ngModel)]="SelectedUserRole" id="UserRoleSelect" name="userRoleAssigner">
             <option *ngFor="let ur of UserRoles" [ngValue]="ur">{{ur.Name}}</option>
           </select>
-          <button type="button" class="btn btn-warning" (click)="assignRole(SelectedUserRole.Value)">Assign</button>
+          <button type="button" class="btn btn-warning" [disabled]="Profile.Roles == SelectedUserRole.Value" (click)="assignRole(SelectedUserRole.Value)">Assign</button>
           <!-- <p *ngIf="SelectedUserRole">{{SelectedUserRole.Name}}</p> -->
         </form>
 
       </div>
     </div>
 
-    <div class="row">
+    <div class="row mt-2" *ngIf="CanBeModerated">
+      <div class="col">
+
+        <form class="form-inline" *ngIf="!Profile.BannedUntil">
+          <label class="my-1 mr-2" for="BanOptionSelect">Ban for ...</label>
+          <select class="form-control my-1 mr-sm-2" [(ngModel)]="SelectedBanOption" id="BanOptionSelect" name="banOption">
+            <option *ngFor="let bo of BanOptions" [ngValue]="bo">{{bo.Text}}</option>
+          </select>
+          <button type="button" class="btn btn-danger" (click)="ban(SelectedBanOption.BanHours)" [disabled]="!SelectedBanOption">BAN</button>
+          <!-- <p *ngIf="SelectedBanOption">{{SelectedBanOption.Text}}</p> -->
+        </form>
+
+        <form class="form-inline" *ngIf="Profile.BannedUntil">
+          <label class="loser-text mr-2"> (BANNED UNTIL: {{Profile.BannedUntil | date: 'dd/MM/yyyy HH:mm:ss'}})</label>
+          <button type="button" class="btn btn-danger" (click)="unban()">UNBAN</button>
+        </form>
+
+      </div>
+    </div>
+
+    <div class="row mt-2" *ngIf="CanBeDeleted">
+      <div class="col">
+        <form class="form-inline">
+
+          <div class="form-check mr-2">
+            <input type="checkbox" name="deleteUserCheckbox" placeholder='Type "DELETE"' class="form-check-input" id="deleteUserCheckbox"
+              [(ngModel)]="IsDeleteUserButtonEnabled" />
+            <label class="form-check-label" for="deleteUserCheckbox">I want to</label>
+          </div>
+
+          <button type="button" class="btn btn-danger" [disabled]="!IsDeleteUserButtonEnabled" (click)="deleteUser()">DELETE
+            {{Profile.Username}}</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-2">
       <div class="col">
 
         <h3>Stats</h3>

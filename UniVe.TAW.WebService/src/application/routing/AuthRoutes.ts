@@ -57,12 +57,12 @@ export default class GameRoutes extends RoutesBase {
                             return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
                         }
                         if (!user) {
-                            return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid user" });
+                            return done({ statusCode: httpStatusCodes.UNAUTHORIZED, error: true, errormessage: "Invalid user" });
                         }
                         if (user.validatePassword(password)) {
                             return done(null, user);
                         }
-                        return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: "Invalid password" });
+                        return done({ statusCode: http.STATUS_CODES.UNAUTHORIZED, error: true, errormessage: "Invalid password" });
                     });
             }
         ));
@@ -73,9 +73,9 @@ export default class GameRoutes extends RoutesBase {
         this._router.post(
             '/login',
             passport.authenticate('basic', { session: false }),
-            (request: express.Request, response: express.Response) => {
+            async (request: express.Request, response: express.Response) => {
 
-                const user = request.user as User.IMongooseUser;
+                let user = request.user as User.IMongooseUser;
 
                 let errMsg: string;
                 let responseData: net.HttpMessage<string>;
@@ -88,16 +88,24 @@ export default class GameRoutes extends RoutesBase {
                     response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
+                    return;
                 }
-                else if (user.BannedUntil) {
-                    responseData = new net.HttpMessage(null, "You are banned until " + moment(user.BannedUntil).format("dd/MM/yyyy HH:mm:ss"));
+
+                if (user.BannedUntil && user.BannedUntil < new Date()) {
+                    user = await User.getModel().findById(user._id).exec();
+                    user.BannedUntil = null;
+                    user = await user.save();
+                }
+
+                if (user.BannedUntil) {
+                    responseData = new net.HttpMessage(null, "You are banned until " + moment(user.BannedUntil).format("DD/MM/YYYY HH:mm:ss"));
                     response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
                 }
                 else {
                     let jwtPayload: DTOs.IUserJWTData = {
-                        Id: user.id,
+                        Id: user._id.toHexString(),
                         Username: user.Username,
                         BannedUtil: user.BannedUntil
                     };
@@ -108,7 +116,7 @@ export default class GameRoutes extends RoutesBase {
                             expiresIn: "7 days" // 60 * 60 * 24 * 7 // 1 week
                         });
 
-                    console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user.id + ", token: " + token + ")");
+                    console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user._id.toHexString() + ", token: " + token + ")");
 
                     responseData = new net.HttpMessage<string>(token);
                     response

@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
     private readonly _router: Router) {
   }
 
-  private _loginRequest: DTOs.ILoginCredentials = { Username: "Daedalus", Password: "aaa" };
+  private _loginRequest = { /*Username: "Daedalus", Password: "aaa"*/ } as DTOs.ILoginCredentials;
   public get LoginRequest() { return this._loginRequest; }
 
   private _responseError: string;
@@ -46,20 +46,8 @@ export class LoginComponent implements OnInit {
             this._router.navigate([ViewsRoutingKeys.MatchFinder]);
           }
         },
-        (error: HttpErrorResponse) => {
-
-          //this._responseError = ;
-          console.log(error);
-
-          switch (error.status) {
-            case httpStatusCodes.UNAUTHORIZED:
-              this._responseError = "Invalid credentials";
-              break;
-
-            default:
-              this._responseError = error.message;
-          }
-
+        (response: HttpErrorResponse) => {
+          this._responseError = response.error.ErrorMessage ? response.error.ErrorMessage : response.statusText;
         });
   }
 

@@ -140,56 +140,6 @@ export default class UsersRoutes extends RoutesBase {
         //     });
 
         this._router.get(
-            "/profile/:" + RoutingParamKeys.userId,
-            this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-                const userHexId = request.params[RoutingParamKeys.userId];
-                const userObjectId = new mongoose.Types.ObjectId(userHexId);
-                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
-
-                User.getModel()
-                    .findById(userHexId)
-                    .then((user) => {
-
-                        if (user) {
-                            EndedMatch.getModel()
-                                .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
-                                .then(userEndedMatches => {
-
-                                    let profileDto: DTOs.IUserProfile = {
-                                        Id: user.id,
-                                        Username: user.Username,
-                                        Age: moment().diff(user.BirthDate, "years", false),
-                                        CountryId: user.CountryId,
-                                        Roles: user.Roles,
-                                        BannedUntil: user.BannedUntil,
-                                        WinsCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => em.WinnerId.equals(userObjectId)).length : 0,
-                                        LossesCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => !em.WinnerId.equals(userObjectId)).length : 0
-                                    };
-
-                                    responseData = new net.HttpMessage(profileDto);
-                                    response
-                                        .status(httpStatusCodes.OK)
-                                        .json(responseData);
-                                });
-                        }
-                        else {
-                            responseData = new net.HttpMessage(null, "user not found");
-                            response
-                                .status(httpStatusCodes.NOT_FOUND)
-                                .json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage<DTOs.IUserProfile>(null, error.message);
-                        response
-                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                            .json(responseData);
-                    });
-            });
-
-        this._router.get(
             '/rankings',//:' + RoutingParamKeys.userId,
             //this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
@@ -285,7 +235,7 @@ export default class UsersRoutes extends RoutesBase {
                             Age: moment().diff(user.BirthDate, "years", false),
                             CountryId: user.CountryId,
                             Roles: user.Roles,
-                            BannedUntil: user.BannedUntil
+                            BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null
                         };
                         responseData = new net.HttpMessage<DTOs.IUserDto>(userDto);
                         response
@@ -296,6 +246,92 @@ export default class UsersRoutes extends RoutesBase {
                         responseData = new net.HttpMessage<DTOs.IUserDto>(null, error.message);
                         response
                             .status(httpStatusCodes.OK)
+                            .json(responseData);
+                    });
+            });
+
+        this._router.delete(
+            '/:' + RoutingParamKeys.userId,
+            this._jwtValidator,
+            async (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                const userId = request.params[RoutingParamKeys.userId];
+                let responseData: net.HttpMessage<boolean> = null;
+
+                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const loggedUser = await User.getModel().findById(jwtUser.Id).exec();
+
+                if (!loggedUser || loggedUser.Roles != identity.UserRoles.Admin || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
+                    responseData = new net.HttpMessage(false, "You have no power here!");
+                    response
+                        .status(httpStatusCodes.UNAUTHORIZED)
+                        .json(responseData);
+                    return;
+                }
+
+                const user = await User.getModel().findById(userId).exec();
+                if (!user) {
+
+                    responseData = new net.HttpMessage(false, "User not found!");
+                    response
+                        .status(httpStatusCodes.NOT_FOUND)
+                        .json(responseData);
+                } else {
+                    const removeResult = await user.remove();
+
+                    responseData = new net.HttpMessage(removeResult != null, removeResult != null ? null : "Something went wrong during user deletion :(");
+                    response
+                        .status(removeResult != null ? httpStatusCodes.OK : httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
+                }
+            });
+
+        this._router.get(
+            "/:" + RoutingParamKeys.userId + "/profile",
+            //this._jwtValidator,
+            (request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+                const userHexId = request.params[RoutingParamKeys.userId];
+                const userObjectId = new mongoose.Types.ObjectId(userHexId);
+                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
+
+                User.getModel()
+                    .findById(userHexId)
+                    .then((user) => {
+
+                        if (user) {
+                            EndedMatch.getModel()
+                                .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
+                                .then(userEndedMatches => {
+
+                                    let profileDto: DTOs.IUserProfile = {
+                                        Id: user.id,
+                                        Username: user.Username,
+                                        Age: moment().diff(user.BirthDate, "years", false),
+                                        CountryId: user.CountryId,
+                                        Roles: user.Roles,
+                                        BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null,
+                                        WinsCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => em.WinnerId.equals(userObjectId)).length : 0,
+                                        LossesCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => !em.WinnerId.equals(userObjectId)).length : 0
+                                    };
+
+                                    responseData = new net.HttpMessage(profileDto);
+                                    response
+                                        .status(httpStatusCodes.OK)
+                                        .json(responseData);
+                                });
+                        }
+                        else {
+                            responseData = new net.HttpMessage(null, "user not found");
+                            response
+                                .status(httpStatusCodes.NOT_FOUND)
+                                .json(responseData);
+                        }
+                    })
+                    .catch((error: mongodb.MongoError) => {
+                        responseData = new net.HttpMessage<DTOs.IUserProfile>(null, error.message);
+                        response
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
                     });
             });
@@ -313,13 +349,10 @@ export default class UsersRoutes extends RoutesBase {
                     .then((user) => {
                         let powers: DTOs.IUserPowers = {
                             Roles: user.Roles,
-                            CanChat: !user.BannedUntil,
-                            CanPlay: !user.BannedUntil,
+                            CanDeleteUser: user.Roles == identity.UserRoles.Admin,
                             CanAssignRoles: user.Roles == identity.UserRoles.Admin,
                             CanPermaBan: user.Roles == identity.UserRoles.Admin,
-                            CanTemporarilyBan:
-                                (user.Roles == identity.UserRoles.Admin
-                                    || user.Roles == identity.UserRoles.Moderator)
+                            CanTemporarilyBan: (user.Roles == identity.UserRoles.Admin || user.Roles == identity.UserRoles.Moderator)
                         };
                         responseData = new net.HttpMessage(powers);
                         response
@@ -464,7 +497,7 @@ export default class UsersRoutes extends RoutesBase {
 
         this._router.get(
             '/:' + RoutingParamKeys.userId + '/matchHistory',
-            this._jwtValidator,
+            //this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
                 const userHexId = request.params[RoutingParamKeys.userId];
@@ -493,12 +526,12 @@ export default class UsersRoutes extends RoutesBase {
                                 EndDateTime: em.EndDateTime,
                                 WinnerId: em.WinnerId.toHexString(),
                                 FirstPlayer: {
-                                    Id: fp._id.toHexString(),
-                                    Username: fp.Username
+                                    Id: fp != null ? fp._id.toHexString() : null,
+                                    Username: fp != null ? fp.Username : "<Deleted User>"
                                 },
                                 SecondPlayer: {
-                                    Id: sp._id.toHexString(),
-                                    Username: sp.Username
+                                    Id: sp != null ? sp._id.toHexString() : null,
+                                    Username: sp != null ? sp.Username : "<Deleted User>"
                                 }
                             } as DTOs.IEndedMatchSummaryDto);
                         });

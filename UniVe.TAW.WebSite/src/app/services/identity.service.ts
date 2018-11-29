@@ -28,11 +28,11 @@ export class IdentityService {
   }
 
   public getUserProfile(userId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/users/profile/" + userId;
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/profile";
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this._authService.Token)
+      //et('Authorization', 'Bearer ' + this._authService.Token)
     };
 
     return this._http.get<net.HttpMessage<DTOs.IUserProfile>>(endPoint, options);
@@ -61,11 +61,12 @@ export class IdentityService {
   }
 
   public getMatchHistory(userId: string = this._authService.LoggedUser.Id) {
+
     const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/matchHistory";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this._authService.Token
+        //'Authorization': 'Bearer ' + this._authService.Token
       })
     };
 
@@ -106,5 +107,17 @@ export class IdentityService {
     };
 
     return this._http.post<net.HttpMessage<identity.UserRoles>>(endPoint, { NewRole: newRole, UserId: userId } as DTOs.IRoleAssignmentRequestDto, options);
+  }
+
+  public deleteUser(userId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId;
+    const options = {
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
+    };
+
+    return this._http.delete<net.HttpMessage<boolean>>(endPoint, options);
   }
 }

@@ -4,6 +4,7 @@ import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
 import * as identity from '../assets/imported/unive.taw.webservice/infrastructure/identity';
 import { Router } from '@angular/router';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-root',
@@ -22,9 +23,11 @@ export class AppComponent {
       this._socketIOService.once(
         ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.BanUpdated),
         (userBannedUntil: Date) => {
-          if (userBannedUntil)
+          if (userBannedUntil) {
             this._authService.logout();
-          this._router.navigate(["/"]);
+            this._router.navigate(["/"]);
+            alert("You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss"));
+          }
         });
 
       this._socketIOService.once(

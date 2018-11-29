@@ -184,28 +184,28 @@ export default class DBUtils {
 
         // fake chats
 
-        const fakeChatMessages = [
-            "hey! :D",
-            "heeyyyyy",
-            "come va?",
-            "bene bene, tu?",
-            "tappost, giochi?",
-            "yessss!! :D"
-        ];
+        // const fakeChatMessages = [
+        //     "hey! :D",
+        //     "heeyyyyy",
+        //     "come va?",
+        //     "bene bene, tu?",
+        //     "tappost, giochi?",
+        //     "yessss!! :D"
+        // ];
 
-        for (let u1i = 0; u1i < users.length - 1; u1i++) {
-            for (let u2i = u1i + 1; u2i < users.length; u2i++) {
-                if (!users[u1i]._id.equals(users[u2i]._id)) {
-                    let intUsers = [users[u1i], users[u2i]];
-                    for (let mi = 0; mi < fakeChatMessages.length; mi++) {
-                        intUsers[mi % 2].logMessage(intUsers[(mi + 1) % 2]._id, fakeChatMessages[mi]);
-                    }
+        // for (let u1i = 0; u1i < users.length - 1; u1i++) {
+        //     for (let u2i = u1i + 1; u2i < users.length; u2i++) {
+        //         if (!users[u1i]._id.equals(users[u2i]._id)) {
+        //             let intUsers = [users[u1i], users[u2i]];
+        //             for (let mi = 0; mi < fakeChatMessages.length; mi++) {
+        //                 intUsers[mi % 2].logMessage(intUsers[(mi + 1) % 2]._id, fakeChatMessages[mi]);
+        //             }
 
-                    await users[u1i].save();
-                    await users[u2i].save();
-                }
-            }
-        }
+        //             await users[u1i].save();
+        //             await users[u2i].save();
+        //         }
+        //     }
+        // }
 
         console.log("fake data generated");
     }

@@ -29,7 +29,7 @@ export class ProfileComponent implements OnInit {
   private _userProfile: DTOs.IUserProfile;
 
   constructor(
-    //private readonly _router: Router,
+    private readonly _router: Router,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _authService: AuthService,
     private readonly _identityService: IdentityService
@@ -56,7 +56,10 @@ export class ProfileComponent implements OnInit {
 
   public get Powers() { return this._userPowers; }
 
-  public get IsItMe() { return this._userId == this._authService.LoggedUser.Id; }
+  public get IsItMe() {
+    return this._authService.IsLogged
+      && this._userId == this._authService.LoggedUser.Id;
+  }
 
   public get CanBeModerated() {
     return !this.IsItMe
@@ -76,10 +79,20 @@ export class ProfileComponent implements OnInit {
   }
 
   public get CanAssignRoles() {
-    return this._userPowers
+    return !this.IsItMe
+      && this._userPowers
+      && this._userPowers.CanAssignRoles
       && this._userPowers.Roles == identity.UserRoles.Admin
       && this._userProfile.Roles < identity.UserRoles.Admin;
   }
+
+  public get CanBeDeleted() {
+    return !this.IsItMe
+      && this._userPowers
+      && this._userPowers.CanDeleteUser;
+  }
+
+  public IsDeleteUserButtonEnabled: boolean;
 
   public get Profile() { return this._userProfile; }
 
@@ -108,6 +121,17 @@ export class ProfileComponent implements OnInit {
         (error: ngHttp.HttpErrorResponse) => { });
   }
 
+  public deleteUser() {
+
+    this._identityService.deleteUser(this._userId)
+      .subscribe(
+        response => {
+          if (response.Content)
+            this._router.navigate(["/"]);
+        },
+        (error: ngHttp.HttpErrorResponse) => { });
+  }
+
   ngOnInit() {
 
     this._identityService.getUserProfile(this._userId)
@@ -119,7 +143,7 @@ export class ProfileComponent implements OnInit {
         },
         (error: ngHttp.HttpErrorResponse) => { });
 
-    if (!this.IsItMe) {
+    if (this._authService.IsLogged && !this.IsItMe) {
 
       this._identityService.getUserPowers(this._authService.LoggedUser.Id)
         .subscribe(

@@ -90,18 +90,21 @@ export default class ApiService {
 
                     // await DBUtils.generateFakeData([
                     //     "Daedalus",
-                    //     "Dio",
-                    //     "Gesoo",
-                    //     "ValeYellow46",
-                    //     "FythacS03",
-                    //     "Jimboo",
-                    //     "Paperino",
-                    //     "DonGiuseppe",
-                    //     "LaMaDonna",
+                    //     "Horus",
+                    //     "Osiride",
+                    //     "Anubi",
                     //     "Pippo",
                     //     "Pluto",
+                    //     "Puffetta",
+                    //     "Paperino",
+                    //     "Minnie",
                     //     "Topolino",
-                    //     "Ashkecium"
+                    //     "Bambee",
+                    //     "Cenerentola",
+                    //     "Troll1",
+                    //     "Troll2",
+                    //     "Canaglia",
+                    //     "Farabutto"
                     // ], 200);
 
                     this.ConfigRoutes();

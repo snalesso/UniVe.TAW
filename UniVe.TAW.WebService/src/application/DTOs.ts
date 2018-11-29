@@ -200,8 +200,9 @@ export interface IUserPowers {
     readonly CanTemporarilyBan: boolean;
     readonly CanPermaBan: boolean;
     readonly CanAssignRoles: boolean;
-    readonly CanPlay: boolean;
-    readonly CanChat: boolean;
+    readonly CanDeleteUser: boolean;
+    //readonly CanPlay: boolean;
+    // readonly CanChat: boolean;
 }
 
 export interface IEndedMatchDto {
