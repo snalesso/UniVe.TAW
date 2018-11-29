@@ -326,6 +326,19 @@ export default class UsersRoutes extends RoutesBase {
                                 ServiceEventKeys.MatchCanceled));
                     }
 
+                    // delete chats
+
+                    const users = await User.getModel().find().exec();
+
+                    for (let user of users) {
+                        if (user.SentMessages) {
+                            if (user.SentMessages.has(deletedUser._id.toHexString())) {
+                                user.SentMessages.delete(deletedUser._id.toHexString());
+                                await user.save();
+                            }
+                        }
+                    }
+
                     responseData = new net.HttpMessage(true);
                     response
                         .status(httpStatusCodes.OK)

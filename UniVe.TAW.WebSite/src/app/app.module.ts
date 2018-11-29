@@ -18,11 +18,8 @@ import { MatchChatComponent } from './ui/game/match/match-chat/match-chat.compon
 import { MatchComponent } from './ui/game/match/match/match.component';
 import { ProfileComponent } from './ui/identity/users/profile/profile.component';
 import { RankingsComponent } from './ui/identity/rankings/rankings.component';
-import { ChatListComponent } from './ui/chat/chat-list/chat-list.component';
-import { ModPanelComponent } from './ui/identity/mod-panel/mod-panel.component';
 import { MatchHistoryComponent } from './ui/identity/users/match-history/match-history.component';
 import { ChatComponent } from './ui/chat/chat/chat.component';
-import { TalkablesComponent } from './ui/chat/talkables/talkables.component';
 import { ChatFormComponent } from './ui/chat/chat-form/chat-form.component';
 import { ChatMessagesComponent } from './ui/chat/chat-messages/chat-messages.component';
 import { ChatListEntryComponent } from './ui/chat/chat-list-entry/chat-list-entry.component';
@@ -46,11 +43,8 @@ import { ChatListEntryComponent } from './ui/chat/chat-list-entry/chat-list-entr
     MatchComponent,
     ProfileComponent,
     RankingsComponent,
-    ChatListComponent,
-    ModPanelComponent,
     MatchHistoryComponent,
     ChatComponent,
-    TalkablesComponent,
     ChatFormComponent,
     ChatMessagesComponent,
     ChatListEntryComponent,

@@ -31,33 +31,11 @@ export class MatchChatComponent implements OnInit {
   @Input()
   public InterlocutorId: string;
 
-  public MessageText: string;
-
-  private _isSendingMessage: boolean = false;
-  public get IsSendingMessage(): boolean { return this._isSendingMessage; }
-
-  public get CanSendMessage(): boolean { return (this.MessageText != null && this.MessageText.length > 0) && !this.IsSendingMessage; }
-
   private _chatMessages: DTOs.IChatMessageDto[] = [];
   public get ChatMessages() { return this._chatMessages; }
 
-  public sendMessage(/*text: string*/) {
-
-    if (this.MessageText == null || this.MessageText.length <= 0)
-      return;
-
-    this._isSendingMessage = true;
-
-    this._chatService.sendMessage(this.InterlocutorId, this.MessageText)
-      .subscribe(
-        response => {
-          this.MessageText = null;
-          this._chatMessages.unshift(response.Content);
-          this._isSendingMessage = false;
-        },
-        (error: http.HttpErrorResponse) => {
-          this._isSendingMessage = false;
-        });
+  public handleWhenChatFormMessageIsSent(sentMessage: DTOs.IChatMessageDto) {
+    this._chatMessages.push(sentMessage);
   }
 
   ngOnInit() {
@@ -66,14 +44,12 @@ export class MatchChatComponent implements OnInit {
       .subscribe(
         response => {
 
-          for (let message of response.Content) {
-            this._chatMessages.unshift(message);
-          }
+          this._chatMessages.push(...response.Content);
 
           this._socketIOService.on(
             ServiceEventKeys.chatEventForUser(this._authService.LoggedUser.Id, ServiceEventKeys.YouGotANewMessage),
             (newMessage: DTOs.IChatMessageDto) => {
-              this._chatMessages.unshift(newMessage);
+              this._chatMessages.push(newMessage);
             });
         },
         (error: http.HttpErrorResponse) => { });

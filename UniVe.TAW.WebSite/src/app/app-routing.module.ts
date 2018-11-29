@@ -18,7 +18,6 @@ import { MatchHistoryComponent } from './ui/identity/users/match-history/match-h
 import { viewClassName } from '@angular/compiler';
 import { Profile } from 'selenium-webdriver/firefox';
 import { ProfileComponent } from './ui/identity/users/profile/profile.component';
-import { ChatListComponent } from './ui/chat/chat-list/chat-list.component';
 import { ChatComponent } from './ui/chat/chat/chat.component';
 
 const routes: Routes = [
