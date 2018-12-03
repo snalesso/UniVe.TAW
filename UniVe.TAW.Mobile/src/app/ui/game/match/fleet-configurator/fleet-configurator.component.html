@@ -1,0 +1,28 @@
+<h1 text-center>Choose your line-up!</h1>
+
+<ion-grid>
+
+  <ion-row>
+    <ion-col>
+
+      <table id="bf-grid" class="bf-grid">
+        <tbody>
+          <tr *ngFor="let row of Cells">
+            <td class="bf-grid-cell" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y" [ngClass]="cell.ShipType > 0 ? 'bf-grid-cell-ship' : ''"
+              [style.padding-bottom]="100/BattleFieldWidth + '%'" *ngFor="let cell of row">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </ion-col>
+  </ion-row>
+
+  <ion-row justify-content-center align-items-center>
+
+    <ion-button [disabled]="!CanRandomize" (click)="randomizeFleet()">Randomize!</ion-button>
+    <ion-button color="success" (click)="submitMatchConfig()">Play!</ion-button>
+
+  </ion-row>
+
+</ion-grid>
