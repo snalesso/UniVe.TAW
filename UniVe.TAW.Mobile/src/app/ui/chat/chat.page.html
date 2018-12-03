@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Chat</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-tabs #_tabs>
+
+    <ion-tab tab="chats-list-tab">
+
+      <ion-content>
+
+        <ion-list>
+
+          <app-chat-list-entry *ngFor="let chat of Chats" [Chat]="chat" (click)="OpenChat(chat)"></app-chat-list-entry>
+
+        </ion-list>
+
+      </ion-content>
+
+    </ion-tab>
+    <ion-tab tab="selected-chat-tab">
+
+      <ion-content #_selectedChatTabContent *ngIf="SelectedChat">
+        <app-chat-messages [Messages]="SelectedChat.Messages" [Reverse]="false"></app-chat-messages>
+      </ion-content>
+
+      <ion-footer size="auto" *ngIf="SelectedChat">
+        <app-chat-form [InterlocutorId]="SelectedChat.Interlocutor.Id" (WhenMessageIsSent)="handleWhenChatFormMessageIsSent($event)"></app-chat-form>
+      </ion-footer>
+
+    </ion-tab>
+
+    <ion-tab-bar slot="bottom">
+
+      <ion-tab-button tab="chats-list-tab">
+        <ion-label>Chats</ion-label>
+        <ion-icon name="people"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="selected-chat-tab" [disabled]="!SelectedChat">
+        <ion-label>{{SelectedChat ? SelectedChat.Interlocutor.Username : "..."}}</ion-label>
+        <ion-icon name="chatbubbles"></ion-icon>
+      </ion-tab-button>
+
+    </ion-tab-bar>
+  </ion-tabs>
+
+</ion-content>

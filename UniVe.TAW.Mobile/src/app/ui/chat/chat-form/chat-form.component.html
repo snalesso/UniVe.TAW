@@ -1,0 +1,12 @@
+<ion-grid>
+  <ion-row>
+    <ion-col>
+      <ion-textarea type="text" placeholder="Your message" [(ngModel)]="MessageText" (keydown.enter)="sendMessage()"></ion-textarea>
+    </ion-col>
+    <ion-col size="auto">
+      <ion-button extend="block" color="success" (click)="sendMessage()" [disabled]="!CanSendMessage">
+        <ion-icon name="send"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+</ion-grid>

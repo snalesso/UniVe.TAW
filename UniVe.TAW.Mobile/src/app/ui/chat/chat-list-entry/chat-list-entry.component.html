@@ -1,0 +1,13 @@
+<ion-item button>
+  <ion-label>
+    <ion-text text-wrap>
+      <p>{{Chat.Interlocutor.Username}}</p>
+    </ion-text>
+    <ion-text color="medium" *ngIf="Chat.Messages && Chat.Messages.length > 0">
+      <small>
+        <span>{{ !Chat.Messages[Chat.Messages.length - 1].IsMine ? Chat.Interlocutor.Username : "Me"}}: </span>
+        <span>{{Chat.Messages[Chat.Messages.length - 1].Text}}</span>
+      </small>
+    </ion-text>
+  </ion-label>
+</ion-item>

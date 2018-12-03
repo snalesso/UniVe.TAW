@@ -1,0 +1,14 @@
+<ion-list lines="none" #list>
+
+  <ion-item *ngFor="let message of SortedMessages" [attr.text-start]="!message.IsMine ? true : null" [attr.text-end]="message.IsMine ? true : null">
+    <ion-label text-wrap>
+      <ion-text color="medium">
+        <small>{{message.Timestamp | date: 'dd/MM/yy HH:mm:ss'}}</small>
+      </ion-text>
+      <ion-text>
+        <p>{{message.Text}}</p>
+      </ion-text>
+    </ion-label>
+  </ion-item>
+
+</ion-list>
