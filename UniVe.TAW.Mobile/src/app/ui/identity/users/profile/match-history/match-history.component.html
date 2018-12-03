@@ -1,0 +1,23 @@
+<h3>
+  <span>Match history</span>
+  <br>
+  <ion-label color="medium">
+    <small>last 20 matches</small>
+  </ion-label>
+</h3>
+
+<ion-card style="margin-left: 0; margin-right: 0" *ngFor="let ems of EndedMatchSummaries">
+  <ion-card-header>
+    <ion-card-subtitle>{{ems.EndDateTime | date: 'dd/MM/yy HH:mm:ss'}}</ion-card-subtitle>
+    <ion-card-title>
+      <span [ngClass]="ems.WinnerId == UserId ? 'winner-text' : 'loser-text'">{{ems.WinnerId == UserId ? "WON" :
+        "LOST"}}</span>
+      <!-- <a href="/users/{{ems.FirstPlayer.Id}}" [ngClass]="ems.WinnerId == ems.FirstPlayer.Id ? 'winner-text' : 'loser-text'">{{ems.FirstPlayer.Username}}</a> -->
+      <span> VS </span>
+      <a href="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
+        == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</a>
+      <span *ngIf="!(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
+        == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</span>
+    </ion-card-title>
+  </ion-card-header>
+</ion-card>

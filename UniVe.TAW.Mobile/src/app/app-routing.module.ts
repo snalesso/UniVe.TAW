@@ -22,20 +22,13 @@ const routes: Routes = [
     ]), loadChildren: './ui/game/match/match.module#MatchPageModule'
   },
   { path: ViewsRoutingKeys.Rankings, loadChildren: './ui/identity/rankings/rankings.module#RankingsPageModule' },
-  // { path: ViewsRoutingKeys.Rankings, component: RankingsComponent },
-  // {
-  //   path: RoutingHelper.buildRoute([
-  //     new RouteStep(ViewsRoutingKeys.Users),
-  //     new RouteParam(RoutingParamKeys.userId)
-  //   ]),
-  //   component: ProfileComponent
-  // },
-  // {
-  //   path: RoutingHelper.buildRoute([
-  //     new RouteStep(ViewsRoutingKeys.Chat)
-  //   ]),
-  //   component: ChatComponent
-  // }
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Users),
+      new RouteParam(RoutingParamKeys.userId)
+    ]),
+    loadChildren: './ui/identity/users/profile/profile.module#ProfilePageModule'
+  },
 ];
 
 @NgModule({

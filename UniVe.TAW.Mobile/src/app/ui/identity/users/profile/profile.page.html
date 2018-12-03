@@ -1,0 +1,105 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-grid *ngIf="Profile">
+
+    <ion-row>
+      <ion-col>
+
+        <h1 style="margin-top: 0">
+          <span>{{Profile.Username}} </span>
+          <ion-badge color="secondary">{{["Player", "Mod", "Admin"][Profile.Roles - 1]}}</ion-badge>
+        </h1>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="CanAssignRoles">
+      <ion-col>
+
+        <form>
+          <ion-label>Assign role of ...</ion-label>
+          <ion-select [(ngModel)]="SelectedUserRole" id="UserRoleSelect" name="userRoleAssigner">
+            <ion-select-option *ngFor="let ur of UserRoles" [value]="ur">{{ur.Name}}</ion-select-option>
+          </ion-select>
+          <ion-button expand="block" [disabled]="Profile.Roles == SelectedUserRole.Value" (click)="assignRole(SelectedUserRole.Value)">Assign</ion-button>
+        </form>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="CanBeModerated">
+      <ion-col>
+
+        <form *ngIf="!Profile.BannedUntil">
+          <label class="my-1 mr-2" for="BanOptionSelect">Ban for ...</label>
+          <ion-select [(ngModel)]="SelectedBanOption" id="BanOptionSelect" name="banOption">
+            <ion-select-option *ngFor="let bo of BanOptions" [value]="bo">{{bo.Text}}</ion-select-option>
+          </ion-select>
+          <ion-button expand="block" color="danger" (click)="ban(SelectedBanOption.BanHours)" [disabled]="!SelectedBanOption">BAN</ion-button>
+          <!-- <p *ngIf="SelectedBanOption">{{SelectedBanOption.Text}}</p> -->
+        </form>
+
+        <form *ngIf="Profile.BannedUntil">
+          <ion-label>(BANNED UNTIL: {{Profile.BannedUntil | date: 'dd/MM/yyyy HH:mm:ss'}})</ion-label>
+          <ion-button expand="block" color="danger" (click)="unban()">UNBAN</ion-button>
+        </form>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="CanBeDeleted">
+      <ion-col>
+
+        <form>
+
+          <form>
+            <ion-item lines="none">
+              <ion-label for="deleteUserCheckbox">I want to DELETE {{Profile.Username}}</ion-label>
+              <ion-checkbox name="deleteUserCheckbox" placeholder='Type "DELETE"' id="deleteUserCheckbox" [(ngModel)]="IsDeleteUserButtonEnabled"></ion-checkbox>
+            </ion-item>
+
+            <ion-button expand="block" color="danger" [disabled]="!IsDeleteUserButtonEnabled" (click)="deleteUser()">DELETE
+              {{Profile.Username}}</ion-button>
+
+          </form>
+        </form>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+
+        <h3>Stats</h3>
+
+        <p>
+          <span class="winner-text">{{Profile.WinsCount}}W</span>
+          <span> / </span>
+          <span class="loser-text">{{Profile.LossesCount}}L</span>
+          <span> ({{WindPercent}}%)</span>
+        </p>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+
+        <!-- <app-gnegne></app-gnegne> -->
+        <app-match-history></app-match-history>
+
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>

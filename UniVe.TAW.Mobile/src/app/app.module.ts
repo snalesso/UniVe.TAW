@@ -13,6 +13,7 @@ import { LoginPage } from './ui/identity/login/login.page';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SideMenuComponent } from './ui/navigation/side-menu/side-menu.component';
+import { MatchHistoryComponent } from './ui/identity/users/profile/match-history/match-history.component';
 
 @NgModule({
   declarations: [AppComponent, SignupPage, LoginPage, SideMenuComponent],
