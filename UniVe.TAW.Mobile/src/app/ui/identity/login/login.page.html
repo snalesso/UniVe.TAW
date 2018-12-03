@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <form>
+
+    <ion-item>
+      <ion-input type="text" [(ngModel)]="LoginRequest.Username" name="username" class="form-control" id="signup-form-username"
+        placeholder="Username"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input type="password" [(ngModel)]="LoginRequest.Password" name="password" class="form-control" id="signup-form-password"
+        placeholder="Password"></ion-input>
+    </ion-item>
+
+    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">{{ResponseError}}</div>
+
+    <br>
+
+    <ion-button class="btn btn-lg btn-primary btn-block" expand="block" [disabled]="!canSendLoginRequest" (click)="sendLoginRequest();">Log
+      in</ion-button>
+  </form>
+
+  <hr>
+
+  <div>
+    <p>Don't have an account?
+      <a routerLink="/signup">Signup here!</a>
+    </p>
+  </div>
+
+</ion-content>
