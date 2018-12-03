@@ -12,7 +12,7 @@ import * as $ from 'jquery';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as httpStatusCodes from 'http-status-codes';
 import { AuthService } from '../../../../services/auth.service';
-import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
 import { TouchSequence } from 'selenium-webdriver';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';

@@ -7,7 +7,7 @@ import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
-import ViewsRoutingKeys from '../../../ui/ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-header',

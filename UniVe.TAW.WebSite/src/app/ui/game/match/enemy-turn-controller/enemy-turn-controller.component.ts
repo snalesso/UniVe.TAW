@@ -48,6 +48,8 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
     return this._enemyTurnInfo.OwnField;
   }
 
+  public get Username() { return this._authService.IsLogged ? this._authService.LoggedUser.Username : "My field"; }
+
   private get IsEnemyTurn(): boolean { return this._enemyTurnInfo != null ? this._enemyTurnInfo.OwnsMove : false; }
 
   // private _winnerId: string;

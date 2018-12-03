@@ -7,7 +7,7 @@ import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
-import ViewsRoutingKeys from '../../ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({

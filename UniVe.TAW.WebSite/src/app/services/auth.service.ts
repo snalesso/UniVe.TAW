@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { unescapeIdentifier } from '@angular/compiler';
 import * as ng_http from '@angular/common/http';
 import * as jwt_decode from 'jwt-decode';
 
@@ -8,10 +7,8 @@ import * as identity from '../../assets/imported/unive.taw.webservice/infrastruc
 import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
 import ServiceConstants from './ServiceConstants';
 
-import 'jquery';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
-import { pipe } from '@angular/core/src/render3/pipe';
 
 //import chalk from 'chalk';
 

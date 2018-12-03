@@ -35,12 +35,6 @@ export class ChatListEntryComponent implements OnInit {
 
   ngOnInit() {
 
-    this._socketIOService.on(
-      ServiceEventKeys.chatEventForUser(this._authService.LoggedUser.Id, ServiceEventKeys.YouGotANewMessage),
-      (newMessage: DTOs.IChatMessageDto) => {
-        this.Chat.Messages.push(newMessage);
-      });
-
   }
 
 }

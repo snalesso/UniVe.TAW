@@ -3,7 +3,7 @@ import { GameService } from '../../../../services/game.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as game_client from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game.client';
-import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
 import * as DTOs from '../../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as net from '../../../../../assets/imported/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';

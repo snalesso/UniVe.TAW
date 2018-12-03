@@ -1,19 +1,21 @@
 <div class="container">
-  <div class="row h-100">
+  <div class="row">
 
     <div class="col-md-3">
-      <app-chat-list-entry *ngFor="let chat of Chats" [IsSelected]="chat == SelectedChat" [Chat]="chat" (click)="OpenChat(chat)"></app-chat-list-entry>
+      <div class="mb-2">
+        <app-chat-list-entry *ngFor="let chat of Chats" [IsSelected]="chat == SelectedChat" [Chat]="chat" (click)="OpenChat(chat)"></app-chat-list-entry>
+      </div>
     </div>
 
-    <div class="col" *ngIf="SelectedChat">
+    <div class="col-md-9" *ngIf="SelectedChat">
 
-      <div class="row ">
+      <div class="row">
         <div class="col">
           <h4 class="text-center">Chat with <a href="/users/{{SelectedChat.Interlocutor.Id}}">{{SelectedChat.Interlocutor.Username}}</a></h4>
         </div>
       </div>
 
-      <div class="row ">
+      <div class="row">
         <div class="col">
           <app-chat-messages [Messages]="SelectedChat.Messages" [Reverse]="false"></app-chat-messages>
         </div>

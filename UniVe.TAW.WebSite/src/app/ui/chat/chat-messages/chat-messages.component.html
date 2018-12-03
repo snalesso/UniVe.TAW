@@ -1,3 +1,7 @@
-<p *ngFor="let message of SortedMessages" [ngClass]="message.IsMine ? 'chat-text-own text-right' : 'chat-text-enemy text-left'">[{{message.Timestamp
-  | date: 'dd/MM/yy HH:mm:ss'}}]
-  {{message.Text}}</p>
+<div style="word-wrap: break-word;" *ngFor="let message of SortedMessages">
+  <p class="text-secondary {{message.IsMine ? 'text-right' : null}} mb-0">
+    <small>{{message.Timestamp | date: 'dd/MM/yy
+      HH:mm:ss'}}</small>
+  </p>
+  <p [ngClass]="message.IsMine ? 'chat-text-own text-right' : 'chat-text-enemy'">{{message.Text}}</p>
+</div>

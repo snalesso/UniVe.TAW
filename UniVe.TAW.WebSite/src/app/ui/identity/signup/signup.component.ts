@@ -5,8 +5,7 @@ import * as $ from 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
-import { isNumber } from 'util';
-import ViewsRoutingKeys from '../../ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-signup',

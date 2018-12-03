@@ -8,7 +8,6 @@ import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/
 // import * as game_client from '../../assets/imported/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from './ServiceConstants';
 
-//import * as $ from 'jquery';
 import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';

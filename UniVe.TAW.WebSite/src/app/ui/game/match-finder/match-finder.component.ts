@@ -2,13 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
-import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as utils from '../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
 import ServiceConstants from '../../../services/ServiceConstants';
-import ViewsRoutingKeys from '../../ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { SocketIOService } from '../../../services/socket-io.service';
 import { Country } from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
 import * as game from '../../../../assets/imported/unive.taw.webservice/infrastructure/game';
@@ -23,7 +22,7 @@ import * as io from 'socket.io-client';
   styleUrls: ['./match-finder.component.css']
 })
 // TODO: update when server emits new pending matches available
-export class JoinableMatchesComponent implements OnInit, OnDestroy {
+export class MatchFinderComponent implements OnInit, OnDestroy {
 
   private _playables: DTOs.IPlayablesDto;
   private _socket = io(ServiceConstants.ServerAddress);
