@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Signup</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <form>
+
+    <ion-item>
+      <ion-input type="text" #username="ngModel" required name="username" [(ngModel)]="SignupRequest.Username" class="form-control"
+        id="signup-form-username" placeholder="Username"></ion-input>
+    </ion-item>
+
+    <div [hidden]="username.valid || (!username.dirty && !username.touched)" class="alert alert-danger">
+      Username is required
+    </div>
+
+    <ion-item>
+      <ion-input type="password" #password="ngModel" required name="password" [(ngModel)]="SignupRequest.Password"
+        class="form-control" id="signup-form-password" placeholder="Password"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input type="password" #passwordRepeated="ngModel" required name="passwordRepeated" [(ngModel)]="RepeatedPassword"
+        class="form-control" id="signup-form-password-repeated" placeholder="Repeat password"></ion-input>
+    </ion-item>
+
+    <div [hidden]="password.valid || (!password.dirty && !password.touched)" class="alert alert-danger">
+      Password is required
+    </div>
+    <div [hidden]="(password.value === passwordRepeated.value) || (!password.dirty && !password.touched) || (!passwordRepeated.dirty && !passwordRepeated.touched)"
+      class="alert alert-danger">
+      Passwords do not match
+    </div>
+
+    <ion-item>
+      <ion-label>Birth date</ion-label>
+      <ion-datetime #birthDate="ngModel" name="birthDate" [(ngModel)]="SignupRequest.BirthDate" class="form-control" id="signup-form-birthDate"
+        placeholder="Birth date" display-format="DD/MM/YYYY">
+      </ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Country</ion-label>
+      <ion-select class="form-control" id="signup-form-countryId" name="country">
+        <ion-select-option *ngFor="let country of Countries; index as i;" [attr.selected]="i == SignupRequest.CountryId ? true : null"
+          [value]="country.id">{{country.name}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">
+      Login error: {{ResponseError}}
+    </div>
+
+    <br>
+
+    <ion-button class="btn btn-lg btn-primary btn-block" expand="block" [disabled]="!canSendSignupRequest" (click)="sendSignupRequest()">Sign
+      up</ion-button>
+
+  </form>
+
+  <hr>
+
+  <div>
+    <p>Already have an account? <a routerLink="/login">Login here!</a></p>
+  </div>
+
+</ion-content>
