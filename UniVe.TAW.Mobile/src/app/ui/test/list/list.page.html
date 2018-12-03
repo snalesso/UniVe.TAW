@@ -1,0 +1,37 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>list</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-tabs>
+    <ion-tab tab="names" active>
+      <ion-content>
+        <ion-list>
+          <ion-item *ngFor="let name of names">
+            <ion-label>{{name}}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-tab>
+    <ion-tab tab="ciao"></ion-tab>
+
+    <ion-tab-bar slot="bottom" selected-tab="names">
+
+      <ion-tab-button tab="names">
+        <ion-label>Names</ion-label>
+        <ion-icon name="person"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="ciao">
+        <ion-label>ciao</ion-label>
+        <ion-icon name="person"></ion-icon>
+      </ion-tab-button>
+
+    </ion-tab-bar>
+
+  </ion-tabs>
+
+</ion-content>

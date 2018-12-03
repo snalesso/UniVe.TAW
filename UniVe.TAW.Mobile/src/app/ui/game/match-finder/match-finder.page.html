@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Match finder</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-grid>
+
+    <ion-row>
+      <ion-col>
+
+        <ion-button *ngIf="CanCreateMatch" expand="block" [disabled]="IsBusy || !CanCreateMatch" (click)="createPendingMatch()">Wait
+          for a challenger</ion-button>
+
+        <ion-button *ngIf="HasPendingMatchOpen" expand="block" color="warning" [disabled]="IsBusy || !HasPendingMatchOpen"
+          (click)="closePendingMatch()">Stop
+          waiting</ion-button>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="AreThereJoinableMatches">
+
+      <h3>... or choose your opponent!</h3>
+
+      <ion-col no-padding>
+
+        <ion-card *ngFor="let jm of JoinableMatches" no-margin>
+          <ion-card-header>
+            <ion-card-title>{{jm.Creator.Username}}</ion-card-title>
+            <ion-card-subtitle>{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from
+              {{getCountryName(jm.Creator.CountryId)}}</ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-button class="btn btn-success" [disabled]="IsBusy" (click)="joinMatch(jm.Id)">Challenge!</ion-button>
+          </ion-card-content>
+        </ion-card>
+
+      </ion-col>
+
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>
