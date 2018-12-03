@@ -1,0 +1,34 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Rankings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-card *ngFor="let ur of UserRankings; index as i">
+    <ion-card-header>
+      <ion-card-title>
+        <span>#{{i+1}} </span>
+        <ion-label color="primary" outline>
+          <a href="/users/{{ur.Id}}">{{ur.Username}}</a></ion-label>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-label>
+        <span class="{{ur.WinRatio > 50 ? 'winner-text' : 'loser-text'}}">{{ur.WinRatio}}</span>
+        <span>% (</span>
+        <span class="winner-text">{{ur.WinsCount}}</span>
+        <span>/</span>
+        <span class="loser-text">{{ur.LossesCount}}</span>
+        <span>)</span>
+      </ion-label>
+    </ion-card-content>
+
+  </ion-card>
+
+</ion-content>

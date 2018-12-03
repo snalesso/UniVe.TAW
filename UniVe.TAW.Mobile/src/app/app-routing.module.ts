@@ -21,6 +21,7 @@ const routes: Routes = [
       new RouteParam(RoutingParamKeys.matchId)
     ]), loadChildren: './ui/game/match/match.module#MatchPageModule'
   },
+  { path: ViewsRoutingKeys.Rankings, loadChildren: './ui/identity/rankings/rankings.module#RankingsPageModule' },
   // { path: ViewsRoutingKeys.Rankings, component: RankingsComponent },
   // {
   //   path: RoutingHelper.buildRoute([
