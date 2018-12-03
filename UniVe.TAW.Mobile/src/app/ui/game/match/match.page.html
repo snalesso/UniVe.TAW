@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Match</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-grid>
+
+    <ion-row *ngIf="IsMatchSetupVisible">
+      <ion-col>
+        <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="IsWaitingForEnemyToConfig">
+      <ion-col>
+        <h4 text-center>Waiting for emeny ...</h4>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="IsWaitingForEnemyToConfig" text-center>
+      <ion-col>
+        <ion-spinner name="crescent"></ion-spinner>
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="IsMatchEnded">
+      <ion-col>
+
+        <div class="alert alert-{{DidIWin ? 'success': 'danger'}} w-100" role="alert">
+          <strong>YOU {{DidIWin ? 'WON': 'LOST'}}! <a href="/match-finder">Play again!</a></strong>
+        </div>
+
+      </ion-col>
+    </ion-row>
+
+    <ion-row *ngIf="AreTurnControllersVisible">
+
+      <ion-col>
+        <app-enemy-turn-controller></app-enemy-turn-controller>
+      </ion-col>
+
+      <ion-col>
+        <app-own-turn-controller></app-own-turn-controller>
+      </ion-col>
+
+      <!-- <ion-col>
+        <br>
+        <app-match-chat [InterlocutorId]="AddresseeId"></app-match-chat>
+      </ion-col> -->
+
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>
