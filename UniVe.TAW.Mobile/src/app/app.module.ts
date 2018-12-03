@@ -1,50 +1,33 @@
-import { NgModule, ErrorHandler } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { MyApp } from './app.component';
+import { RouteReuseStrategy } from '@angular/router';
 
-import { SignupPage } from '../pages/signup/signup';
-import { LoginPage } from '../pages/login/login';
-import { HomePage } from '../pages/home/home';
-import { MatchPage } from '../pages/match/match';
-import { ChatPage } from '../pages/chat/chat';
-import { TabsPage } from '../pages/tabs/tabs';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { SplashScreen } from '@ionic-native/splash-screen/ngx';
+import { StatusBar } from '@ionic-native/status-bar/ngx';
 
-import { StatusBar } from '@ionic-native/status-bar';
-import { SplashScreen } from '@ionic-native/splash-screen';
-import { ChatServiceProvider } from '../providers/chat-service/chat-service';
-import { AuthServiceProvider } from '../providers/auth-service/auth-service';
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
+import { SignupPage } from './ui/identity/signup/signup.page';
+import { LoginPage } from './ui/identity/login/login.page';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [
-    MyApp,
-    SignupPage,
-    LoginPage,
-    HomePage,
-    MatchPage,
-    ChatPage,
-    TabsPage
-  ],
+  declarations: [AppComponent, SignupPage, LoginPage],
+  entryComponents: [],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
-  ],
-  bootstrap: [IonicApp],
-  entryComponents: [
-    MyApp,
-    SignupPage,
-    LoginPage,
-    HomePage,
-    MatchPage,
-    ChatPage,
-    TabsPage
+    FormsModule,
+    IonicModule.forRoot(),
+    AppRoutingModule,
+    HttpClientModule
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    { provide: ErrorHandler, useClass: IonicErrorHandler },
-    ChatServiceProvider,
-    AuthServiceProvider
-  ]
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+  ],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

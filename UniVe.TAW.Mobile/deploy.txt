@@ -1,5 +1,0 @@
-ionic cordova run android --prod --release
-
-"C:\Program Files\Java\jdk1.8.0_162\bin\keytool.exe" -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-alias
-
-"C:\Program Files\Java\jdk1.8.0_162\bin\jarsigner.exe" -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore my-release-key.jks android-release-unsigned.apk my-alias
