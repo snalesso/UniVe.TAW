@@ -522,7 +522,8 @@ export default class GameRoutes extends RoutesBase {
                             const ownSideMatchStatusDto = {
                                 IsConfigNeeded: !ownSide.isConfigured(match.Settings),
                                 IsMatchStarted: match.StartDateTime != null,
-                                EnemyId: enemySide.PlayerId.toHexString()
+                                EnemyId: enemySide.PlayerId.toHexString(),
+                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId)
                             } as DTOs.IOwnSideMatchStatus;
 
                             responseData = new net.HttpMessage(ownSideMatchStatusDto);

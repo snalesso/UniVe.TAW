@@ -86,29 +86,29 @@ export default class ApiService {
                 async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    // await DBUtils.deleteEverything();
+                    await DBUtils.deleteEverything();
 
-                    // await DBUtils.generateFakeData(
-                    //     [
-                    //         "Daedalus",
-                    //         "Horus",
-                    //         "Osiride",
-                    //         "Anubi",
-                    //         "Pippo",
-                    //         "Pluto",
-                    //         "Puffetta",
-                    //         "Paperino",
-                    //         "Minnie",
-                    //         "Topolino",
-                    //         "Bambee",
-                    //         "Cenerentola",
-                    //         "TrollKing",
-                    //         "TheDouchebagOne",
-                    //         "Canaglia",
-                    //         "Farabutto"
-                    //     ],
-                    //     100,
-                    //     false);
+                    await DBUtils.generateFakeData(
+                        [
+                            "Daedalus",
+                            "Horus",
+                            "Osiride",
+                            "Anubi",
+                            "Pippo",
+                            "Pluto",
+                            "Puffetta",
+                            "Paperino",
+                            "Minnie",
+                            "Topolino",
+                            "Bambee",
+                            "Cenerentola",
+                            "TrollKing",
+                            "Furfante",
+                            "Canaglia",
+                            "Farabutto"
+                        ],
+                        200,
+                        false);
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

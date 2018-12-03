@@ -190,14 +190,18 @@ export default class ChatRoutes extends RoutesBase {
 
                     await senderUser.save();
 
+                    const senderId = senderUser._id.toHexString();
+
                     const senderMessageDto = {
                         IsMine: true,
+                        SenderId: senderId,
                         Text: loggedMsg.Text,
                         Timestamp: loggedMsg.Timestamp
                     } as DTOs.IChatMessageDto;
 
                     const addresseeMessageDto = {
                         IsMine: false,
+                        SenderId: senderId,
                         Text: loggedMsg.Text,
                         Timestamp: loggedMsg.Timestamp
                     } as DTOs.IChatMessageDto;
@@ -207,7 +211,13 @@ export default class ChatRoutes extends RoutesBase {
                         .status(httpStatusCodes.OK)
                         .json(responseData);
 
-                    this._socketIOServer.emit(ServiceEventKeys.chatEventForUser(incMsg.AddresseeId, ServiceEventKeys.YouGotANewMessage), addresseeMessageDto);
+                    this._socketIOServer.emit(
+                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId, senderId),
+                        addresseeMessageDto);
+
+                    this._socketIOServer.emit(
+                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId),
+                        addresseeMessageDto);
                 }
                 catch (ex) {
                     console.log(ex);

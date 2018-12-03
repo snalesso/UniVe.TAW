@@ -33,7 +33,7 @@ export default class DBUtils {
 
             for (let pm of pms) {
                 await pm.remove();
-                console.log("deleted PM (id: " + pm._id.toHexString() + ")");
+                //console.log("deleted PM (id: " + pm._id.toHexString() + ")");
             }
         }).catch(error => { console.log("error deleting pending match") });
 

@@ -18,8 +18,12 @@ export default class ServiceEventKeys {
         return "uid=" + subscribingUserId + "&mid=" + matchId + "&mek=" + matchEvent;
     }
 
-    public static chatEventForUser(subscribingUserId: string, chatEvent: string) {
-        return "uid=" + subscribingUserId + "&cek=" + chatEvent;
+    public static chatEventForUser(chatEvent: string, addresseeId: string, senderId?: string) {
+        let x = "cek=" + chatEvent + "&aid=" + addresseeId;
+        if (senderId)
+            x += "&sid=" + senderId;
+
+        return x;
     }
 
     public static userEvent(subscribingUserId: string, userEvent: string) {

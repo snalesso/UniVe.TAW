@@ -160,6 +160,7 @@ export interface INewMessage {
 
 export interface IChatMessageDto {
     readonly IsMine: boolean;
+    readonly SenderId?: string;
     readonly Text: string;
     readonly Timestamp: Date;
 }
