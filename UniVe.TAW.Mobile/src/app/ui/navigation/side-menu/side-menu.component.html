@@ -1,0 +1,38 @@
+<ion-list>
+
+  <ion-menu-toggle auto-hide="false">
+    <ion-item routerDirection="root" routerLink="{{IsLogged ? './match-finder' : './login'}}">
+      <ion-icon slot="start" name="locate"></ion-icon>
+      <ion-label>Play</ion-label>
+    </ion-item>
+  </ion-menu-toggle>
+
+  <ion-menu-toggle auto-hide="false" *ngIf="IsLogged">
+    <ion-item routerDirection="root" routerLink="/chat">
+      <ion-icon slot="start" name="chatbubbles"></ion-icon>
+      <ion-label>Chat</ion-label>
+    </ion-item>
+  </ion-menu-toggle>
+
+  <ion-menu-toggle auto-hide="false">
+    <ion-item routerDirection="root" routerLink="/rankings">
+      <ion-icon slot="start" name="trophy"></ion-icon>
+      <ion-label>Rankings</ion-label>
+    </ion-item>
+  </ion-menu-toggle>
+
+  <ion-menu-toggle auto-hide="false" *ngIf="!IsLogged">
+    <ion-item routerDirection="root" routerLink="/login">
+      <ion-icon slot="start" name="key"></ion-icon>
+      <ion-label>Login</ion-label>
+    </ion-item>
+  </ion-menu-toggle>
+
+  <ion-menu-toggle auto-hide="false" *ngIf="IsLogged">
+    <ion-item routerDirection="root" (click)="logout()">
+      <ion-icon slot="start" name="exit"></ion-icon>
+      <ion-label>Logout</ion-label>
+    </ion-item>
+  </ion-menu-toggle>
+
+</ion-list>

@@ -4,16 +4,16 @@ import { AuthService } from '../../../services/auth.service';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
-import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
+import * as DTOs from '../../../../assets/scripts/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  selector: 'app-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrls: ['./side-menu.component.scss']
 })
-export class HeaderComponent implements OnInit, OnDestroy {
+export class SideMenuComponent implements OnInit {
 
   private readonly _subscriptions: Subscription[] = [];
 

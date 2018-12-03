@@ -9,7 +9,7 @@ import { RoutingHelper, RouteStep, RouteParam } from './Routing';
 import RoutingParamKeys from '../assets/scripts/unive.taw.webservice/application/routing/RoutingParamKeys';
 
 const routes: Routes = [
-  { path: '', redirectTo: ViewsRoutingKeys.Signup, pathMatch: 'full' },
+  { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
   { path: ViewsRoutingKeys.Login, component: LoginPage },
   { path: ViewsRoutingKeys.Signup, component: SignupPage },
   { path: ViewsRoutingKeys.MatchFinder, loadChildren: './ui/game/match-finder/match-finder.module#MatchFinderPageModule' },

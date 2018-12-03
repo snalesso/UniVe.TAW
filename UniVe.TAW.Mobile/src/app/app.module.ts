@@ -12,9 +12,10 @@ import { SignupPage } from './ui/identity/signup/signup.page';
 import { LoginPage } from './ui/identity/login/login.page';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { SideMenuComponent } from './ui/navigation/side-menu/side-menu.component';
 
 @NgModule({
-  declarations: [AppComponent, SignupPage, LoginPage],
+  declarations: [AppComponent, SignupPage, LoginPage, SideMenuComponent],
   entryComponents: [],
   imports: [
     BrowserModule,
