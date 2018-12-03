@@ -11,6 +11,7 @@ import { AuthService } from '../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-match',
@@ -30,7 +31,9 @@ export class MatchPage implements OnInit, OnDestroy {
     private readonly _router: Router,
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _authService: AuthService,
-    private readonly _socketIOService: ngxSocketIO.Socket) {
+    private readonly _socketIOService: ngxSocketIO.Socket,
+    private readonly _toastController: ToastController
+  ) {
 
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
 
