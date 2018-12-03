@@ -1,13 +1,12 @@
 // FLAGS
 export enum UserRoles {
-    Player = 1 << 0,
-    Moderator = 1 << 1,
-
+    Player = 1, //1 << 0,
+    Moderator = 2, //1 << 1,
     Admin = Player | Moderator // ~(~0 << 2) // all
 }
 
 export enum Country {
-    Unknown = 0,
+    Undefined = 0,
     Afghanistan,
     Albania,
     Algeria,
