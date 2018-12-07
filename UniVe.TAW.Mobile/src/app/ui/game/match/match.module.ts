@@ -9,6 +9,10 @@ import { MatchPage } from './match.page';
 import { FleetConfiguratorComponent } from './fleet-configurator/fleet-configurator.component';
 import { OwnTurnControllerComponent } from './own-turn-controller/own-turn-controller.component';
 import { EnemyTurnControllerComponent } from './enemy-turn-controller/enemy-turn-controller.component';
+import { MatchChatComponent } from './match-chat/match-chat.component';
+import { ChatFormComponent } from '../../chat/chat-form/chat-form.component';
+import { ChatMessagesComponent } from '../../chat/chat-messages/chat-messages.component';
+//import { ChatComponentsModule } from '../../chat/chat.components.module';
 
 const routes: Routes = [
   {
@@ -22,8 +26,16 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     IonicModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    //ChatComponentsModule
   ],
-  declarations: [MatchPage, FleetConfiguratorComponent, OwnTurnControllerComponent, EnemyTurnControllerComponent]
+  declarations: [
+    MatchPage,
+
+    FleetConfiguratorComponent,
+    OwnTurnControllerComponent,
+    EnemyTurnControllerComponent,
+    MatchChatComponent,
+  ]
 })
-export class MatchPageModule {}
+export class MatchPageModule { }

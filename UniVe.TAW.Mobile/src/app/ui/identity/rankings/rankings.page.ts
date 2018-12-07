@@ -26,9 +26,6 @@ export class RankingsPage implements OnInit {
 
   constructor(
     private readonly _router: Router,
-    //private readonly _activatedRoute: ActivatedRoute,
-    //private readonly _authService: AuthService,
-    //private readonly _gameService: GameService,
     private readonly _identityService: IdentityService) { }
 
   public get UserRankings() { return this._rankings; }
@@ -39,29 +36,11 @@ export class RankingsPage implements OnInit {
 
   ngOnInit() {
 
-    // this._identityService.getUserProfile(this._authService.LoggedUser.Id)
-    //   .subscribe(response => {
-
-    //     console.log(response.Content);
-    //   });
-
     this._identityService.getRankings()
       .subscribe(response => {
 
         this._rankings = response.Content;
       });
-
-    // this._identityService.getCazzo()
-    //   .subscribe(response => {
-
-    //     console.log(response.Content);
-    //   });
-
-    // this._identityService.getDiocane()
-    //   .subscribe(response => {
-
-    //     console.log(response.Content);
-    //   });
 
   }
 

@@ -3,62 +3,99 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Match</ion-title>
+    <ion-title>Match VS {{EnemyUsername}}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
 
-  <ion-grid>
+  <!-- <ion-chip *ngIf="IsMatchEnded" color="{{DidIWin ? 'success': 'danger'}}" style="width: 100%">
+    <ion-label>
+      <strong>YOU {{DidIWin ? 'WON': 'LOST'}}!</strong>
+      <a href="/match-finder">Play again!</a>
+    </ion-label>
+  </ion-chip> -->
 
-    <ion-row *ngIf="IsMatchSetupVisible">
-      <ion-col>
-        <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
-      </ion-col>
-    </ion-row>
+  <ion-tabs #_tabs>
 
-    <ion-row *ngIf="IsWaitingForEnemyToConfig">
-      <ion-col>
-        <h4 text-center>Waiting for emeny ...</h4>
-      </ion-col>
-    </ion-row>
+    <ion-tab tab="fleet-configurator-tab">
+      <ion-content *ngIf="IsMatchSetupVisible || IsWaitingForEnemyToConfig">
 
-    <ion-row *ngIf="IsWaitingForEnemyToConfig" text-center>
-      <ion-col>
-        <ion-spinner name="crescent"></ion-spinner>
-      </ion-col>
-    </ion-row>
+        <ion-grid>
 
-    <ion-row *ngIf="IsMatchEnded">
-      <ion-col>
+          <ion-row *ngIf="IsMatchSetupVisible">
+            <ion-col>
+              <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
+            </ion-col>
+          </ion-row>
 
-        <ion-chip color="{{DidIWin ? 'success': 'danger'}}" style="width: 100%">
-          <ion-label>
-            <strong>YOU {{DidIWin ? 'WON': 'LOST'}}!</strong>
-            <a href="/match-finder">Play again!</a>
-          </ion-label>
-        </ion-chip>
+          <ion-row *ngIf="IsWaitingForEnemyToConfig">
+            <ion-col>
+              <h4 text-center>Waiting for emeny ...</h4>
+            </ion-col>
+          </ion-row>
 
-      </ion-col>
-    </ion-row>
+          <ion-row *ngIf="IsWaitingForEnemyToConfig" text-center>
+            <ion-col>
+              <ion-spinner name="crescent"></ion-spinner>
+            </ion-col>
+          </ion-row>
 
-    <ion-row *ngIf="AreTurnControllersVisible">
+        </ion-grid>
 
-      <ion-col>
+      </ion-content>
+    </ion-tab>
+
+    <ion-tab tab="enemy-turn-controller-tab">
+      <ion-content *ngIf="AreTurnControllersVisible">
         <app-enemy-turn-controller></app-enemy-turn-controller>
-      </ion-col>
+      </ion-content>
+    </ion-tab>
 
-      <ion-col>
+    <ion-tab tab="own-turn-controller-tab">
+      <ion-content *ngIf="AreTurnControllersVisible">
         <app-own-turn-controller></app-own-turn-controller>
-      </ion-col>
+      </ion-content>
+    </ion-tab>
 
-      <!-- <ion-col>
-        <br>
-        <app-match-chat [InterlocutorId]="AddresseeId"></app-match-chat>
-      </ion-col> -->
+    <ion-tab tab="chat-tab">
+      <ion-content>
+        <app-match-chat [InterlocutorId]="EnemyId"></app-match-chat>
+      </ion-content>
+      <!-- <ion-content>
+        <app-match-chat-messages #_matchChatMessagesComponent></app-match-chat-messages>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <app-match-chat-form [InterlocutorId]="SelectedChat.Interlocutor.Id" (WhenMessageIsSent)="handleWhenChatFormMessageIsSent($event)"></app-match-chat-form>
+        </ion-toolbar>
+      </ion-footer> -->
+    </ion-tab>
 
-    </ion-row>
+    <ion-tab-bar slot="bottom">
 
-  </ion-grid>
+      <ion-tab-button tab="fleet-configurator-tab" *ngIf="IsMatchSetupVisible || IsWaitingForEnemyToConfig">
+        <ion-label>Config</ion-label>
+        <ion-icon name="boat"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="enemy-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+        <ion-label>Defend</ion-label>
+        <ion-icon name="heart"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="own-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+        <ion-label>Attack {{EnemyUsername}}</ion-label>
+        <ion-icon name="locate"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="chat-tab">
+        <ion-label>Chat</ion-label>
+        <ion-icon name="chatbubbles"></ion-icon>
+      </ion-tab-button>
+
+    </ion-tab-bar>
+
+  </ion-tabs>
 
 </ion-content>

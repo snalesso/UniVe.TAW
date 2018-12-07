@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 //import 'socket.io-client';
-import { SocketIOService } from './socket-io.service';
+import * as ngxSocketIO from 'ngx-socket-io';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +22,7 @@ export class GameService {
   constructor(
     private readonly _http: ng_http.HttpClient,
     private readonly _authService: AuthService,
-    private readonly _socketIOService: SocketIOService
+    private readonly _socketIOService: ngxSocketIO.Socket
   ) {
   }
 

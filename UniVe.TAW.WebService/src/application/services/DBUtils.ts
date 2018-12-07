@@ -109,7 +109,7 @@ export default class DBUtils {
 
         // generates matches
 
-        console.log("generating fake matches ...");
+        console.log("generating fake endedmatches ...");
 
         const matches: Match.IMongooseMatch[] = [];
 

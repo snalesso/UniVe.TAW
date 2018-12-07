@@ -57,12 +57,13 @@ export interface IMatchDto {
 }
 
 export interface IOwnSideMatchStatus {
-    EnemyId: string;
+    Enemy: ISimpleUserDto;
     IsConfigNeeded: boolean;
     IsMatchStarted: boolean;
     //IsMatchEnded: boolean; // TODO: remove, EndDateTime is enough, same for start
     EndDateTime: Date;
     DidIWin: boolean;
+    DoIOwnMove: boolean;
 }
 
 export interface IOwnSideMatchConfigStatus {
@@ -126,7 +127,8 @@ export interface IMatchEventDto {
 }
 
 /** When both players joined but someone didn't config his fleet yet **/
-export interface IMatchReadyEventDto extends IMatchEventDto {
+export interface IPendingMatchJoinedEventDto extends IMatchEventDto {
+    readonly PendingMatchId: string;
 }
 
 /** When both players joined the match and both configured their fleet */

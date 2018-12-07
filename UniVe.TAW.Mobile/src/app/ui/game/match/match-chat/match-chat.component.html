@@ -1,0 +1,37 @@
+<ion-grid>
+
+  <ion-row>
+    <ion-col>
+      <ion-textarea type="text" placeholder="Your message" [(ngModel)]="MessageText" (keydown.enter)="sendMessage()"></ion-textarea>
+    </ion-col>
+
+    <ion-col size="auto">
+      <ion-button extend="block" color="success" (click)="sendMessage()" [disabled]="!CanSendMessage">
+        <ion-icon name="send"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+
+  <ion-row>
+    <ion-col>
+
+      <ion-list lines="none">
+
+        <ion-item *ngFor="let message of ChatMessages" [attr.text-start]="!message.IsMine ? true : null"
+          [attr.text-end]="message.IsMine ? true : null">
+          <ion-label text-wrap>
+            <ion-text color="medium">
+              <small>{{message.Timestamp | date: 'dd/MM/yy HH:mm:ss'}}</small>
+            </ion-text>
+            <ion-text>
+              <p>{{message.Text}}</p>
+            </ion-text>
+          </ion-label>
+        </ion-item>
+
+      </ion-list>
+
+    </ion-col>
+  </ion-row>
+
+</ion-grid>

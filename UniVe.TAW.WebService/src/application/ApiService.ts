@@ -107,7 +107,7 @@ export default class ApiService {
                             "Canaglia",
                             "Farabutto"
                         ],
-                        200,
+                        20,
                         false);
 
                     this.ConfigRoutes();

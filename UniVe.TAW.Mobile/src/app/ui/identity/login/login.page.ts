@@ -17,7 +17,7 @@ export class LoginPage implements OnInit {
     private readonly _router: Router) {
   }
 
-  private _loginRequest = { /*Username: "Daedalus", Password: "aaa"*/ } as DTOs.ILoginCredentials;
+  private _loginRequest = { Username: "Furfante", Password: "aaa" } as DTOs.ILoginCredentials;
   public get LoginRequest() { return this._loginRequest; }
 
   private _responseError: string;
@@ -30,6 +30,10 @@ export class LoginPage implements OnInit {
   }
 
   public sendLoginRequest() {
+
+    if (!this.canSendLoginRequest)
+      return;
+
     // TODO: handle no response when server is down
     this._authService.login(this.LoginRequest)
       .subscribe(
@@ -49,7 +53,9 @@ export class LoginPage implements OnInit {
   ngOnInit() {
     // if already logged in re-route to avaiable matches
     if (this._authService.Token) {
-      this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+      setTimeout(() => {
+        this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+      }, 150);
     }
   }
 

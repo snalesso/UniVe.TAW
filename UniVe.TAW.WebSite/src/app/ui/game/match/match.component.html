@@ -5,7 +5,7 @@
   </div>
 
   <div class="row justify-content-center" *ngIf="IsWaitingForEnemyToConfig">
-    <h4>Waiting for emeny to line-up ...</h4>
+    <h4>Waiting for {{EnemyUsername}} to line-up ...</h4>
   </div>
 
   <div class="row" *ngIf="IsMatchEnded">
@@ -30,7 +30,7 @@
 
     <div class="col">
       <br>
-      <app-match-chat [InterlocutorId]="AddresseeId"></app-match-chat>
+      <app-match-chat [InterlocutorId]="EnemyId"></app-match-chat>
     </div>
 
   </div>

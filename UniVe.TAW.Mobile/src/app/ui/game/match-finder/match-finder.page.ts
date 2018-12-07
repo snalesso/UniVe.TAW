@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
@@ -8,7 +8,6 @@ import * as identity from '../../../../assets/scripts/unive.taw.webservice/infra
 import * as utils from '../../../../assets/scripts/unive.taw.webservice/infrastructure/utils';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
-import { SocketIOService } from '../../../services/socket-io.service';
 import { Country } from '../../../../assets/scripts/unive.taw.webservice/infrastructure/identity';
 import * as game from '../../../../assets/scripts/unive.taw.webservice/infrastructure/game';
 import * as http from '@angular/common/http';
@@ -26,30 +25,27 @@ export class MatchFinderPage implements OnInit, OnDestroy {
   private _playables: DTOs.IPlayablesDto;
   private _socket = io(ServiceConstants.ServerAddress);
 
+  private _pendingMatchesChangedEventKey: string;
+  private _pendingMatchJoinedEventKey: string;
+
   constructor(
+    private readonly _zone: NgZone,
+    private readonly _router: Router,
     private readonly _gameService: GameService,
-    private readonly _router: Router
+    private readonly _authService: AuthService,
   ) {
   }
 
   private _isBusy: boolean = false;
   public get IsBusy() { return this._isBusy; }
 
-  public get CanCreateMatch() {
-    return (this._playables != null ? this._playables.CanCreateMatch : false);
-  }
+  public get CanCreateMatch() { return (this._playables != null ? this._playables.CanCreateMatch : false); }
 
-  public get HasPendingMatchOpen() {
-    return (this._playables != null ? this._playables.PendingMatchId != null : false);
-  }
+  public get HasPendingMatchOpen() { return (this._playables != null ? this._playables.PendingMatchId != null : false); }
 
-  public get JoinableMatches() {
-    return (this._playables != null ? this._playables.JoinableMatches : null);
-  }
+  public get JoinableMatches() { return (this._playables != null ? this._playables.JoinableMatches : null); }
 
-  public get AreThereJoinableMatches() {
-    return (this._playables != null ? (this._playables.JoinableMatches != null && this._playables.JoinableMatches.length > 0) : false);
-  }
+  public get AreThereJoinableMatches() { return (this._playables != null ? (this._playables.JoinableMatches != null && this._playables.JoinableMatches.length > 0) : false); }
 
   // TODO: ensure that, if browser page is reloaded, a socket.io connection is created to listen for when someone joins the PendingMatch
   public createPendingMatch() {
@@ -67,7 +63,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
                 // this._socketIOService.connect().subscribe(message => {
                 //   console.log("match-finder received message: " + JSON.stringify(message));
                 // });
-                this.updatePlayables();
+                //this.updatePlayables();
               }
             }
 
@@ -87,6 +83,10 @@ export class MatchFinderPage implements OnInit, OnDestroy {
             console.log(response.ErrorMessage);
           } else {
             if (response.Content) {
+              if (this._pendingMatchJoinedEventKey) {
+                this._socket.removeListener(this._pendingMatchJoinedEventKey);
+                this._pendingMatchJoinedEventKey = null;
+              }
               this.updatePlayables();
             }
           }
@@ -126,26 +126,41 @@ export class MatchFinderPage implements OnInit, OnDestroy {
       .subscribe(
         response => {
           if (response.HasError) {
+
             console.log(response.ErrorMessage);
+            this._isBusy = false;
+
           }
           else if (!response.Content) {
+
             console.log("Server returned null");
+            this._isBusy = false;
+
           } else {
+            // dfaewf
+
             this._playables = response.Content;
+            this._isBusy = false;
 
             if (this._playables.PendingMatchId) {
-              this._socket.once(
-                ServiceEventKeys.MatchReady,
-                (matchReadyEvent: DTOs.IMatchReadyEventDto) => {
-                  this._router.navigate([ViewsRoutingKeys.Match, matchReadyEvent.MatchId]);
+
+              this._pendingMatchJoinedEventKey = ServiceEventKeys.pendingMatchJoined(this._authService.LoggedUser.Id, this._playables.PendingMatchId);
+              this._socket.once(this._pendingMatchJoinedEventKey,
+                (pendingMatchJoinedEvent: DTOs.IPendingMatchJoinedEventDto) => {
+                  setTimeout(() => {
+                    this._router.navigate([ViewsRoutingKeys.Match, pendingMatchJoinedEvent.MatchId]);
+                  }, 100);
                 });
+
             }
             else if (this._playables.PlayingMatch) {
-              this._router.navigate([ViewsRoutingKeys.Match, this._playables.PlayingMatch.Id]);
-            }
-          }
 
-          this._isBusy = false;
+              setTimeout(() => {
+                this._router.navigate([ViewsRoutingKeys.Match, this._playables.PlayingMatch.Id]);
+              }, 100);
+            }
+
+          }
         }, this.errorHandler);
   }
 
@@ -156,14 +171,25 @@ export class MatchFinderPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._socket.on(ServiceEventKeys.PendingMatchesChanged, (socket) => {
-      this.updatePlayables();
-    });
+
+    this._pendingMatchesChangedEventKey = ServiceEventKeys.PendingMatchesChanged;
+    this._socket.on(this._pendingMatchesChangedEventKey, () => this.updatePlayables());
+
     this.updatePlayables();
   }
 
   ngOnDestroy(): void {
-    this._socket.removeListener(ServiceEventKeys.PendingMatchesChanged);
+    // for (let sub of this._subscriptions) {
+    //   sub.unsubscribe();
+    // }
+    if (this._pendingMatchJoinedEventKey) {
+      this._socket.removeListener(this._pendingMatchJoinedEventKey);
+      this._pendingMatchJoinedEventKey = null;
+    }
+    if (this._pendingMatchesChangedEventKey) {
+      this._socket.removeListener(this._pendingMatchesChangedEventKey);
+      this._pendingMatchesChangedEventKey = null;
+    }
   }
 
 }

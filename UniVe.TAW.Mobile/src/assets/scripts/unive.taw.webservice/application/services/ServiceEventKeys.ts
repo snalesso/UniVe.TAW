@@ -3,6 +3,7 @@ export default class ServiceEventKeys {
     public static readonly WhoAreYou = "WhoAreYou";
     public static readonly WhoIAm = "WhoIAm";
     public static readonly PendingMatchesChanged = "PendingMatchesChanged";
+    public static readonly PendingMatchJoined = "PendingMatchJoined";
     public static readonly MatchReady = "MatchReady";
     public static readonly MatchStarted = "MatchStarted";
     public static readonly MatchUpdated = "MatchUpdated";
@@ -13,6 +14,10 @@ export default class ServiceEventKeys {
     public static readonly BanUpdated = "BanUpdated";
     public static readonly RolesUpdated = "RolesUpdated";
     public static readonly UserDeleted = "UserDeleted";
+
+    public static pendingMatchJoined(subscribingUserId: string, pendingMatchid: string) {
+        return "uid=" + subscribingUserId + "&pmid=" + pendingMatchid + "&pmek=" + this.PendingMatchJoined;
+    }
 
     public static matchEventForUser(subscribingUserId: string, matchId: string, matchEvent: string) {
         return "uid=" + subscribingUserId + "&mid=" + matchId + "&mek=" + matchEvent;

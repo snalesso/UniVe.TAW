@@ -8,13 +8,13 @@ import RoutingParamKeys from '../../../assets/scripts/unive.taw.webservice/appli
 import * as DTOs from '../../../assets/scripts/unive.taw.webservice/application/DTOs';
 import * as utils from '../../../assets/scripts/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
-import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { IdentityService } from 'src/app/services/identity.service';
 import { ChatService } from 'src/app/services/chat.service';
 import { Tabs, Content } from '@ionic/angular';
+import * as ngxSocketIO from 'ngx-socket-io';
 
 @Component({
   selector: 'app-chat',
@@ -55,7 +55,7 @@ export class ChatPage implements OnInit {
     //this._tabs.ionNavDidChange.subscribe(next => console.log(next));
 
     if (this._authService.IsLogged) {
-      const x = this._chatService.getChatHistory()
+      this._chatService.getChatHistory()
         .subscribe(
           response => {
             this._chats = response.Content;

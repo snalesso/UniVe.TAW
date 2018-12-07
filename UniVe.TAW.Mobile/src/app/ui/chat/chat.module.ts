@@ -9,6 +9,7 @@ import { ChatPage } from './chat.page';
 import { ChatFormComponent } from './chat-form/chat-form.component';
 import { ChatListEntryComponent } from './chat-list-entry/chat-list-entry.component';
 import { ChatMessagesComponent } from './chat-messages/chat-messages.component';
+//import { ChatComponentsModule } from './chat.components.module';
 
 const routes: Routes = [
   {
@@ -22,8 +23,20 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     IonicModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    //ChatComponentsModule
   ],
-  declarations: [ChatPage, ChatFormComponent, ChatListEntryComponent, ChatMessagesComponent]
+  declarations: [
+    ChatPage,
+
+    ChatFormComponent,
+    ChatMessagesComponent,
+    ChatListEntryComponent,
+  ],
+  exports: [
+    // ChatListEntryComponent,
+    // ChatMessagesComponent,
+    // ChatFormComponent
+  ]
 })
-export class ChatPageModule {}
+export class ChatPageModule { }

@@ -13,17 +13,17 @@
 
     <ion-item>
       <ion-input type="text" [(ngModel)]="LoginRequest.Username" name="username" class="form-control" id="signup-form-username"
-        placeholder="Username"></ion-input>
+        (keydown.enter)="sendLoginRequest()" placeholder="Username"></ion-input>
     </ion-item>
 
     <ion-item>
       <ion-input type="password" [(ngModel)]="LoginRequest.Password" name="password" class="form-control" id="signup-form-password"
-        placeholder="Password"></ion-input>
+        (keydown.enter)="sendLoginRequest()" placeholder="Password"></ion-input>
     </ion-item>
 
-    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">{{ResponseError}}</div>
+    <p *ngIf="ResponseError" class="alert alert-danger" role="alert">{{ResponseError}}</p>
 
-    <br>
+    <br *ngIf="!ResponseError">
 
     <ion-button class="btn btn-lg btn-primary btn-block" expand="block" [disabled]="!canSendLoginRequest" (click)="sendLoginRequest();">Log
       in</ion-button>

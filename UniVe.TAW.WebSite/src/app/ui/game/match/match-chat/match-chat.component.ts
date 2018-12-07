@@ -18,7 +18,9 @@ import { ChatService } from 'src/app/services/chat.service';
   templateUrl: './match-chat.component.html',
   styleUrls: ['./match-chat.component.css']
 })
-export class MatchChatComponent implements OnInit {
+export class MatchChatComponent implements OnInit, OnDestroy {
+
+  private _youGotANewMessageEventKey: string;
 
   constructor(
     // private readonly _gameService: GameService,
@@ -46,13 +48,25 @@ export class MatchChatComponent implements OnInit {
 
           this._chatMessages.push(...response.Content);
 
-          this._socketIOService.on(
-            ServiceEventKeys.chatEventForUser(this._authService.LoggedUser.Id, ServiceEventKeys.YouGotANewMessage),
-            (newMessage: DTOs.IChatMessageDto) => {
-              this._chatMessages.push(newMessage);
-            });
+          if (!this._youGotANewMessageEventKey) {
+
+            this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id);
+            this._socketIOService.on(
+              this._youGotANewMessageEventKey,
+              (newMessage: DTOs.IChatMessageDto) => {
+                this._chatMessages.push(newMessage);
+              });
+          }
+
         },
         (error: http.HttpErrorResponse) => { });
+  }
+
+  ngOnDestroy(): void {
+    if (this._youGotANewMessageEventKey) {
+      this._socketIOService.removeListener(this._youGotANewMessageEventKey);
+      this._youGotANewMessageEventKey = null;
+    }
   }
 
 }

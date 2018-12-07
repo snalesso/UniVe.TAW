@@ -1,3 +1,27 @@
-<p>
-  enemy-turn-controller works!
-</p>
+<ion-grid>
+
+  <ion-row>
+    <ion-col>
+
+      <h1 text-center>{{Username}}</h1>
+
+    </ion-col>
+  </ion-row>
+
+  <ion-row>
+    <ion-col>
+
+      <table id="bf-grid" class="bf-grid">
+        <tbody>
+          <tr *ngFor="let row of Cells">
+            <td class="bf-grid-cell not-clickable" [ngClass]="[getCellStatusUIClass(cell)]" [style.padding-bottom]="100/BattleFieldWidth + '%'"
+              *ngFor="let cell of row">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </ion-col>
+  </ion-row>
+
+</ion-grid>

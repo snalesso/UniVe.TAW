@@ -14,6 +14,14 @@
         <app-side-menu></app-side-menu>
       </ion-content>
 
+      <ion-footer>
+        <ion-toolbar>
+          <ion-title>
+            <a routerLink="/users/{{LoggedUserId}}">{{LoggedUsername}}</a>
+          </ion-title>
+        </ion-toolbar>
+      </ion-footer>
+
     </ion-menu>
 
     <ion-router-outlet main></ion-router-outlet>

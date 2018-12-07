@@ -7,12 +7,13 @@ import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/
 // import * as game from '../../assets/imported/unive.taw.webservice/infrastructure/game';
 // import * as game_client from '../../assets/imported/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from './ServiceConstants';
+import * as ngxSocketIO from 'ngx-socket-io';
 
 import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 //import 'socket.io-client';
-import { SocketIOService } from './socket-io.service';
+//import { SocketIOService } from './socket-io.service';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class ChatService {
   constructor(
     private readonly _http: ng_http.HttpClient,
     private readonly _authService: AuthService,
-    private readonly _socketIOService: SocketIOService) {
+    private readonly _socketIOService: ngxSocketIO.Socket) {
   }
 
   public sendMessage(addresseeId: string, text: string) {

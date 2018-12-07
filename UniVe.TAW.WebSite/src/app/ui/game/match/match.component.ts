@@ -44,7 +44,9 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   public get AreTurnControllersVisible() { return this._matchStatus != null && this._matchStatus.IsMatchStarted; }
 
-  public get AddresseeId(): string { return this._matchStatus ? this._matchStatus.EnemyId : null; }
+  public get EnemyId(): string { return this._matchStatus ? this._matchStatus.Enemy.Id : null; }
+
+  public get EnemyUsername(): string { return this._matchStatus ? this._matchStatus.Enemy.Username : null; }
 
   public get IsMatchEnded(): boolean { return this._matchStatus ? this._matchStatus.EndDateTime != null : undefined; }
 
@@ -108,14 +110,14 @@ export class MatchComponent implements OnInit, OnDestroy {
               //   (matchUpdatedEvent: DTOs.IMatchUpdatedEventDto) => {
               //     this._matchStatus.IsMatchStarted = true;
               //   });
-              this._matchStatus.DidIWin = true;
+              //this._matchStatus.DidIWin = true;
               this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
               this._socketIOService.once(
                 this._matchEndedEventKey,
-                (event: DTOs.IMatchEndedEventDto) => {
+                (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
                   if (this._matchStatus) {
-                    this._matchStatus.EndDateTime = event.EndDateTime;
-                    this._matchStatus.DidIWin = (event.WinnerId && event.WinnerId == this._authService.LoggedUser.Id);
+                    this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
+                    this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
                     //alert("YOU " + (this.DidIWin ? "WON" : "LOST") + "!");
                   }
                 });
@@ -138,8 +140,14 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // TODO: removelistener rimuove le sottoscrizioni allo stesso evento per tutti? non è che ci siano altri sottoscritti ad un evento sottoscritto qui, qua viene rimosso e gli altri perdono le comunicazioni?
-    this._socketIOService.removeListener(this._matchStartedEventKey);
-    this._socketIOService.removeListener(this._matchEndedEventKey);
+    if (this._matchStartedEventKey != null) {
+      this._socketIOService.removeListener(this._matchStartedEventKey);
+      this._matchStartedEventKey = null;
+    }
+    if (this._matchEndedEventKey != null) {
+      this._socketIOService.removeListener(this._matchEndedEventKey);
+      this._matchEndedEventKey = null;
+    }
   }
 
 }

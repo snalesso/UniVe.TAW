@@ -1,9 +1,7 @@
 import * as express from 'express';
-import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
 import * as httpStatusCodes from 'http-status-codes';
 import * as mongodb from 'mongodb';
-import * as expressJwt from 'express-jwt';
 import * as socketio from 'socket.io';
 
 import * as net from '../../infrastructure/net';
@@ -28,21 +26,12 @@ import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlay
 import * as  ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipTypeAvailability } from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipPlacement } from '../../domain/models/mongodb/mongoose/ShipPlacement';
-import * as cors from 'cors';
 
 export default class GameRoutes extends RoutesBase {
-
-    private readonly _jwtValidator: expressJwt.RequestHandler;
 
     public constructor(socketIOServer: socketio.Server) {
 
         super(socketIOServer);
-
-        this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
-
-        this._router.use(bodyParser.urlencoded({ extended: true }));
-        this._router.use(bodyParser.json());
-        this._router.use(cors());
 
         this._router.get(
             "/canCreateMatch",
@@ -158,7 +147,7 @@ export default class GameRoutes extends RoutesBase {
         this._router.post(
             "/closePendingMatch" + "/:" + RoutingParamKeys.pendingMatchId,
             this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
+            async (request: express.Request, response: express.Response) => {
 
                 if (!request.user) {
                     response.status(httpStatusCodes.NETWORK_AUTHENTICATION_REQUIRED);
@@ -175,40 +164,31 @@ export default class GameRoutes extends RoutesBase {
                     _id: new mongoose.Types.ObjectId(request.params[RoutingParamKeys.pendingMatchId])
                 } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>;
 
-                PendingMatch
-                    .getModel()
-                    .findOne(pendingMatchCriteria)
-                    .then((pendingMatch) => {
+                const pendingMatch = await PendingMatch.getModel().findOne(pendingMatchCriteria).exec();
 
-                        if (pendingMatch) {
-                            pendingMatch
-                                .remove()
-                                .then(result => {
-                                    responseData = new net.HttpMessage(true);
-                                    response
-                                        .status(httpStatusCodes.OK)
-                                        .json(responseData);
-                                })
-                                .catch((error: mongodb.MongoError) => {
-                                    responseData = new net.HttpMessage(false, error.message);
-                                    response
-                                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                        .json(responseData);
-                                });
-                        }
-                        else {
-                            responseData = new net.HttpMessage(false, "Requested PendingMatch not found");
-                            response
-                                .status(httpStatusCodes.NOT_FOUND)
-                                .json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage(false, error.message);
+                if (pendingMatch) {
+                    const removedPendingMatch = await pendingMatch.remove();
+
+                    if (removedPendingMatch) {
+                        responseData = new net.HttpMessage(true);
+                        response
+                            .status(httpStatusCodes.OK)
+                            .json(responseData);
+
+                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                    }
+                    else {
+                        responseData = new net.HttpMessage(false, "Could not delete pending match");
                         response
                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
-                    });
+                    }
+                } else {
+                    responseData = new net.HttpMessage(false, "Requested PendingMatch not found");
+                    response
+                        .status(httpStatusCodes.NOT_FOUND)
+                        .json(responseData);
+                }
             }
         );
 
@@ -216,7 +196,7 @@ export default class GameRoutes extends RoutesBase {
         this._router.post(
             "/joinPendingMatch/:" + RoutingParamKeys.pendingMatchId,
             this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
+            async (request: express.Request, response: express.Response) => {
 
                 let responseData: net.HttpMessage<string> = null;
 
@@ -230,94 +210,96 @@ export default class GameRoutes extends RoutesBase {
                     return;
                 }
 
-                PendingMatch.getModel()
-                    .findById(pendingMatchId)
-                    .then((pendingMatch) => {
+                const pendingMatch = await PendingMatch.getModel().findById(pendingMatchId).exec();
 
-                        console.log(chalk.green("Pending match identified"));
+                if (!PendingMatch) {
+                    console.log(chalk.red("Could not find requested pending match"));
+                    responseData = new net.HttpMessage(null, "Unable to find requested pending match.");
+                    response
+                        .status(httpStatusCodes.NOT_FOUND)
+                        .json(responseData);
+                    return;
+                }
 
-                        const jwtUser = (request.user as DTOs.IUserJWTData);
-                        const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
+                console.log(chalk.green("Pending match identified"));
 
-                        // ensure the pending match is not trying to be joined by the same player who created it
-                        if (pendingMatch.PlayerId.equals(jwtUserObjectId)) {
-                            responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
-                            response
-                                .status(httpStatusCodes.FORBIDDEN)
-                                .json(responseData);
+                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
-                            return;
-                        }
+                // ensure the pending match is not trying to be joined by the same player who created it
+                if (pendingMatch.PlayerId.equals(jwtUserObjectId)) {
+                    responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
+                    response
+                        .status(httpStatusCodes.FORBIDDEN)
+                        .json(responseData);
 
-                        pendingMatch.remove()
-                            .then((deletedPendingMatch) => {
+                    return;
+                }
 
-                                console.log(chalk.green("PendingMatch (id: " + deletedPendingMatch._id.toHexString() + ") deleted"));
+                const removedPendingMatch = await pendingMatch.remove();
+                if (!removedPendingMatch) {
+                    responseData = new net.HttpMessage(null, "Could not delete pending match.");
+                    response
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
+                    return;
+                }
 
-                                const newMatchSkel = {
-                                    FirstPlayerSide: {
-                                        PlayerId: pendingMatch.PlayerId
-                                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
-                                    SecondPlayerSide: {
-                                        PlayerId: jwtUserObjectId
-                                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
-                                    Settings: {
-                                        // TODO: use default settings
-                                        MinShipsDistance: 2,
-                                        BattleFieldHeight: 10,
-                                        BattleFieldWidth: 10,
-                                        AvailableShips: [
-                                            { ShipType: game.ShipType.Destroyer, Count: 4 },
-                                            { ShipType: game.ShipType.Submarine, Count: 2 },
-                                            { ShipType: game.ShipType.Battleship, Count: 2 },
-                                            { ShipType: game.ShipType.Carrier, Count: 1 } as ShipTypeAvailability.IMongooseShipTypeAvailability
-                                        ] as ReadonlyArray<IMongooseShipTypeAvailability>
-                                    } as MatchSettings.IMongooseMatchSettings
-                                } as Match.IMongooseMatch;
+                console.log(chalk.green("PendingMatch (id: " + removedPendingMatch._id.toHexString() + ") deleted"));
 
-                                Match
-                                    .create(newMatchSkel)
-                                    .save()
-                                    .then((createdMatch) => {
+                const newMatchSkel = {
+                    FirstPlayerSide: {
+                        PlayerId: pendingMatch.PlayerId
+                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
+                    SecondPlayerSide: {
+                        PlayerId: jwtUserObjectId
+                    } as MatchPlayerSide.IMongooseMatchPlayerSide,
+                    Settings: {
+                        // TODO: use default settings
+                        MinShipsDistance: 2,
+                        BattleFieldHeight: 10,
+                        BattleFieldWidth: 10,
+                        AvailableShips: [
+                            { ShipType: game.ShipType.Destroyer, Count: 4 },
+                            { ShipType: game.ShipType.Submarine, Count: 2 },
+                            { ShipType: game.ShipType.Battleship, Count: 2 },
+                            { ShipType: game.ShipType.Carrier, Count: 1 } as ShipTypeAvailability.IMongooseShipTypeAvailability
+                        ] as ReadonlyArray<IMongooseShipTypeAvailability>
+                    } as MatchSettings.IMongooseMatchSettings
+                } as Match.IMongooseMatch;
 
-                                        const matchHexId = createdMatch._id.toHexString();
-                                        console.log(chalk.green("New match created (id: " + matchHexId + ")"));
+                const match = await Match.create(newMatchSkel).save();
+                if (!match) {
+                    console.log(chalk.red("SHITSTORM: PendingMatch found & deleted BUT couldn't create the Match D:"));
 
-                                        this._socketIOServer.emit(ServiceEventKeys.MatchReady, { MatchId: matchHexId } as DTOs.IMatchReadyEventDto);
+                    responseData = new net.HttpMessage(null, "PendingMatch deleted but couldn't create the Match D:");
+                    response
+                        .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        .json(responseData);
+                    return;
+                }
 
-                                        responseData = new net.HttpMessage(matchHexId);
-                                        response
-                                            .status(httpStatusCodes.CREATED)
-                                            .json(responseData);
-                                    })
-                                    // error when creating the match
-                                    .catch((error: mongodb.MongoError) => {
+                const matchHexId = match._id.toHexString();
+                console.log(chalk.green("New match created (id: " + matchHexId + ")"));
 
-                                        console.log(chalk.red("SHITSTORM: PendingMatch found & deleted BUT couldn't create the Match D:"));
+                console.log("Deleted pending match: " + removedPendingMatch.id);
+                console.log("Created match: " + match.id);
 
-                                        responseData = new net.HttpMessage(null, "PendingMatch deleted but couldn't create the real Match! Reason: " + error.message);
-                                        response
-                                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                            .json(responseData);
-                                    });
-                            })
-                            // couldn't delete pending match
-                            .catch((error: mongodb.MongoError) => {
-                                responseData = new net.HttpMessage(null, error.message);
-                                response
-                                    .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                                    .json(responseData);
-                            });
-                    })
-                    // if the provided id for the pending match to join is not found
-                    .catch((error: mongodb.MongoError) => {
+                this._socketIOServer.emit(
+                    ServiceEventKeys.pendingMatchJoined(
+                        pendingMatch.PlayerId.toHexString(),
+                        pendingMatch._id.toHexString())
+                    , {
+                        PendingMatchId: pendingMatch._id.toHexString(),
+                        MatchId: matchHexId
+                    } as DTOs.IPendingMatchJoinedEventDto);
 
-                        console.log(chalk.red("Could not find requested pending match"));
-                        responseData = new net.HttpMessage(null, "Unable to find requested pending match. Reason: " + error.message);
-                        response
-                            .status(httpStatusCodes.NOT_FOUND)
-                            .json(responseData);
-                    });
+                //this._socketIOServer.emit(ServiceEventKeys.PendingMatchJoined, { MatchId: matchHexId } as DTOs.IMatchReadyEventDto);
+
+                responseData = new net.HttpMessage(matchHexId);
+                response
+                    .status(httpStatusCodes.CREATED)
+                    .json(responseData);
             }
         );
 
@@ -504,8 +486,12 @@ export default class GameRoutes extends RoutesBase {
                 const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
+                const userModel = User.getModel();
+
                 Match.getModel()
                     .findById(matchObjectId)
+                    .populate({ path: "FirstPlayerSide.PlayerId", model: userModel })
+                    .populate({ path: "SecondPlayerSide.PlayerId", model: userModel })
                     .then(match => {
 
                         if (!match) {
@@ -519,11 +505,13 @@ export default class GameRoutes extends RoutesBase {
                         if (ownSide) {
 
                             const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
+                            const enemy = enemySide.PlayerId as any as User.IMongooseUser;
                             const ownSideMatchStatusDto = {
                                 IsConfigNeeded: !ownSide.isConfigured(match.Settings),
                                 IsMatchStarted: match.StartDateTime != null,
-                                EnemyId: enemySide.PlayerId.toHexString(),
-                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId)
+                                Enemy: { Id: enemy._id.toHexString(), Username: enemy.Username },
+                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId),
+                                DoIOwnMove: match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId)
                             } as DTOs.IOwnSideMatchStatus;
 
                             responseData = new net.HttpMessage(ownSideMatchStatusDto);
@@ -714,13 +702,10 @@ export default class GameRoutes extends RoutesBase {
                                     IsResigned: false
                                 } as DTOs.IMatchEndedEventDto;
 
-                                this._socketIOServer.emit(
-                                    ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded),
-                                    mee
-                                );
-                                this._socketIOServer.emit(
-                                    ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded),
-                                    mee);
+                                let matchEndedEventKey = ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded);
+                                this._socketIOServer.emit(matchEndedEventKey, mee);
+                                matchEndedEventKey = ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded);
+                                this._socketIOServer.emit(matchEndedEventKey, mee);
                             }
                         }
                         catch (ex) {

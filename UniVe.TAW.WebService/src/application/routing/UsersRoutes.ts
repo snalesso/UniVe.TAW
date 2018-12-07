@@ -26,17 +26,9 @@ import ServiceEventKeys from '../services/ServiceEventKeys';
 
 export default class UsersRoutes extends RoutesBase {
 
-    private readonly _jwtValidator: expressJwt.RequestHandler;
-
     public constructor(socketIOServer: socketio.Server) {
 
         super(socketIOServer);
-
-        this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
-
-        this._router.use(bodyParser.urlencoded({ extended: true }));
-        this._router.use(bodyParser.json());
-        this._router.use(cors());
 
         this._router.post(
             '/signup',
