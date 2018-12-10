@@ -1,0 +1,75 @@
+<div class="container" style="width: 400px; margin-top: 20px;">
+
+  <form class="signup-form">
+
+    <div class="form-group">
+      <input type="text" #username="ngModel" required name="username" [(ngModel)]="SignupRequest.Username" class="form-control"
+        id="signup-form-username" placeholder="Username">
+    </div>
+
+    <div [hidden]="username.valid || (!username.dirty && !username.touched)" class="alert alert-danger">
+      Username is required
+    </div>
+
+    <!-- <div class="form-group">
+      <input type="email"  name="mail" [(ngModel)]="SignupRequest.Email" pattern="[^@\s]+@[^@\s]+\.[^@\s]+" class="form-control"
+        required id="signup-form-email" aria-describedby="signup-form-email-help" placeholder="Email">
+    </div>
+
+    <div [hidden]="mail.valid || mail.pristine" class="alert alert-danger">
+      Mail is not valid
+    </div> -->
+
+    <div class="form-group">
+      <input type="password" #password="ngModel" required name="password" [(ngModel)]="SignupRequest.Password" class="form-control"
+        id="signup-form-password" placeholder="Password">
+    </div>
+
+    <div class="form-group">
+      <input type="password" #passwordRepeated="ngModel" required name="passwordRepeated" [(ngModel)]="RepeatedPassword"
+        class="form-control" id="signup-form-password-repeated" placeholder="Repeat password">
+    </div>
+
+    <div [hidden]="password.valid || (!password.dirty && !password.touched)" class="alert alert-danger">
+      Password is required
+    </div>
+    <div [hidden]="(password.value === passwordRepeated.value) || (!password.dirty && !password.touched) || (!passwordRepeated.dirty && !passwordRepeated.touched)"
+      class="alert alert-danger">
+      Passwords do not match
+    </div>
+
+    <div class="form-group">
+      <input type="date" #birthDate="ngModel" name="birthDate" [(ngModel)]="SignupRequest.BirthDate" class="form-control"
+        id="signup-form-birthDate" placeholder="Birth date">
+    </div>
+
+    <!-- <div [hidden]="birthDate.valid || (!birthDate.dirty && !birthDate.touched)" class="alert alert-danger">
+      Birth date is required
+    </div> -->
+
+    <div class="form-group">
+      <!-- <input type="" #country="ngModel" placeholder="Country"> -->
+      <select class="form-control" id="signup-form-countryId" name="country">
+        <option *ngFor="let country of Countries; index as i;" [attr.selected]="i == SignupRequest.CountryId ? true : null"
+          [value]="country.id">{{country.name}}</option>
+      </select>
+    </div>
+
+    <div *ngIf="ResponseError" class="alert alert-danger" role="alert">
+      Login error: {{ResponseError}}
+    </div>
+
+    <br>
+
+    <button class="btn btn-lg btn-primary btn-block" [disabled]="!canSendSignupRequest" (click)="sendSignupRequest()">Sign
+      up</button>
+  </form>
+
+  <hr>
+
+  <div>
+    <p>Already have an account?
+      <a routerLink="/login">Login here!</a>
+    </p>
+  </div>
+</div>

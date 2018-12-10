@@ -1,0 +1,36 @@
+<div class="container">
+
+  <div class="row justify-content-center" *ngIf="HasPendingMatchOpen">
+
+    <!-- <h1>Waiting for a challenger ...!</h1> -->
+
+    <button class="btn btn-warning btn-block" [disabled]="IsBusy || !HasPendingMatchOpen" (click)="closePendingMatch()">Stop
+      waiting</button>
+
+  </div>
+
+  <div class="row justify-content-center" *ngIf="CanCreateMatch">
+
+    <button class="btn btn-primary btn-block" [disabled]="IsBusy || !CanCreateMatch" (click)="createPendingMatch()">Wait
+      for a challenger</button>
+
+  </div>
+
+  <div class="row justify-content-center" *ngIf="AreThereJoinableMatches">
+    <h3>... or choose your opponent!</h3>
+  </div>
+
+  <div class="row justify-content-center" *ngIf="AreThereJoinableMatches">
+
+    <div class="card w-100" *ngFor="let jm of JoinableMatches">
+      <div class="card-body">
+        <h5 class="card-title">{{jm.Creator.Username}}</h5>
+        <p class="card-text">{{jm.Creator.Age}} year{{jm.Creator.Age > 1 ? 's' : ''}} from
+          {{getCountryName(jm.Creator.CountryId)}}</p>
+        <button class="btn btn-success" [disabled]="IsBusy" (click)="joinMatch(jm.Id)">Challenge!</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>

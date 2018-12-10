@@ -5,3 +5,50 @@ html, body {
 
   height: 100%;
 }
+.bf-grid {
+  border: 1px solid black;
+  height: 100%;
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 350px;
+}
+.bf-grid-disabled {
+  opacity: .42;
+}
+.bf-grid-cell {
+  border: 1px solid black;
+}
+.bf-grid-cell-unknown {
+  background-color: white;
+  cursor: pointer;
+}
+.bf-grid-cell-ship {
+  background-color: #888;
+}
+.bf-grid-cell-water {
+  background-color: rgb(188, 228, 255); /*#0066ff;*/
+}
+.bf-grid-cell-hitship {
+  background-color: #cc0000;
+}
+.bf-grid-disabled > .bf-grid-cell {    
+  cursor: default !important;
+}
+.bf-grid-cell-disabled {    
+  cursor: default !important;
+}
+.chat-text-own {
+  color: royalblue;
+}
+.chat-text-enemy {
+  color: #cc0000;
+}
+.not-clickable{
+  cursor: default !important;
+}
+.winner-text{
+  color: #00964b !important;
+}
+.loser-text{
+  color: #cc0000 !important;
+}

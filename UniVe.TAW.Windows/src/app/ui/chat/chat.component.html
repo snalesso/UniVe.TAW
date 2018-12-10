@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="row">
+
+    <div class="col-md-3">
+      <div class="mb-2">
+        <app-chat-list-entry *ngFor="let chat of Chats" [IsSelected]="chat == SelectedChat" [Chat]="chat" (click)="OpenChat(chat)"></app-chat-list-entry>
+      </div>
+    </div>
+
+    <div class="col-md-9" *ngIf="SelectedChat">
+
+      <div class="row">
+        <div class="col">
+          <h4 class="text-center">Chat with <a routerLink="/users/{{SelectedChat.Interlocutor.Id}}">{{SelectedChat.Interlocutor.Username}}</a></h4>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <app-chat-messages [Messages]="SelectedChat.Messages" [Reverse]="false"></app-chat-messages>
+        </div>
+      </div>
+
+      <div class="row align-items-end">
+        <div class="col">
+          <app-chat-form [InterlocutorId]="SelectedChat.Interlocutor.Id" (WhenMessageIsSent)="handleWhenChatFormMessageIsSent($event)"></app-chat-form>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

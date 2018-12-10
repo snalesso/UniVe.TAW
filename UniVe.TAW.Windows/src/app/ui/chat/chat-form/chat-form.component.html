@@ -1,0 +1,6 @@
+<div class="input-group">
+  <input type="text" class="form-control" aria-label="Your message" [(ngModel)]="MessageText" (keydown.enter)="sendMessage()">
+  <div class="input-group-append">
+    <button class="btn btn-success" type="button" (click)="sendMessage()" [disabled]="!CanSendMessage">Send</button>
+  </div>
+</div>
