@@ -3,7 +3,7 @@ import * as ngHttp from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import { IdentityService } from '../../../../services/identity.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from '../../../../services/auth.service';
 import * as game from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import { IdentityService } from '../../../../services/identity.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from '../../../../services/auth.service';
 import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';

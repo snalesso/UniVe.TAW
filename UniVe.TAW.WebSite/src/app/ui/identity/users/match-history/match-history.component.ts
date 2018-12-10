@@ -11,8 +11,8 @@ import { AuthService } from '../../../../services/auth.service';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
-import { ChatService } from 'src/app/services/chat.service';
-import { IdentityService } from 'src/app/services/identity.service';
+import { ChatService } from '../../../../services/chat.service';
+import { IdentityService } from '../../../../services/identity.service';
 
 @Component({
   selector: 'app-match-history',

@@ -11,7 +11,7 @@ import { AuthService } from '../../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/imported/unive.taw.webservice/application/services/ServiceEventKeys';
-import { ChatService } from 'src/app/services/chat.service';
+import { ChatService } from '../../../../services/chat.service';
 
 @Component({
   selector: 'app-match-chat',

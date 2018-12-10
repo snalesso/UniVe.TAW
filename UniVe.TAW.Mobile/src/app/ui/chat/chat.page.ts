@@ -10,9 +10,9 @@ import * as utils from '../../../assets/scripts/unive.taw.webservice/infrastruct
 import * as ngHttp from '@angular/common/http';
 import ServiceEventKeys from '../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
 import { Subscription, Observable, Subject } from 'rxjs';
-import { AuthService } from 'src/app/services/auth.service';
-import { IdentityService } from 'src/app/services/identity.service';
-import { ChatService } from 'src/app/services/chat.service';
+import { AuthService } from '../../services/auth.service';
+import { IdentityService } from '../../services/identity.service';
+import { ChatService } from '../../services/chat.service';
 import { Tabs, Content } from '@ionic/angular';
 import * as ngxSocketIO from 'ngx-socket-io';
 

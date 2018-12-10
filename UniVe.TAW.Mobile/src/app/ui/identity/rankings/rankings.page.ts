@@ -11,9 +11,9 @@ import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
 import { Subscription } from 'rxjs';
-import { AuthService } from 'src/app/services/auth.service';
-import { IdentityService } from 'src/app/services/identity.service';
-import ViewsRoutingKeys from 'src/app/ViewsRoutingKeys';
+import { AuthService } from '../../../services/auth.service';
+import { IdentityService } from '../../../services/identity.service';
+import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-rankings',

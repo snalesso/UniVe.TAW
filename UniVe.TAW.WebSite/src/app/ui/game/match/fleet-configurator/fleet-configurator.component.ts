@@ -6,9 +6,7 @@ import * as game_client from '../../../../../assets/imported/unive.taw.webservic
 import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as DTOs from '../../../../../assets/imported/unive.taw.webservice/application/DTOs';
-//import * as interactjs from 'interactjs';
 import * as utils from '../../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
-import * as $ from 'jquery';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as httpStatusCodes from 'http-status-codes';
 import { AuthService } from '../../../../services/auth.service';

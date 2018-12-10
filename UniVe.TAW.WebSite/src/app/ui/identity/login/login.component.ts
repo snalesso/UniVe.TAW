@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import * as jwt_decode from 'jwt-decode';
 import * as httpStatusCodes from 'http-status-codes';
-import 'jquery';
 
 import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
