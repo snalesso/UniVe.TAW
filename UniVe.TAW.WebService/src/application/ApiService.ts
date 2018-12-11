@@ -86,29 +86,33 @@ export default class ApiService {
                 async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    await DBUtils.deleteEverything();
+                    // await DBUtils.deleteEverything();
 
-                    await DBUtils.generateFakeData(
-                        [
-                            "Daedalus",
-                            "Horus",
-                            "Osiride",
-                            "Anubi",
-                            "Pippo",
-                            "Pluto",
-                            "Puffetta",
-                            "Paperino",
-                            "Minnie",
-                            "Topolino",
-                            "Bambee",
-                            "Cenerentola",
-                            "TrollKing",
-                            "Furfante",
-                            "Canaglia",
-                            "Farabutto"
-                        ],
-                        20,
-                        false);
+                    // await DBUtils.generateFakeData(
+                    //     [
+                    //         // admin
+                    //         "Daedalus",
+                    //         // mods
+                    //         "Horus",
+                    //         "Osiride",
+                    //         "Anubi",
+                    //         // players
+                    //         "Pippo",
+                    //         "Pluto",
+                    //         "Puffetta",
+                    //         "Paperino",
+                    //         "Minnie",
+                    //         "Topolino",
+                    //         "Bambee",
+                    //         "Cenerentola",
+                    //         // bannable
+                    //         "TrollKing",
+                    //         "Furfante",
+                    //         "Canaglia",
+                    //         "Farabutto"
+                    //     ],
+                    //     20,
+                    //     false);
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();
@@ -160,14 +164,6 @@ export default class ApiService {
 
     private ConfigRoutes() {
         console.log("Configuring routes ...");
-
-        this._expressApp.get(
-            '/diocane',
-            (request: express.Request, response: express.Response) => {
-                response
-                    .status(httpStatusCodes.OK)
-                    .json("diocane");
-            });
 
         this._expressApp.use('/users', this._usersRoutes.Router);
         this._expressApp.use('/auth', this._authRoutes.Router);
