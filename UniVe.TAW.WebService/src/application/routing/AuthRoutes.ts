@@ -1,4 +1,5 @@
 import * as http from 'http';
+import * as https from 'https';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as httpStatusCodes from 'http-status-codes';
@@ -32,12 +33,12 @@ export default class GameRoutes extends RoutesBase {
             (username, password, done) => {
                 console.log(chalk.yellow("Passport validating credentials ... "));
 
-                const criteria = {} as utils.Mutable<User.IMongooseUser>;
-                criteria.Username = username;
+                const criteria = { Username: username } as utils.Mutable<User.IMongooseUser>;
+
                 User.getModel()
                     .findOne(criteria, (error, user: User.IMongooseUser) => {
                         if (error) {
-                            return done({ statusCode: http.STATUS_CODES.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
+                            return done({ statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
                         }
                         if (!user) {
                             return done({ statusCode: httpStatusCodes.UNAUTHORIZED, error: true, errormessage: "Invalid user" });
@@ -45,7 +46,7 @@ export default class GameRoutes extends RoutesBase {
                         if (user.validatePassword(password)) {
                             return done(null, user);
                         }
-                        return done({ statusCode: http.STATUS_CODES.UNAUTHORIZED, error: true, errormessage: "Invalid password" });
+                        return done({ statusCode: httpStatusCodes.UNAUTHORIZED, error: true, errormessage: "Invalid password" });
                     });
             }
         ));
