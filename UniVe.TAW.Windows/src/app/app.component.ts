@@ -5,6 +5,10 @@ import { AppConfig } from '../environments/environment';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
 import * as ngxSocketIO from 'ngx-socket-io';
+import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
+import ViewsRoutingKeys from './ViewsRoutingKeys';
+import * as moment from 'moment'
 
 @Component({
   selector: 'app-root',
@@ -12,22 +16,60 @@ import * as ngxSocketIO from 'ngx-socket-io';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+
   constructor(
-    public electronService: ElectronService,
-    private translate: TranslateService,
+    public _electronService: ElectronService,
+    private _translate: TranslateService,
     private readonly _router: Router,
     private readonly _socketIOService: ngxSocketIO.Socket,
     private readonly _authService: AuthService) {
 
-    translate.setDefaultLang('en');
+    this._translate.setDefaultLang('en');
     console.log('AppConfig', AppConfig);
 
-    if (electronService.isElectron()) {
+    if (this._electronService.isElectron()) {
       console.log('Mode electron');
-      console.log('Electron ipcRenderer', electronService.ipcRenderer);
-      console.log('NodeJS childProcess', electronService.childProcess);
+      console.log('Electron ipcRenderer', this._electronService.ipcRenderer);
+      console.log('NodeJS childProcess', this._electronService.childProcess);
     } else {
       console.log('Mode web');
     }
+
+    if (this._authService.IsLogged) {
+
+      this._socketIOService.once(
+        ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.BanUpdated),
+        (userBannedUntil: Date) => {
+          console.log("BanUpdated received");
+          if (userBannedUntil) {
+            this._authService.logout();
+            alert("You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss"));
+            this._router.navigate([ViewsRoutingKeys.Root]);
+          }
+        });
+      console.log("subscribed to BanUpdated");
+
+      this._socketIOService.once(
+        ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted),
+        () => {
+          console.log("UserDeleted received");
+          this._authService.logout();
+          //alert("Your account has been deleted!");
+          this._router.navigate([ViewsRoutingKeys.Root]);
+        });
+      console.log("subscribed to UserDeleted");
+
+      this._socketIOService.once(
+        ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated),
+        (newRole: identity.UserRoles) => {
+          console.log("RolesUpdated received");
+          location.reload();
+        });
+      console.log("subscribed to RolesUpdated");
+    }
   }
+
+  private _isLogged: boolean;
+  public get IsLogged() { return this._authService.IsLogged; }
+
 }

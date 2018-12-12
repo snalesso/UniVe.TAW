@@ -19,10 +19,10 @@ import { ChatComponent } from './ui/chat/chat.component';
 import RoutingParamKeys from '../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 
 const routes: Routes = [
-    {
-        path: '',
-        component: HomeComponent
-    },
+    // {
+    //     path: '',
+    //     component: HomeComponent
+    // },
     { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
     { path: ViewsRoutingKeys.Signup, component: SignupComponent },
     { path: ViewsRoutingKeys.Login, component: LoginComponent },
@@ -43,10 +43,7 @@ const routes: Routes = [
     // },
     { path: ViewsRoutingKeys.Rankings, component: RankingsComponent },
     {
-        path: RoutingHelper.buildRoute([
-            new RouteStep(ViewsRoutingKeys.Users),
-            new RouteParam(RoutingParamKeys.userId)
-        ]),
+        path: 'users/:userId',
         component: ProfileComponent
     },
     {
@@ -59,7 +56,7 @@ const routes: Routes = [
 
 @NgModule({
     imports: [
-        RouterModule.forRoot(routes, { useHash: true }),
+        RouterModule.forRoot(routes, { useHash: false }),
         SocketIoModule.forRoot({ url: ServiceConstants.ServerAddress, options: {} })
     ],
     exports: [RouterModule]

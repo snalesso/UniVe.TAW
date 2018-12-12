@@ -9,11 +9,10 @@
         "LOST"}}</span>
       <!-- <a href="/users/{{ems.FirstPlayer.Id}}" [ngClass]="ems.WinnerId == ems.FirstPlayer.Id ? 'winner-text' : 'loser-text'">{{ems.FirstPlayer.Username}}</a> -->
       <span> VS </span>
-      <a routerLink="../../chat" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
+      <a href="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
         == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</a>
       <span *ngIf="!(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
         == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</span>
-      <span> {{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}</span>
     </h5>
     <p class="card-text">{{ems.EndDateTime | date: 'dd/MM/yy HH:mm:ss'}}</p>
   </div>
