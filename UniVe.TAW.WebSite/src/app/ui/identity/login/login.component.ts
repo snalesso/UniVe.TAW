@@ -4,7 +4,7 @@ import { AuthService } from '../../../services/auth.service';
 import * as jwt_decode from 'jwt-decode';
 import * as httpStatusCodes from 'http-status-codes';
 
-import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { HttpErrorResponse } from '@angular/common/http';

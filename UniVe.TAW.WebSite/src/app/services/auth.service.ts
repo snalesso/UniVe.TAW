@@ -2,9 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import * as ng_http from '@angular/common/http';
 import * as jwt_decode from 'jwt-decode';
 
-import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as identity from '../../assets/imported/unive.taw.webservice/infrastructure/identity';
-import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
+import * as DTOs from '../../assets/unive.taw.webservice/application/DTOs';
+import * as identity from '../../assets/unive.taw.webservice/infrastructure/identity';
+import * as net from '../../assets/unive.taw.webservice/infrastructure/net';
 import ServiceConstants from './ServiceConstants';
 
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';

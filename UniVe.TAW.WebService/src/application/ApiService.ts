@@ -120,9 +120,6 @@ export default class ApiService {
                     this._socketIOServer.on(
                         "connection",
                         (clientSocket) => {
-                            clientSocket.emit(ServiceEventKeys.WhoAreYou, (response) => { });
-
-                            clientSocket.emit("ciao", { data: 3232 });
                             console.log("Socket.io connection from " + clientSocket.id);
                             clientSocket.on("disconnect", (data) => console.log("Socket.io disconnection from " + clientSocket.id));
                         });
@@ -167,7 +164,7 @@ export default class ApiService {
 
         this._expressApp.use('/users', this._usersRoutes.Router);
         this._expressApp.use('/auth', this._authRoutes.Router);
-        this._expressApp.use('/matches', this._gameRoutes.Router); // TODO: rename to /game?
+        this._expressApp.use('/game', this._gameRoutes.Router);
         this._expressApp.use('/chat', this._chatRoutes.Router);
     }
 }

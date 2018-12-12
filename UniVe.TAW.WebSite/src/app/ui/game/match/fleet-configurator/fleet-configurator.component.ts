@@ -1,12 +1,12 @@
 import { Component, OnInit, Output, EventEmitter, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
-import * as game from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game';
-import * as game_client from '../../../../../assets/imported/unive.taw.webservice/infrastructure/game.client';
+import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
+import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
-import RoutingParamKeys from '../../../../../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as utils from '../../../../../assets/imported/unive.taw.webservice/infrastructure/utils';
+import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
+import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as httpStatusCodes from 'http-status-codes';
 import { AuthService } from '../../../../services/auth.service';

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as ng_http from '@angular/common/http';
 
-import * as DTOs from '../../assets/scripts/unive.taw.webservice/application/DTOs';
-import * as net from '../../assets/scripts/unive.taw.webservice/infrastructure/net';
-import * as game from '../../assets/scripts/unive.taw.webservice/infrastructure/game';
-import * as game_client from '../../assets/scripts/unive.taw.webservice/infrastructure/game.client';
-import * as identity from '../../assets/scripts/unive.taw.webservice/infrastructure/identity';
+import * as DTOs from '../../assets/unive.taw.webservice/application/DTOs';
+import * as net from '../../assets/unive.taw.webservice/infrastructure/net';
+import * as game from '../../assets/unive.taw.webservice/infrastructure/game';
+import * as game_client from '../../assets/unive.taw.webservice/infrastructure/game.client';
+import * as identity from '../../assets/unive.taw.webservice/infrastructure/identity';
 import ServiceConstants from './ServiceConstants';
 
 //import * as $ from 'jquery';

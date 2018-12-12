@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { AuthService } from '../../../services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import * as DTOs from '../../../../assets/scripts/unive.taw.webservice/application/DTOs';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 
 @Component({
   selector: 'app-login',

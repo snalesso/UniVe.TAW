@@ -1,16 +1,16 @@
 import { Component, OnInit, Input, Output, OnDestroy, ViewChild } from '@angular/core';
 import { GameService } from '../../../services/game.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import RoutingParamKeys from '../../../../assets/scripts/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as game_client from '../../../../assets/scripts/unive.taw.webservice/infrastructure/game.client';
+import RoutingParamKeys from '../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
+import * as game_client from '../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
-import * as DTOs from '../../../../assets/scripts/unive.taw.webservice/application/DTOs';
-import * as net from '../../../../assets/scripts/unive.taw.webservice/infrastructure/net';
-import * as game from '../../../../assets/scripts/unive.taw.webservice/infrastructure/game';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
+import * as game from '../../../../assets/unive.taw.webservice/infrastructure/game';
 import { AuthService } from '../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import { ToastController, Tabs, AlertController } from '@ionic/angular';
 
 @Component({

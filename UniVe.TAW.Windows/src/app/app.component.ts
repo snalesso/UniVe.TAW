@@ -17,6 +17,10 @@ import * as moment from 'moment'
 })
 export class AppComponent {
 
+  private _accountBannedEventKey: string;
+  private _accountDeletedEventKey: string;
+  private _accountRolesUpdatedEventKey: string;
+
   constructor(
     public _electronService: ElectronService,
     private _translate: TranslateService,
@@ -34,6 +38,12 @@ export class AppComponent {
     } else {
       console.log('Mode web');
     }
+  }
+
+  private _isLogged: boolean;
+  public get IsLogged() { return this._authService.IsLogged; }
+
+  private activateSubscriptions() {
 
     if (this._authService.IsLogged) {
 
@@ -69,7 +79,28 @@ export class AppComponent {
     }
   }
 
-  private _isLogged: boolean;
-  public get IsLogged() { return this._authService.IsLogged; }
+  private removeSubscriptions() {
+
+    if (this._accountBannedEventKey) {
+      this._socketIOService.removeListener(this._accountBannedEventKey);
+      this._accountBannedEventKey = null;
+    }
+    if (this._accountDeletedEventKey) {
+      this._socketIOService.removeListener(this._accountDeletedEventKey);
+      this._accountDeletedEventKey = null;
+    }
+    if (this._accountRolesUpdatedEventKey) {
+      this._socketIOService.removeListener(this._accountRolesUpdatedEventKey);
+      this._accountRolesUpdatedEventKey = null;
+    }
+  }
+
+  ngOnInit(): void {
+    this.activateSubscriptions();
+  }
+
+  ngOnDestroy(): void {
+    this.removeSubscriptions();
+  }
 
 }

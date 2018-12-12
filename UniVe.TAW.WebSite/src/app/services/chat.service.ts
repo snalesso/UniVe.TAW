@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as ng_http from '@angular/common/http';
 
-import * as DTOs from '../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as net from '../../assets/imported/unive.taw.webservice/infrastructure/net';
-//import * as chat from '../../assets/imported/unive.taw.webservice/infrastructure/chat';
-// import * as game from '../../assets/imported/unive.taw.webservice/infrastructure/game';
-// import * as game_client from '../../assets/imported/unive.taw.webservice/infrastructure/game.client';
+import * as DTOs from '../../assets/unive.taw.webservice/application/DTOs';
+import * as net from '../../assets/unive.taw.webservice/infrastructure/net';
+//import * as chat from '../../assets/unive.taw.webservice/infrastructure/chat';
+// import * as game from '../../assets/unive.taw.webservice/infrastructure/game';
+// import * as game_client from '../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from './ServiceConstants';
 import * as ngxSocketIO from 'ngx-socket-io';
 

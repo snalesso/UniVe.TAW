@@ -4,7 +4,7 @@ import { AuthService } from '../../../services/auth.service';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
-import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 

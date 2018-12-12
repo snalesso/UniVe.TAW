@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 //import { Router } from '@angular/router';
 //import { NavController } from 'ionic-angular';
 
-import * as DTOs from '../../../../assets/scripts/unive.taw.webservice/application/DTOs';
-import * as identity from '../../../../assets/scripts/unive.taw.webservice/infrastructure/identity';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 //import ViewsRoutingKeys from '../../../presentation/ViewsRoutingKeys';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';

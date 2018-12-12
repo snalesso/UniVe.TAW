@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import * as $ from 'jquery';
 
-import * as DTOs from '../../../../assets/imported/unive.taw.webservice/application/DTOs';
-import * as identity from '../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
 @Component({

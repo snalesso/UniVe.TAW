@@ -4,16 +4,16 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import { IdentityService } from '../../../../services/identity.service';
 import { AuthService } from '../../../../services/auth.service';
-import * as game from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/game';
-import * as game_client from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/game.client';
+import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
+import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
-import RoutingParamKeys from '../../../../../assets/scripts/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../../assets/scripts/unive.taw.webservice/application/DTOs';
-import * as utils from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/utils';
+import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
+import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import BanOption from './BanOption';
-import * as identity from '../../../../../assets/scripts/unive.taw.webservice/infrastructure/identity';
+import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import UserRole from './UserRole';
 
 @Component({

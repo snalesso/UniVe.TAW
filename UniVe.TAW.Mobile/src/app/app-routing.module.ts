@@ -6,7 +6,7 @@ import { SignupPage } from './ui/identity/signup/signup.page';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import ServiceConstants from './services/ServiceConstants';
 import { RoutingHelper, RouteStep, RouteParam } from './Routing';
-import RoutingParamKeys from '../assets/scripts/unive.taw.webservice/application/routing/RoutingParamKeys';
+import RoutingParamKeys from '../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 
 const routes: Routes = [
   { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },

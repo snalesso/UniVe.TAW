@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { Platform, AlertController } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
@@ -7,15 +7,15 @@ import { Router } from '@angular/router';
 import * as ngxSocketIO from 'ngx-socket-io';
 import { AuthService } from './services/auth.service';
 import * as moment from 'moment';
-import ServiceEventKeys from '../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
-import * as identity from '../assets/scripts/unive.taw.webservice/infrastructure/identity';
+import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
 import ViewsRoutingKeys from './ViewsRoutingKeys';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html'
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnInit, OnDestroy {
 
   private _accountBannedEventKey: string;
   private _accountDeletedEventKey: string;
@@ -113,6 +113,10 @@ export class AppComponent implements OnDestroy {
       this._socketIOService.removeListener(this._accountRolesUpdatedEventKey);
       this._accountRolesUpdatedEventKey = null;
     }
+  }
+
+  ngOnInit(): void {
+    this.activateSubscriptions();
   }
 
   ngOnDestroy(): void {

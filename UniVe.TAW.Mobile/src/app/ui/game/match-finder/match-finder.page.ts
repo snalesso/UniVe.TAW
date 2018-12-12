@@ -3,15 +3,15 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
 
-import * as DTOs from '../../../../assets/scripts/unive.taw.webservice/application/DTOs';
-import * as identity from '../../../../assets/scripts/unive.taw.webservice/infrastructure/identity';
-import * as utils from '../../../../assets/scripts/unive.taw.webservice/infrastructure/utils';
+import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
+import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
-import { Country } from '../../../../assets/scripts/unive.taw.webservice/infrastructure/identity';
-import * as game from '../../../../assets/scripts/unive.taw.webservice/infrastructure/game';
+import { Country } from '../../../../assets/unive.taw.webservice/infrastructure/identity';
+import * as game from '../../../../assets/unive.taw.webservice/infrastructure/game';
 import * as http from '@angular/common/http';
-import ServiceEventKeys from '../../../../assets/scripts/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import * as ngxSocketIO from 'ngx-socket-io';
 import * as io from 'socket.io-client';
 

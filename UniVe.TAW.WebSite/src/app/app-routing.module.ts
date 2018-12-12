@@ -9,7 +9,7 @@ import { FleetConfiguratorComponent } from './ui/game/match/fleet-configurator/f
 import { OwnTurnControllerComponent } from './ui/game/match/own-turn-controller/own-turn-controller.component';
 import ViewsRoutingKeys from './ViewsRoutingKeys';
 import { RoutingHelper, RouteParam, RouteStep } from './Routing';
-import RoutingParamKeys from '../assets/imported/unive.taw.webservice/application/routing/RoutingParamKeys';
+import RoutingParamKeys from '../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import { MatchComponent } from './ui/game/match/match.component';
 import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import ServiceConstants from './services/ServiceConstants';

@@ -1,4 +1,4 @@
-import * as identity from '../../../../../assets/imported/unive.taw.webservice/infrastructure/identity';
+import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 
 export default class UserRole {
 

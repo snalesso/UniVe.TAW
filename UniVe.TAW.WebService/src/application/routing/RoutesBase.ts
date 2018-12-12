@@ -3,6 +3,9 @@ import * as socketio from 'socket.io';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as expressJwt from 'express-jwt';
+import * as DTOs from '../../application/DTOs';
+import * as User from '../../domain/models/mongodb/mongoose/User';
+import { MongoError } from 'mongodb';
 
 export default abstract class RoutesBase {
 
@@ -17,7 +20,10 @@ export default abstract class RoutesBase {
 
         this._socketIOServer = socketIOServer;
 
-        this._jwtValidator = expressJwt({ secret: process.env.JWT_KEY });
+        this._jwtValidator = expressJwt({
+            secret: process.env.JWT_KEY,
+            isRevoked: this.isTokenRevokedCallback
+        });
 
         this._router.use(bodyParser.urlencoded({ extended: true }));
         this._router.use(bodyParser.json());
@@ -25,4 +31,20 @@ export default abstract class RoutesBase {
     }
 
     public get Router() { return this._router; }
+
+    private isTokenRevokedCallback(
+        req: express.Request,
+        payload: DTOs.IUserJWTData,
+        done: (err: any, revoked: boolean) => any) {
+
+        User.getModel().findById(payload.Id)
+            .then((user: User.IMongooseUser) => {
+                const error = user.BannedUntil == null ? null : "User banned";
+                const isRevoked = user.BannedUntil != null;
+                return done(error, isRevoked);
+            })
+            .catch((error: MongoError) => {
+                return done("Couldn't validate token", true);
+            });
+    }
 }
