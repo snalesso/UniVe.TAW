@@ -14,9 +14,16 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { SideMenuComponent } from './ui/navigation/side-menu/side-menu.component';
 import { MatchHistoryComponent } from './ui/identity/users/profile/match-history/match-history.component';
+import { ProfilePage } from './ui/identity/users/profile/profile.page';
 
 @NgModule({
-  declarations: [AppComponent, SignupPage, LoginPage, SideMenuComponent],
+  declarations: [
+    AppComponent,
+    SignupPage,
+    LoginPage,
+    SideMenuComponent,
+    MatchHistoryComponent,
+    ProfilePage],
   entryComponents: [],
   imports: [
     BrowserModule,

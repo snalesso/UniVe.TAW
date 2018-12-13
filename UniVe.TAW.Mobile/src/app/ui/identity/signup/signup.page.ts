@@ -15,25 +15,9 @@ import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
   styleUrls: ['./signup.page.scss'],
 })
 export class SignupPage implements OnInit {
-  ngOnInit(): void {
-    // if already logged in re-route to avaiable matches
-    // if (this._authService.Token) {
-    //   this._router.navigate([ViewsRoutingKeys.MatchFinder]);
-    // }
-  }
-
-  // TODO: make default BirthDate from code to UI binding work. Idea: https://stackoverflow.com/a/49690089/1790497
 
   public readonly Countries: { id: identity.Country, name: string }[];
   public readonly SignupRequest = { Username: "_sergio", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy } as DTOs.ISignupRequestDto;
-  public RepeatedPassword: string;
-  public ResponseError: string;
-
-  public get canSendSignupRequest(): boolean {
-    return this.SignupRequest.Username != null
-      && this.SignupRequest.Password != null
-      && this.RepeatedPassword == this.SignupRequest.Password;
-  }
 
   constructor(
     private readonly _authService: AuthService,
@@ -46,6 +30,15 @@ export class SignupPage implements OnInit {
       .map(countryName => ({ id: identity.Country[countryName], name: countryName }));
   }
 
+  public RepeatedPassword: string;
+  public ResponseError: string;
+
+  public get canSendSignupRequest(): boolean {
+    return this.SignupRequest.Username != null
+      && this.SignupRequest.Password != null
+      && this.RepeatedPassword == this.SignupRequest.Password;
+  }
+
   public sendSignupRequest() {
     // TODO: handle no response when server is down
     this._authService.signup(this.SignupRequest)
@@ -53,10 +46,12 @@ export class SignupPage implements OnInit {
         if (response.HasError) {
           this.ResponseError = response.ErrorMessage;
         } else {
-          alert(response.Content);
-          //this._router.navigate([ViewsRoutingKeys.Login]);
+          this._router.navigate([ViewsRoutingKeys.Login]);
         }
       });
+  }
+
+  ngOnInit(): void {
   }
 
 }

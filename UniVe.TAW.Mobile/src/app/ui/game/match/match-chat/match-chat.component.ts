@@ -30,9 +30,6 @@ export class MatchChatComponent implements OnInit, OnDestroy {
     private readonly _chatService: ChatService,
     private readonly _socketIOService: ngxSocketIO.Socket
   ) {
-
-    //console.log("match chat component ctor");
-
   }
 
   private _chatMessages: DTOs.IChatMessageDto[] = [];

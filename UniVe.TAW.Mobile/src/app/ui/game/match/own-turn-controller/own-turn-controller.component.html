@@ -4,7 +4,7 @@
     <ion-col>
 
       <h1 text-center>
-        <a href="./users/{{EnemyId}}" *ngIf="EnemyId">{{EnemyUsername}}</a>
+        <a routerLink="/users/{{EnemyId}}" *ngIf="EnemyId">{{EnemyUsername}}</a>
         <span *ngIf="!EnemyId">Enemy</span>
       </h1>
 

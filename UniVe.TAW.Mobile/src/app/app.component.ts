@@ -37,20 +37,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.platform.ready().then(() => {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
-
-      this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
-        if (isLogged)
-          this.activateSubscriptions();
-        else
-          this.removeSubscriptions();
-      });
-
-      if (!this._authService.IsLogged) {
-        setTimeout(() => {
-          this._router.navigate([ViewsRoutingKeys.Login]);
-        }, 150);
-      }
-
     });
   }
 
@@ -63,40 +49,46 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private activateSubscriptions() {
 
-    this._socketIOService.once(
-      (this._accountBannedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.BanUpdated)),
-      async (userBannedUntil: Date) => {
-        if (userBannedUntil) {
+    if (this._authService.IsLogged) {
+
+      this._socketIOService.once(
+        (this._accountBannedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.BanUpdated)),
+        async (userBannedUntil: Date) => {
+          if (userBannedUntil) {
+            this._authService.logout();
+            console.log("banned");
+            const alert = await this.alertController.create({
+              buttons: ["Ok"],
+              message: "You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss") +
+                "<br>" + "You will be logeed out.",
+              header: "You got banned!"
+            });
+            await alert.present();
+            //this._router.navigate([ViewsRoutingKeys.Root]);
+          }
+        });
+
+      this._socketIOService.once(
+        (this._accountDeletedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted)),
+        async () => {
           this._authService.logout();
+          console.log("account deleted");
           const alert = await this.alertController.create({
             buttons: ["Ok"],
-            message: "You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss") +
-              "<br>" + "You will be logeed out.",
-            header: "You got banned!"
+            message: "Your account has been DELETED by the Admin! :O" + "<br>" + "WTF did you do??? BYE",
+            header: "ACCOUNT DELETED!"
           });
           await alert.present();
-          this._router.navigate([ViewsRoutingKeys.Root]);
-        }
-      });
-
-    this._socketIOService.once(
-      (this._accountDeletedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted)),
-      async () => {
-        this._authService.logout();
-        const alert = await this.alertController.create({
-          buttons: ["Ok"],
-          message: "Your account has been DELETED by the Admin! :O" + "<br>" + "WTF did you do??? BYE",
-          header: "ACCOUNT DELETED!"
+          //this._router.navigate([ViewsRoutingKeys.Root]);
         });
-        await alert.present();
-        this._router.navigate([ViewsRoutingKeys.Root]);
-      });
 
-    this._socketIOService.once(
-      (this._accountRolesUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated)),
-      (newRole: identity.UserRoles) => {
-        location.reload();
-      });
+      this._socketIOService.once(
+        (this._accountRolesUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated)),
+        (newRole: identity.UserRoles) => {
+          location.reload();
+          console.log("roles updated");
+        });
+    }
   }
 
   private removeSubscriptions() {
@@ -116,7 +108,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.activateSubscriptions();
+
+    this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
+      if (isLogged)
+        this.activateSubscriptions();
+      else
+        this.removeSubscriptions();
+    });
   }
 
   ngOnDestroy(): void {

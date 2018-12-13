@@ -42,7 +42,7 @@ export class LoginPage implements OnInit {
             this._responseError = response.ErrorMessage;
           }
           else if (response.Content) {
-            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+            this._router.navigate([ViewsRoutingKeys.Root]);
           }
         },
         (response: HttpErrorResponse) => {
@@ -51,12 +51,6 @@ export class LoginPage implements OnInit {
   }
 
   ngOnInit() {
-    // if already logged in re-route to avaiable matches
-    if (this._authService.Token) {
-      setTimeout(() => {
-        this._router.navigate([ViewsRoutingKeys.MatchFinder]);
-      }, 150);
-    }
   }
 
 }

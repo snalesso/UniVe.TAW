@@ -14,11 +14,15 @@
         <app-side-menu></app-side-menu>
       </ion-content>
 
-      <ion-footer>
+      <ion-footer *ngIf="IsLogged">
         <ion-toolbar>
-          <ion-title>
-            <a routerLink="/users/{{LoggedUserId}}">{{LoggedUsername}}</a>
-          </ion-title>
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item routerDirection="root" lines="none" routerLink="/users/{{LoggedUserId}}">
+              <ion-title>{{LoggedUsername}}</ion-title>
+            </ion-item>
+          </ion-menu-toggle>
+
         </ion-toolbar>
       </ion-footer>
 
