@@ -22,18 +22,22 @@
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
     "@types/chalk": "^2.2.0",
+    "@types/del": "^3.0.1",
     "@types/express": "^4.16.0",
     "@types/express-jwt": "0.0.40",
-    "@types/gulp": "^3.8.36",
+    "@types/gulp": "^4.0.5",
     "@types/http-status-codes": "^1.2.0",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/mongoose": "^5.2.22",
     "@types/node": "^9.6.23",
     "@types/socket.io": "^1.4.38",
     "chalk": "^2.4.1",
-    "gulp": "^3.9.1",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-cli": "^2.0.1",
     "gulp-print": "^5.0.0",
-    "gulp-typescript": "^5.0.0-alpha.3",
-    "typescript": "^3.0.1"
+    "gulp-typescript": "^5.0.0",
+    "typescript": "^3.2.2",
+    "vinyl-paths": "^2.1.0"
   }
 }

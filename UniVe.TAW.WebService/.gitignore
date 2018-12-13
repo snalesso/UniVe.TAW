@@ -47,3 +47,5 @@ Thumbs.db
 /data/db/*
 /src/**/*.js
 /src/**/*.js.map
+gulpfile.js
+gulpfile.js.map

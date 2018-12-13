@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "identifier": "transpile",
+            "label": "Transpile",
             "type": "typescript",
             "tsconfig": "tsconfig.json",
             "problemMatcher": [
@@ -16,14 +16,10 @@
             }
         },
         {
-            "identifier": "export",
-            "label": "Export dependencies to other workspaces libs folders",
-            "command": "gulp",
-            "args": [
-                "export"
-            ],
+            "label": "Export dependencies to other projects",
+            "command": "gulp export-dependencies",
             "type": "shell",
-            "dependsOn": "transpile"
+            "dependsOn": "Transpile"
         }
     ]
 }

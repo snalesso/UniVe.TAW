@@ -12,9 +12,21 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "preLaunchTask": "transpile",
+            "preLaunchTask": "Transpile",
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
-        }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Export dependencies & launch WebService",
+            "program": "${workspaceFolder}/src/application/Bootstrapper.ts",
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "preLaunchTask": "Export dependencies to other projects",
+            "envFile": "${workspaceFolder}/.env",
+            "internalConsoleOptions": "openOnSessionStart",
+        },
     ]
 }

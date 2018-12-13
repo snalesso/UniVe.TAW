@@ -7,13 +7,16 @@
 			"path": "UniVe.TAW.Course"
 		},
 		{
-			"path": "UniVe.TAW.Mobile"
-		},
-		{
 			"path": "UniVe.TAW.WebService"
 		},
 		{
 			"path": "UniVe.TAW.WebSite"
+		},
+		{
+			"path": "UniVe.TAW.Mobile"
+		},
+		{
+			"path": "UniVe.TAW.Windows"
 		},
 		{
 			"path": "docs"

@@ -4,21 +4,12 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Imports dependencies from other workspaces",
-            "type": "shell",
-            "command": "gulp",
-            "args": [
-                "import"
-            ]
-        },
-        {
-            "label": "import & ng serve",
+            "label": "ng serve",
             "type": "shell",
             "command": "ng",
             "args": [
                 "serve"
-            ],
-            "dependsOn": "import"
+            ]
         }
     ]
 }
