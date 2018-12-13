@@ -23,7 +23,7 @@ const routes: Routes = [
     //     path: '',
     //     component: HomeComponent
     // },
-    { path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
+    //{ path: '', redirectTo: ViewsRoutingKeys.Login, pathMatch: 'full' },
     { path: ViewsRoutingKeys.Signup, component: SignupComponent },
     { path: ViewsRoutingKeys.Login, component: LoginComponent },
     { path: ViewsRoutingKeys.MatchFinder, component: MatchFinderComponent },

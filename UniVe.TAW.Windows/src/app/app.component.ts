@@ -96,7 +96,17 @@ export class AppComponent {
   }
 
   ngOnInit(): void {
-    this.activateSubscriptions();
+
+    this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
+      if (isLogged)
+        this.activateSubscriptions();
+      else
+        this.removeSubscriptions();
+    });
+
+    if (!this._authService.IsLogged) {
+      this._router.navigate([ViewsRoutingKeys.Login]);
+    }
   }
 
   ngOnDestroy(): void {
