@@ -52,18 +52,18 @@ const routes: Routes = [
   {
     path: RoutingHelper.buildRoute([
       new RouteStep(ViewsRoutingKeys.Users),
-      new RouteStep(RoutingParamKeys.self)
-    ]),
-    component: ProfileComponent,
-    canActivate: [LoggedInGuardService]
-  },
-  {
-    path: RoutingHelper.buildRoute([
-      new RouteStep(ViewsRoutingKeys.Users),
       new RouteParam(RoutingParamKeys.userId)
     ]),
     component: ProfileComponent
   },
+  // {
+  //   path: RoutingHelper.buildRoute([
+  //     new RouteStep(ViewsRoutingKeys.Users),
+  //     new RouteStep(RoutingParamKeys.self)
+  //   ]),
+  //   component: ProfileComponent,
+  //   canActivate: [LoggedInGuardService]
+  // },
   {
     path: RoutingHelper.buildRoute([
       new RouteStep(ViewsRoutingKeys.Chat)

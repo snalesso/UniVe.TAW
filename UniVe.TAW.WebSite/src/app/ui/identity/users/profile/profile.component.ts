@@ -16,6 +16,7 @@ import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import UserRole from './UserRole';
 import { BehaviorSubject, Observable } from 'rxjs';
+import ViewsRoutingKeys from 'src/app/ViewsRoutingKeys';
 
 @Component({
   selector: 'app-profile',
@@ -129,7 +130,7 @@ export class ProfileComponent implements OnInit {
       .subscribe(
         response => {
           if (response.Content)
-            this._router.navigate(["/"]);
+            this._router.navigate([ViewsRoutingKeys.Root]);
         },
         (error: ngHttp.HttpErrorResponse) => { });
   }
@@ -138,10 +139,7 @@ export class ProfileComponent implements OnInit {
 
     this._activatedRoute.paramMap.subscribe(params => {
 
-      const paramUserId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
-      this._userId = (paramUserId == RoutingParamKeys.self)
-        ? this._authService.LoggedUser.Id
-        : paramUserId;
+      this._userId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
 
       this._identityService.getUserProfile(this._userId)
         .subscribe(

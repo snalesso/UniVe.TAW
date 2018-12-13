@@ -18,14 +18,6 @@ export class SignupComponent implements OnInit {
 
   public readonly Countries: { id: identity.Country, name: string }[];
   public readonly SignupRequest = { /*Username: "Daedalus", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy*/ } as DTOs.ISignupRequestDto;
-  public RepeatedPassword: string;
-  public ResponseError: string;
-
-  public get canSendSignupRequest(): boolean {
-    return this.SignupRequest.Username != null
-      && this.SignupRequest.Password != null
-      && this.RepeatedPassword == this.SignupRequest.Password;
-  }
 
   constructor(
     private readonly _authService: AuthService,
@@ -34,6 +26,15 @@ export class SignupComponent implements OnInit {
     this.Countries = Object.keys(identity.Country)
       .filter(countryName => !isNaN(identity.Country[countryName]))
       .map(countryName => ({ id: identity.Country[countryName], name: countryName }));
+  }
+
+  public RepeatedPassword: string;
+  public ResponseError: string;
+
+  public get canSendSignupRequest(): boolean {
+    return this.SignupRequest.Username != null
+      && this.SignupRequest.Password != null
+      && this.RepeatedPassword == this.SignupRequest.Password;
   }
 
   public sendSignupRequest() {
@@ -49,7 +50,6 @@ export class SignupComponent implements OnInit {
   }
 
   ngOnInit() {
-    // TODO: if already logged in re-route to avaiable matches
   }
 
 }

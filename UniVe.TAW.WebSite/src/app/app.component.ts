@@ -88,8 +88,9 @@ export class AppComponent implements OnInit, OnDestroy
   ngOnInit(): void {
 
     this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
-      if (isLogged)
+      if (isLogged) {
         this.activateSubscriptions();
+      }
       else {
         this.removeSubscriptions();
         //this._router.navigate([ViewsRoutingKeys.Root]);

@@ -59,7 +59,7 @@ export class AuthService implements OnDestroy {
     return this.http.post<net.HttpMessage<boolean>>(
       endPoint,
       signupRequest,
-      options)
+      options);
   }
 
   public login(credentials: DTOs.ILoginCredentials)/*: Observable<net.HttpMessage<string>>*/ {
