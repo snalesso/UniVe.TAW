@@ -21,6 +21,8 @@ function createWindow() {
     height: size.height,
   });
 
+  win.maximize();
+
   if (serve) {
     require('electron-reload')(__dirname, {
       electron: require(`${__dirname}/node_modules/electron`)

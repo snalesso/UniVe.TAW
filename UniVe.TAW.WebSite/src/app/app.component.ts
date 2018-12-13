@@ -12,9 +12,7 @@ import ViewsRoutingKeys from './ViewsRoutingKeys';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy
-//, CanActivate
-{
+export class AppComponent implements OnInit, OnDestroy {
 
   private _accountBannedEventKey: string;
   private _accountDeletedEventKey: string;
@@ -29,14 +27,6 @@ export class AppComponent implements OnInit, OnDestroy
   private _isLogged: boolean;
   public get IsLogged() { return this._authService.IsLogged; }
 
-  // public canActivate(): boolean {
-  //   if (!this._authService.IsLogged) {
-  //     this._router.navigate([ViewsRoutingKeys.Login]);
-  //     return false;
-  //   }
-  //   return true;
-  // }
-
   private activateSubscriptions() {
 
     if (this._authService.IsLogged) {
@@ -46,8 +36,8 @@ export class AppComponent implements OnInit, OnDestroy
         (userBannedUntil: Date) => {
           if (userBannedUntil) {
             console.log("banned");
-            //alert("You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss"));
             this._authService.logout();
+            const msg = "You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss");
           }
         });
 
@@ -55,7 +45,7 @@ export class AppComponent implements OnInit, OnDestroy
         ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted),
         () => {
           console.log("account deleted");
-          //alert("Your account has been deleted!");
+          alert("Your account has been deleted!");
           this._authService.logout();
         });
 
@@ -93,7 +83,7 @@ export class AppComponent implements OnInit, OnDestroy
       }
       else {
         this.removeSubscriptions();
-        //this._router.navigate([ViewsRoutingKeys.Root]);
+        this._router.navigate([ViewsRoutingKeys.Login]);
       }
     });
   }

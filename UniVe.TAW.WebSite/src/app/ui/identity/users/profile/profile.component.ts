@@ -16,7 +16,7 @@ import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import UserRole from './UserRole';
 import { BehaviorSubject, Observable } from 'rxjs';
-import ViewsRoutingKeys from 'src/app/ViewsRoutingKeys';
+import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
 
 @Component({
   selector: 'app-profile',

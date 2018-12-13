@@ -7,9 +7,8 @@
     <h5 class="card-title">
       <span [ngClass]="ems.WinnerId == UserId ? 'winner-text' : 'loser-text'">{{ems.WinnerId == UserId ? "WON" :
         "LOST"}}</span>
-      <!-- <a href="/users/{{ems.FirstPlayer.Id}}" [ngClass]="ems.WinnerId == ems.FirstPlayer.Id ? 'winner-text' : 'loser-text'">{{ems.FirstPlayer.Username}}</a> -->
       <span> VS </span>
-      <a href="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
+      <a routerLink="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
         == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</a>
       <span *ngIf="!(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
         == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</span>

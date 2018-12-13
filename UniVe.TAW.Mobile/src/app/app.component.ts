@@ -64,7 +64,6 @@ export class AppComponent implements OnInit, OnDestroy {
               header: "You got banned!"
             });
             await alert.present();
-            //this._router.navigate([ViewsRoutingKeys.Root]);
           }
         });
 
@@ -79,14 +78,12 @@ export class AppComponent implements OnInit, OnDestroy {
             header: "ACCOUNT DELETED!"
           });
           await alert.present();
-          //this._router.navigate([ViewsRoutingKeys.Root]);
         });
 
       this._socketIOService.once(
         (this._accountRolesUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated)),
         (newRole: identity.UserRoles) => {
           location.reload();
-          console.log("roles updated");
         });
     }
   }
@@ -114,6 +111,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.activateSubscriptions();
       else
         this.removeSubscriptions();
+      this._router.navigate([ViewsRoutingKeys.Login]);
     });
   }
 

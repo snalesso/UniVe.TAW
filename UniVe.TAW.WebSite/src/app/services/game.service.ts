@@ -7,11 +7,9 @@ import * as game from '../../assets/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from './ServiceConstants';
 
-//import * as $ from 'jquery';
 import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
-//import 'socket.io-client';
 import * as ngxSocketIO from 'ngx-socket-io';
 
 @Injectable({

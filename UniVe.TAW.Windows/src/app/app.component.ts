@@ -54,20 +54,16 @@ export class AppComponent {
           if (userBannedUntil) {
             this._authService.logout();
             alert("You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss"));
-            this._router.navigate([ViewsRoutingKeys.Root]);
           }
         });
-      console.log("subscribed to BanUpdated");
 
       this._socketIOService.once(
         ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted),
         () => {
           console.log("UserDeleted received");
           this._authService.logout();
-          //alert("Your account has been deleted!");
-          this._router.navigate([ViewsRoutingKeys.Root]);
+          alert("Your account has been deleted!");
         });
-      console.log("subscribed to UserDeleted");
 
       this._socketIOService.once(
         ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated),
@@ -75,7 +71,6 @@ export class AppComponent {
           console.log("RolesUpdated received");
           location.reload();
         });
-      console.log("subscribed to RolesUpdated");
     }
   }
 
@@ -98,15 +93,14 @@ export class AppComponent {
   ngOnInit(): void {
 
     this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
-      if (isLogged)
+      if (isLogged) {
         this.activateSubscriptions();
-      else
+      }
+      else {
         this.removeSubscriptions();
+        this._router.navigate([ViewsRoutingKeys.Login]);
+      }
     });
-
-    if (!this._authService.IsLogged) {
-      this._router.navigate([ViewsRoutingKeys.Login]);
-    }
   }
 
   ngOnDestroy(): void {

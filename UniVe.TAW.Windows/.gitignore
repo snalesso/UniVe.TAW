@@ -47,3 +47,6 @@ package-lock.json
 # System Files
 .DS_Store
 Thumbs.db
+
+# custom
+src/assets/unive.taw.webservice
