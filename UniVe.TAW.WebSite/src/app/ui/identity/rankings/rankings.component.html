@@ -9,7 +9,7 @@
         <div class="card-body">
           <h5 class="card-title">
             <span>#{{i+1}} </span>
-            <a href="/users/{{ur.Id}}">{{ur.Username}}</a>
+            <a routerLink="/users/{{ur.Id}}">{{ur.Username}}</a>
           </h5>
           <p class="card-text">{{ur.WinRatio}}% ({{ur.WinsCount}}/{{ur.LossesCount}})</p>
         </div>

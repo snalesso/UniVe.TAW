@@ -21,7 +21,7 @@ import { IdentityService } from '../../../../services/identity.service';
 })
 export class MatchHistoryComponent implements OnInit {
 
-  private readonly _userId: string;
+  private _userId: string;
 
   constructor(
     private readonly _activatedRoute: ActivatedRoute,
@@ -30,28 +30,34 @@ export class MatchHistoryComponent implements OnInit {
     private readonly _identityService: IdentityService,
     //private readonly _router: Router
   ) {
-
-    const paramUserId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
-    this._userId = (paramUserId == RoutingParamKeys.self)
-      ? this._authService.LoggedUser.Id
-      : paramUserId;
   }
 
+  @Input()
+  public set UserId(value: string) {
+    this._userId = value;
+    this.updateMatchHistory();
+  }
   public get UserId() { return this._userId; }
 
   private _endedMatchSummaries: DTOs.IEndedMatchSummaryDto[];
   public get EndedMatchSummaries() { return this._endedMatchSummaries; }
 
   ngOnInit() {
+  }
 
-    this._identityService.getMatchHistory(this._userId)
-      .subscribe(
-        response => {
+  private updateMatchHistory() {
 
-          this._endedMatchSummaries = response.Content;
+    if (this.UserId) {
 
-        },
-        (error: ngHttp.HttpErrorResponse) => { });
+      this._endedMatchSummaries = null;
+
+      this._identityService.getMatchHistory(this._userId)
+        .subscribe(
+          response => {
+            this._endedMatchSummaries = response.Content;
+          },
+          (error: ngHttp.HttpErrorResponse) => { });
+    }
   }
 
 }

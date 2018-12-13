@@ -20,9 +20,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private readonly _authService: AuthService,
     private readonly _router: Router) {
-
-    this._userData = this._authService.LoggedUser;
-    this._subscriptions.push(this._authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
   }
 
   private _userData: DTOs.IUserJWTData;
@@ -37,6 +34,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+    this._userData = this._authService.LoggedUser;
+    this._subscriptions.push(this._authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
   }
 
   ngOnDestroy(): void {

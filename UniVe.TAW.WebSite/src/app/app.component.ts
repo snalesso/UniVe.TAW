@@ -3,7 +3,7 @@ import { AuthService } from './services/auth.service';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
-import { Router } from '@angular/router';
+import { Router, CanActivate } from '@angular/router';
 import * as moment from 'moment';
 import ViewsRoutingKeys from './ViewsRoutingKeys';
 
@@ -12,7 +12,9 @@ import ViewsRoutingKeys from './ViewsRoutingKeys';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy
+//, CanActivate
+{
 
   private _accountBannedEventKey: string;
   private _accountDeletedEventKey: string;
@@ -27,7 +29,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private _isLogged: boolean;
   public get IsLogged() { return this._authService.IsLogged; }
 
-  ngOnInit(): void {
+  // public canActivate(): boolean {
+  //   if (!this._authService.IsLogged) {
+  //     this._router.navigate([ViewsRoutingKeys.Login]);
+  //     return false;
+  //   }
+  //   return true;
+  // }
+
+  private activateSubscriptions() {
 
     if (this._authService.IsLogged) {
 
@@ -38,7 +48,6 @@ export class AppComponent implements OnInit, OnDestroy {
             console.log("banned");
             //alert("You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss"));
             this._authService.logout();
-            this._router.navigate([ViewsRoutingKeys.Root]);
           }
         });
 
@@ -48,7 +57,6 @@ export class AppComponent implements OnInit, OnDestroy {
           console.log("account deleted");
           //alert("Your account has been deleted!");
           this._authService.logout();
-          this._router.navigate([ViewsRoutingKeys.Root]);
         });
 
       this._socketIOService.once(
@@ -58,10 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
           location.reload();
         });
     }
-  }
 
-  ngOnDestroy(): void {
-    this.removeSubscriptions();
   }
 
   private removeSubscriptions() {
@@ -78,6 +83,22 @@ export class AppComponent implements OnInit, OnDestroy {
       this._socketIOService.removeListener(this._accountRolesUpdatedEventKey);
       this._accountRolesUpdatedEventKey = null;
     }
+  }
+
+  ngOnInit(): void {
+
+    this._authService.WhenIsLoggedChanged.subscribe((isLogged) => {
+      if (isLogged)
+        this.activateSubscriptions();
+      else {
+        this.removeSubscriptions();
+        //this._router.navigate([ViewsRoutingKeys.Root]);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.removeSubscriptions();
   }
 
 }
