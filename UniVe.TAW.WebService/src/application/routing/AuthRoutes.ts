@@ -25,7 +25,7 @@ export default class GameRoutes extends RoutesBase {
 
         passport.use(new passportHTTP.BasicStrategy(
             (username, password, verifiedCallback: (error: net.IHttpResponseError, user?: User.IMongooseUser) => void) => {
-                console.log(chalk.yellow("Passport validating credentials ... "));
+                console.log(chalk.yellow("Passport validating credentials ..."));
 
                 const criteria = { Username: username } as utils.Mutable<User.IMongooseUser>;
 
