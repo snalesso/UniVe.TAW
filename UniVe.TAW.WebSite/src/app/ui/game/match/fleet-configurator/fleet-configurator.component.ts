@@ -49,7 +49,7 @@ export class FleetConfiguratorComponent implements OnInit {
     return 0;
   }
 
-  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
+  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][];
   public get Cells() { return this._gridCells; }
 
   public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.IsConfigNeeded }
@@ -137,7 +137,7 @@ export class FleetConfiguratorComponent implements OnInit {
       .configMatch(this._matchId, this._shipPlacements)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
             this._canSubmitConfig = this._canRandomize = true;
           }
@@ -179,18 +179,15 @@ export class FleetConfiguratorComponent implements OnInit {
 
   private updateMatchConfigStatus() {
 
-    // TODO: handle no resposne
-    // TODO: get config info only, anche determine at ngOnInit if it's visible or not
+    // TODO: add missing handles
     this._gameService
       .getMatchConfigStatus(this._matchId)
       .subscribe(
         (response) => {
-          if (response.HasError) {
-            // TODO: handle
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
-            // TODO: handle
             console.log("The server returned null");
           }
           else {

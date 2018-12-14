@@ -70,8 +70,6 @@ export class GameService {
     return this._http.put<net.HttpMessage<string>>(endPoint, null, options);
   }
 
-  // TODO: rename
-  // TODO: return only bool instead of DTOs.IOwnSideMatchConfigStatus
   public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
     const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/config";
     const options = {

@@ -137,7 +137,7 @@ export class FleetConfiguratorComponent implements OnInit {
       .configMatch(this._matchId, this._shipPlacements)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
             this._canSubmitConfig = this._canRandomize = true;
           }
@@ -188,7 +188,7 @@ export class FleetConfiguratorComponent implements OnInit {
 
           //console.log(response);
 
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             // TODO: handle
             console.log(response.ErrorMessage);
           }

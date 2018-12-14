@@ -6,8 +6,6 @@ import * as Constants from './Constants';
 import * as identity from '../../../../infrastructure/identity';
 import * as ChatMessage from './ChatMessage';
 
-// TODO: trim username spaces
-
 export interface IMongooseUser extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
     readonly Username: string,
@@ -15,8 +13,8 @@ export interface IMongooseUser extends mongoose.Document {
     BirthDate: Date,
     CountryId: identity.Country,
     Roles: identity.UserRoles,
-    Salt: string, // TODO: make readonly?
-    Digest: string, // TODO: make readonly?
+    Salt: string,
+    Digest: string,
     SentMessages: Map<String, ChatMessage.IMongooseChatMessage[]>,
     BannedUntil: Date,
     setPassword: (pwd: string) => void,
@@ -71,8 +69,6 @@ const userSchema = new mongoose.Schema({
     },
 });
 
-// TODO: userSchema.virtual("Matches", { ref: "Match", localField: "_id", foreignField: "FirstPlayerId" });
-
 userSchema.methods.setPassword = function (pwd: string): void {
     this.Salt = crypto.randomBytes(16).toString('hex');
     let hmac = crypto.createHmac('sha512', this.Salt);
@@ -115,17 +111,14 @@ userSchema.methods.logMessage = function (
     }
 };
 
-//export function GetSchema() { return userSchema; }
-
 let userModel;
 export function getModel(): mongoose.Model<IMongooseUser> {
     if (!userModel) {
-        userModel = mongoose.model(Constants.ModelsNames.User, userSchema); //GetSchema());
+        userModel = mongoose.model(Constants.ModelsNames.User, userSchema);
     }
     return userModel;
 }
 
-// export function create(data: IUser) : mongoose.Document<IUser> {
 export function create(data: any): IMongooseUser {
     let userModelCtor = getModel();
     let user = new userModelCtor(data);

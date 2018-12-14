@@ -84,7 +84,7 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
       .getEnemyTurnInfo(this._matchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {

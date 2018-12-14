@@ -73,7 +73,7 @@ export class MatchPage implements OnInit, OnDestroy {
         .subscribe(
           async response => {
 
-            if (response.HasError) {
+            if (response.ErrorMessage) {
               console.log(response.ErrorMessage);
             }
             else if (!response.Content) {

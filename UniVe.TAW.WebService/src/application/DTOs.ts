@@ -60,7 +60,6 @@ export interface IOwnSideMatchStatus {
     Enemy: ISimpleUserDto;
     IsConfigNeeded: boolean;
     IsMatchStarted: boolean;
-    //IsMatchEnded: boolean; // TODO: remove, EndDateTime is enough, same for start
     EndDateTime: Date;
     DidIWin: boolean;
     DoIOwnMove: boolean;

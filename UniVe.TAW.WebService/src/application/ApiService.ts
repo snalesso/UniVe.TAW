@@ -24,8 +24,6 @@ import * as utils from '../infrastructure/utils';
 import ServiceEventKeys from './services/ServiceEventKeys';
 import DBUtils from './services/DBUtils';
 
-// TODO: rename into WebService?
-// TODO: use cors()
 export default class ApiService {
 
     private readonly _dbUrl = 'mongodb://localhost:27017/univetaw';
@@ -60,7 +58,6 @@ export default class ApiService {
 
     public async Start() {
 
-        // TODO: get rid of magic string
         console.log("ApiService starting ...");
 
         // mongoose.connection.on("connected", () => {

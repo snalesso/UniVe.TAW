@@ -53,7 +53,6 @@ export default class GameRoutes extends RoutesBase {
 
         // routes
 
-        // TODO: check not already logged in
         this._router.post(
             '/login',
             passport.authenticate('basic', { session: false }),
@@ -109,8 +108,6 @@ export default class GameRoutes extends RoutesBase {
                 }
             });
 
-        // TODO: check logged in
-        // TODO: prevent requests from same account on different devices or set up so that multiple devices receive updates
         this._router.post(
             '/logout',
             this._jwtValidator,

@@ -38,7 +38,7 @@ export class LoginPage implements OnInit {
     this._authService.login(this.LoginRequest)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             this._responseError = response.ErrorMessage;
           }
           else if (response.Content) {

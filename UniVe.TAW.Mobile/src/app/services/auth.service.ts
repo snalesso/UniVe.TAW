@@ -75,7 +75,7 @@ export class AuthService implements OnDestroy {
       .post<net.HttpMessage<string>>(endPoint, null, options)
       .pipe(
         tap((response) => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log("Login failed - server says: " + JSON.stringify(response.ErrorMessage));
           }
           else {

@@ -546,8 +546,6 @@ export default class UsersRoutes extends RoutesBase {
                             } as DTOs.IEndedMatchSummaryDto);
                         });
 
-                        // TODO: order by date descending & take last 10/20
-
                         emDtos = emDtos.sort((a, b) => {
                             const dateSort = (b.EndDateTime.valueOf() - a.EndDateTime.valueOf());
                             return dateSort != 0

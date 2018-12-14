@@ -15,7 +15,6 @@ import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
-// TODO: handle socket.io connection to send user, and disconnection to inform server and close user connection so in case of new login with another account, the newly logged user (that is different from the previous) does not keep using the other user's connection
 export class AuthService implements OnDestroy {
 
   private readonly AccessTokenKey = "access_token";
@@ -78,7 +77,7 @@ export class AuthService implements OnDestroy {
       .post<net.HttpMessage<string>>(endPoint, null, options)
       .pipe(
         tap((response) => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log("Login failed - server says: " + JSON.stringify(response.ErrorMessage));
           }
           else {

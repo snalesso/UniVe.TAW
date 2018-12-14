@@ -39,7 +39,6 @@ const endedMatchSchema = new mongoose.Schema({
         required: true,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: Date): boolean {
-        //         // TODO: check for it to work
         //         return this.CreationDateTime.getTime() == null
         //             && value.getTime() > this.CreationDateTime.getTime();
         //     },
@@ -51,7 +50,6 @@ const endedMatchSchema = new mongoose.Schema({
         required: true,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: Date): boolean {
-        //         // TODO: check for it to work
         //         return this.StartDateTime.getTime() != null
         //             && this.EndDateTime.getTime() == null
         //             && value.getTime() > this.StartDateTime.getTime();
@@ -65,7 +63,6 @@ const endedMatchSchema = new mongoose.Schema({
         required: true,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: mongoose.Types.ObjectId): boolean {
-        //         // TODO: check for it to work
         //         return value === this.FirstPlayerSide.PlayerId || value === this.SecondPlayerSide.PlayerId;
         //     },
         //     msg: 'Action must be granted to one the match players'
@@ -79,7 +76,7 @@ const endedMatchSchema = new mongoose.Schema({
         //         return this.FirstPlayerSide == null
         //             && value != null;
         //     },
-        //     msg: "1st player side not valid" // TODO: add error message (anche sulle altre colonne)
+        //     msg: "1st player side not valid"
         // }
     },
     SecondPlayerSide: {

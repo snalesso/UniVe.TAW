@@ -72,7 +72,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
     this._gameService.singleShot(this._matchId, { Coord: cell.Coord } as game.ISingleShotMatchAction)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
@@ -138,7 +138,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
       .getOwnTurnInfo(this._matchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {

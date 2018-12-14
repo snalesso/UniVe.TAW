@@ -52,39 +52,17 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   public get DidIWin(): boolean { return (this._matchStatus && this._matchStatus.EndDateTime != null) ? this._matchStatus.DidIWin : false; }
 
-  // private errorHandler(error: http.HttpErrorResponse) {
-  //   // TODO: handle
-  //   console.log(error);
-  // }
 
   public handleWhenIsConfigNeededChanged(value: boolean) {
     this._matchStatus.IsConfigNeeded = value;
   }
-
-  // private updateMatchStatus() {
-
-  //   this._gameService.getOwnSideMatchStatus(this._matchId)
-  //     .subscribe(
-  //       response => {
-  //         if (response.HasError) {
-  //           console.log(response.ErrorMessage);
-  //         }
-  //         else if (!response.Content) {
-  //           console.log("getOwnSideMatchStatus returned null");
-  //         }
-  //         else {
-  //           this._matchStatus = response.Content;
-  //         }
-  //       },
-  //       this.errorHandler);
-  // }
 
   ngOnInit() {
 
     this._gameService.getOwnSideMatchStatus(this._matchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {

@@ -11,8 +11,6 @@ import * as Coord from './Coord';
 
 import * as game from '../../../../infrastructure/game';
 import * as utils from '../../../../infrastructure/utils';
-//import * as game_client from '../../../../infrastructure/game.client';
-//import * as chat from '../../../../infrastructure/chat';
 
 export interface IMongooseMatch extends mongoose.Document {
     readonly _id: mongoose.Types.ObjectId,
@@ -21,19 +19,14 @@ export interface IMongooseMatch extends mongoose.Document {
     StartDateTime: Date,
     EndDateTime: Date,
     InActionPlayerId: mongoose.Types.ObjectId,
-    // TODO: find other names instead of First & Second? Red & Blue? Black and White?
     FirstPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
-    // readonly ActionsHistory: game.MatchAction[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
-    // readonly ChatHistory: chat.TimeStampedMessage[], // TODO: might be a dedicated type, with methods for: log/clear/unsend
     areBothConfigured: () => boolean,
     configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
     /** returns true if a ship was hit, false if water, exception if it was already hit */
     fire: (firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord) => boolean,
-    //logChatMessage: (senderId: mongoose.Types.ObjectId, text: string) => chat.TimeStampedMessage,
     getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,
     getEnemyMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide
-    //getSortedChatHistory: () => chat.TimeStampedMessage[]
 }
 
 const matchSchema = new mongoose.Schema({
@@ -52,7 +45,6 @@ const matchSchema = new mongoose.Schema({
         required: false,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: Date): boolean {
-        //         // TODO: check for it to work
         //         return this.CreationDateTime.getTime() == null
         //             && value.getTime() > this.CreationDateTime.getTime();
         //     },
@@ -64,7 +56,6 @@ const matchSchema = new mongoose.Schema({
         required: false,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: Date): boolean {
-        //         // TODO: check for it to work
         //         return this.StartDateTime.getTime() != null
         //             && this.EndDateTime.getTime() == null
         //             && value.getTime() > this.StartDateTime.getTime();
@@ -78,7 +69,6 @@ const matchSchema = new mongoose.Schema({
         ref: Constants.ModelsNames.User,
         // validate: {
         //     validator: function (this: IMongooseMatch, value: mongoose.Types.ObjectId): boolean {
-        //         // TODO: check for it to work
         //         return value === this.FirstPlayerSide.PlayerId || value === this.SecondPlayerSide.PlayerId;
         //     },
         //     msg: 'Action must be granted to one the match players'
@@ -92,7 +82,7 @@ const matchSchema = new mongoose.Schema({
         //         return this.FirstPlayerSide == null
         //             && value != null;
         //     },
-        //     msg: "1st player side not valid" // TODO: add error message (anche sulle altre colonne)
+        //     msg: "1st player side not valid"
         // }
     },
     SecondPlayerSide: {
@@ -212,7 +202,7 @@ matchSchema.methods.configFleet = function (
     shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean {
 
     const sideToConfig = this.getOwnerMatchPlayerSide(playerId);
-    // TODO: check settings compliance
+    // TODO: ensure settings compliance
     if (shipPlacements == null || shipPlacements.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
 

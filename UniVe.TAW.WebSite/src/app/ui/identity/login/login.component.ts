@@ -34,11 +34,10 @@ export class LoginComponent implements OnInit {
   }
 
   public sendLoginRequest() {
-    // TODO: handle no response when server is down
     this._authService.login(this.LoginRequest)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             this._responseError = response.ErrorMessage;
           }
           else if (response.Content) {

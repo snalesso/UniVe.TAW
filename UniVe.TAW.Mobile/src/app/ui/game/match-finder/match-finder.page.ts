@@ -56,7 +56,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
       this._gameService.createPendingMatch()
         .subscribe(
           response => {
-            if (response.HasError) {
+            if (response.ErrorMessage) {
               console.log(response.ErrorMessage);
             } else {
               if (response.Content != null && response.Content != undefined) {
@@ -79,7 +79,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
     this._gameService.closePendingMatch(this._playables.PendingMatchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           } else {
             if (response.Content) {
@@ -101,7 +101,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
     this._gameService.joinPendingMatch(joinableMatchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           } else if (response.Content == null) {
             console.log("WTF?? Server returned null Match.Id without providing a reason! :O");
@@ -125,7 +125,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
     this._gameService.getPlayables()
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
 
             console.log(response.ErrorMessage);
             this._isBusy = false;

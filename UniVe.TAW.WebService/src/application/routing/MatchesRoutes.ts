@@ -194,7 +194,7 @@ export default class MatchesRoutes extends RoutesBase {
                                 ownSideMatchConfigStatus,
                                 "Match is already configured and cannot be changed");
 
-                            response.status(httpStatusCodes.LOCKED).json(responseData); // TODO: return info instead of http error response
+                            response.status(httpStatusCodes.LOCKED).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {

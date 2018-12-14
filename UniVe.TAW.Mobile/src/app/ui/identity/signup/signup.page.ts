@@ -43,7 +43,7 @@ export class SignupPage implements OnInit {
     // TODO: handle no response when server is down
     this._authService.signup(this.SignupRequest)
       .subscribe(response => {
-        if (response.HasError) {
+        if (response.ErrorMessage) {
           this.ResponseError = response.ErrorMessage;
         } else {
           this._router.navigate([ViewsRoutingKeys.Login]);

@@ -21,7 +21,6 @@ import { Subscription } from 'rxjs';
   templateUrl: './match-finder.component.html',
   styleUrls: ['./match-finder.component.css']
 })
-// TODO: update when server emits new pending matches available
 export class MatchFinderComponent implements OnInit, OnDestroy {
 
   private readonly _subscriptions: Subscription[] = [];
@@ -50,7 +49,6 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
 
   public get AreThereJoinableMatches() { return (this._playables != null ? (this._playables.JoinableMatches != null && this._playables.JoinableMatches.length > 0) : false); }
 
-  // TODO: ensure that, if browser page is reloaded, a socket.io connection is created to listen for when someone joins the PendingMatch
   public createPendingMatch() {
 
     this._isBusy = true;
@@ -59,15 +57,10 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
       this._gameService.createPendingMatch()
         .subscribe(
           response => {
-            if (response.HasError) {
+            if (response.ErrorMessage) {
               console.log(response.ErrorMessage);
-            } else {
-              if (response.Content != null && response.Content != undefined) {
-                // this._socketIOService.connect().subscribe(message => {
-                //   console.log("match-finder received message: " + JSON.stringify(message));
-                // });
-                this.updatePlayables();
-              }
+            } else if (response.Content) {
+              this.updatePlayables();
             }
 
             this._isBusy = false;
@@ -82,7 +75,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
     this._gameService.closePendingMatch(this._playables.PendingMatchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           } else {
             if (response.Content) {
@@ -104,7 +97,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
     this._gameService.joinPendingMatch(joinableMatchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           } else if (response.Content == null) {
             console.log("Server returned null :O");
@@ -127,7 +120,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
     this._gameService.getPlayables()
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
@@ -168,9 +161,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // for (let sub of this._subscriptions) {
-    //   sub.unsubscribe();
-    // }
+
     if (this._pendingMatchJoinedEventKey) {
       this._socket.removeListener(this._pendingMatchJoinedEventKey);
       this._pendingMatchJoinedEventKey = null;

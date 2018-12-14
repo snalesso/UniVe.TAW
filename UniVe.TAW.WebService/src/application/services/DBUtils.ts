@@ -129,7 +129,6 @@ export default class DBUtils {
                 .create(
                     {
                         Settings: {
-                            // TODO: use default settings
                             MinShipsDistance: 2,
                             BattleFieldHeight: 10,
                             BattleFieldWidth: 10,

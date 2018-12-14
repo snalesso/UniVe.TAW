@@ -1,7 +1,5 @@
 export default class ServiceEventKeys {
 
-    //public static readonly WhoAreYou = "WhoAreYou";
-    //public static readonly WhoIAm = "WhoIAm";
     public static readonly PendingMatchesChanged = "PendingMatchesChanged";
     public static readonly PendingMatchJoined = "PendingMatchJoined";
     public static readonly MatchReady = "MatchReady";

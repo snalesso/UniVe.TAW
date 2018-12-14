@@ -10,19 +10,14 @@ import * as MatchSettings from './MatchSettings';
 import * as game from '../../../../infrastructure/game';
 import * as game_server from '../../../../infrastructure/game.server';
 import * as utils_2_8 from '../../../../infrastructure/utils-2.8';
-//import * as game_client from '../../../../infrastructure/game.client';
 
 // TODO: split validators into many single validators each with its own error message
 
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
-    //FleetConfig: ReadonlyArray<ShipPlacement.IMongooseShipPlacement>,
-    BattleFieldCells: ServerSideBattleFieldCell.IMongooseBattleFieldCell[][], //ReadonlyArray<ReadonlyArray<ServerSideBattleFieldCell.IMongooseServerSideBattleFieldCell>>,
-    // TODO: does it work if IMongooseX interfaces' methods take in pure TS classes?
+    BattleFieldCells: ServerSideBattleFieldCell.IMongooseBattleFieldCell[][],
     isConfigured: (matchSettings: MatchSettings.IMongooseMatchSettings) => boolean,
     configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
-    // getOwnerView: () => game_client.ClientSideBattleFieldCell_Owner[][],
-    // getEnemyView: () => game_client.ClientSideBattleFieldCell_Enemy[][],
     /** returns true if hit, false if water, exception if it was already hit */
     receiveFire: (coord: game.Coord) => boolean,
     areAllShipsHit: () => boolean
@@ -96,8 +91,6 @@ matchPlayerSideSchema.methods.configFleet = function (
     for (let x = 0; x < bfCells.length; x++) {
         this.BattleFieldCells[x] = [];
         for (let y = 0; y < bfCells[x].length; y++) {
-            // const newCell = ServerSideBattleFieldCell.create(bfCells[x][y]);
-            // this.BattleFieldCells[x][y] = newCell;
             this.BattleFieldCells[x][y] = bfCells[x][y] as ServerSideBattleFieldCell.IMongooseBattleFieldCell;
         }
     }
