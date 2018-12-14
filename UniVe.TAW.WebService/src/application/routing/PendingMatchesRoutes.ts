@@ -46,8 +46,8 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<string> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
 
                 const pendingMatchCriteria = {
                     PlayerId: userObjectId
@@ -108,8 +108,8 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<boolean> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
 
                 const pendingMatchCriteria = {
                     PlayerId: userObjectId,
@@ -175,7 +175,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 console.log(chalk.green("Pending match identified"));
 
-                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUser = (request.user as DTOs.IUserJWTPayload);
                 const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
                 // ensure the pending match is not trying to be joined by the same player who created it

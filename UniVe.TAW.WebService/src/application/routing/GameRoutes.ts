@@ -32,8 +32,8 @@ export default class GameRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IPlayablesDto> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 DataManager.GetPlayables(userObjectId)
                     .then(playables => {
 

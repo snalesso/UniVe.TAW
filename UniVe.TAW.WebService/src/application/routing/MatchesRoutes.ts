@@ -84,8 +84,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IOwnSideMatchConfigStatus> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchHexId = request.params[RoutingParamKeys.matchId];
                 const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
 
@@ -137,8 +137,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IOwnSideMatchConfigStatus> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchHexId = request.params[RoutingParamKeys.matchId];
                 const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
 
@@ -214,8 +214,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IOwnSideMatchStatus> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 const userModel = User.getModel();
@@ -270,8 +270,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IOwnTurnInfoDto> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 const userModel = User.getModel();
@@ -345,8 +345,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IAttackResultDto> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
                 const singleShotAction = request.body as game.ISingleShotMatchAction;
 
@@ -462,8 +462,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IEnemyTurnInfoDto> = null;
 
-                const userJWTData = (request.user as DTOs.IUserJWTData);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
                 const userModel = User.getModel();

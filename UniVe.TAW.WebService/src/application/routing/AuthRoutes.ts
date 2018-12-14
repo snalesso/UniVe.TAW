@@ -1,12 +1,8 @@
-import * as http from 'http';
-import * as https from 'https';
-import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as httpStatusCodes from 'http-status-codes';
 import * as passport from 'passport';
 import * as passportHTTP from 'passport-http';
 import * as jwt from 'jsonwebtoken';
-import * as expressJwt from 'express-jwt';
 import * as mongodb from 'mongodb';
 import * as socketio from 'socket.io';
 
@@ -16,10 +12,8 @@ import * as utils from '../../infrastructure/utils-2.8';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
 import * as DTOs from '../DTOs';
-import RoutingParamKeys from './RoutingParamKeys';
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
-import * as cors from 'cors';
 
 import * as moment from 'moment';
 
@@ -30,23 +24,20 @@ export default class GameRoutes extends RoutesBase {
         super(socketIOServer);
 
         passport.use(new passportHTTP.BasicStrategy(
-            (username, password, done) => {
+            (username, password, verifiedCallback: (error: net.IHttpResponseError, user?: User.IMongooseUser) => void) => {
                 console.log(chalk.yellow("Passport validating credentials ... "));
 
                 const criteria = { Username: username } as utils.Mutable<User.IMongooseUser>;
 
                 User.getModel()
-                    .findOne(criteria, (error, user: User.IMongooseUser) => {
+                    .findOne(criteria, (error: mongodb.MongoError, user: User.IMongooseUser) => {
                         if (error) {
-                            return done({ statusCode: httpStatusCodes.INTERNAL_SERVER_ERROR, error: true, errormessage: error });
+                            return verifiedCallback({ Message: error.message, Status: httpStatusCodes.INTERNAL_SERVER_ERROR });
                         }
-                        if (!user) {
-                            return done({ statusCode: httpStatusCodes.UNAUTHORIZED, error: true, errormessage: "Invalid user" });
+                        if (!user || !user.validatePassword(password)) {
+                            return verifiedCallback({ Message: "Invalid credentials", Status: httpStatusCodes.UNAUTHORIZED });
                         }
-                        if (user.validatePassword(password)) {
-                            return done(null, user);
-                        }
-                        return done({ statusCode: httpStatusCodes.UNAUTHORIZED, error: true, errormessage: "Invalid password" });
+                        return verifiedCallback(null, user);
                     });
             }
         ));
@@ -68,10 +59,9 @@ export default class GameRoutes extends RoutesBase {
                     console.log(chalk.red("Login failed!"));
 
                     responseData = new net.HttpMessage(null, "Invalid credentials");
-                    response
+                    return response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
-                    return;
                 }
 
                 if (user.BannedUntil && user.BannedUntil < new Date()) {
@@ -82,12 +72,12 @@ export default class GameRoutes extends RoutesBase {
 
                 if (user.BannedUntil) {
                     responseData = new net.HttpMessage(null, "You are banned until " + moment(user.BannedUntil).format("DD/MM/YYYY HH:mm:ss"));
-                    response
+                    return response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
                 }
                 else {
-                    let jwtPayload: DTOs.IUserJWTData = {
+                    let jwtPayload: DTOs.IUserJWTPayload = {
                         Id: user._id.toHexString(),
                         Username: user.Username,
                         BannedUtil: user.BannedUntil
@@ -102,7 +92,7 @@ export default class GameRoutes extends RoutesBase {
                     console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user._id.toHexString() + ", token: " + token + ")");
 
                     responseData = new net.HttpMessage<string>(token);
-                    response
+                    return response
                         .status(httpStatusCodes.OK)
                         .json(responseData);
                 }
@@ -113,17 +103,17 @@ export default class GameRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
-                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUser = (request.user as DTOs.IUserJWTPayload);
                 let responseData: net.HttpMessage<boolean>;
 
                 if (!jwtUser) {
                     responseData = new net.HttpMessage<boolean>(false, "You need to be logged in to log out.");
-                    response
+                    return response
                         .status(httpStatusCodes.BAD_REQUEST)
                         .json(responseData);
                 } else {
                     responseData = new net.HttpMessage<boolean>(true);
-                    response
+                    return response
                         .status(httpStatusCodes.OK)
                         .json(responseData);
                 }

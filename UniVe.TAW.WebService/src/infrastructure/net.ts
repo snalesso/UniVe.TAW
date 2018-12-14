@@ -5,3 +5,8 @@ export class HttpMessage<T> {
         public readonly ErrorMessage?: string) {
     }
 }
+
+export interface IHttpResponseError {
+    Message: string;
+    Status: number;
+}

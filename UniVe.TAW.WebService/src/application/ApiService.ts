@@ -23,6 +23,8 @@ import * as utils from '../infrastructure/utils';
 
 import ServiceEventKeys from './services/ServiceEventKeys';
 import DBUtils from './services/DBUtils';
+import passport = require('passport');
+import * as jwt from 'jsonwebtoken';
 
 export default class ApiService {
 
@@ -138,22 +140,12 @@ export default class ApiService {
         this._expressApp.use(cors());
 
         // handles express-jwt invalid tokens
-        this._expressApp.use((error: expressJwt.UnauthorizedError, request: express.Request, response: express.Response, next: express.NextFunction) => {
-            console.log(chalk.red("UnauthorizedError (JWT): ") + JSON.stringify(error.message));
-            response
-                .status(httpStatusCodes.UNAUTHORIZED)
-                .json(new net.HttpMessage<string>(null, error.message));
+        this._expressApp.use((error: net.IHttpResponseError, request: express.Request, response: express.Response, next: express.NextFunction) => {
+            console.log(chalk.red("Unhandled error: ") + error.Message);
+            return response
+                .status(error.Status)
+                .json(new net.HttpMessage(null, error.Message));
         });
-        // handles unhandled errors
-        this._expressApp.use(function (err, req, res, next) {
-            console.log(chalk.red("Request error: ") + JSON.stringify(err));
-            res.status(err.statusCode || 500).json(err);
-
-        });
-        // handle request that point to invalid endpoints
-        // this._expressApp.use((req, res, next) => {
-        //     res.status(404).json({ statusCode: 404, error: true, errormessage: "Invalid endpoint " + req.url });
-        // });
     }
 
     private ConfigRoutes() {

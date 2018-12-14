@@ -34,7 +34,7 @@ export default abstract class RoutesBase {
 
     private isTokenRevokedCallback(
         req: express.Request,
-        payload: DTOs.IUserJWTData,
+        payload: DTOs.IUserJWTPayload,
         done: (err: any, revoked: boolean) => any) {
 
         User.getModel().findById(payload.Id)

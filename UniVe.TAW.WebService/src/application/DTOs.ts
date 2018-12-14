@@ -30,7 +30,7 @@ export interface ILoginCredentials {
     Password: string;
 }
 
-export interface IUserJWTData {
+export interface IUserJWTPayload {
     Id: string;
     Username: string;
     BannedUtil: Date;

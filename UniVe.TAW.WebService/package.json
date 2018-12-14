@@ -30,6 +30,7 @@
     "@types/jsonwebtoken": "^7.2.8",
     "@types/mongoose": "^5.2.22",
     "@types/node": "^9.6.23",
+    "@types/passport-http": "^0.3.6",
     "@types/socket.io": "^1.4.38",
     "chalk": "^2.4.1",
     "del": "^3.0.0",

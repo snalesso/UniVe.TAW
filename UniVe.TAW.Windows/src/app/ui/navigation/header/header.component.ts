@@ -22,7 +22,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private readonly _router: Router) {
   }
 
-  private _userData: DTOs.IUserJWTData;
+  private _userData: DTOs.IUserJWTPayload;
   public get Username() { return this._userData != null ? this._userData.Username : null; }
 
   public get UserId() { return this._userData != null ? this._userData.Id : null; }

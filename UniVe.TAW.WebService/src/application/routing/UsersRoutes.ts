@@ -94,8 +94,8 @@ export default class UsersRoutes extends RoutesBase {
             //this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                //const userJWTData = (request.user as DTOs.IUserJWTData);
-                //const userObjectId = new mongoose.Types.ObjectId(userJWTData.Id);
+                //const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                //const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 let responseData: net.HttpMessage<DTOs.IUserRanking[]> = null;
 
                 Promise
@@ -208,7 +208,7 @@ export default class UsersRoutes extends RoutesBase {
                 const userId = request.params[RoutingParamKeys.userId];
                 let responseData: net.HttpMessage<boolean> = null;
 
-                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUser = (request.user as DTOs.IUserJWTPayload);
                 const loggedUser = await User.getModel().findById(jwtUser.Id).exec();
 
                 if (!loggedUser || loggedUser.Roles != identity.UserRoles.Admin || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
@@ -382,7 +382,7 @@ export default class UsersRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response) => {
 
-                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUser = (request.user as DTOs.IUserJWTPayload);
 
                 let responseData: net.HttpMessage<Date>;
 
@@ -465,7 +465,7 @@ export default class UsersRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response) => {
 
-                const jwtUser = (request.user as DTOs.IUserJWTData);
+                const jwtUser = (request.user as DTOs.IUserJWTPayload);
 
                 let responseData: net.HttpMessage<identity.UserRoles>;
 

@@ -25,11 +25,11 @@ export class AuthService implements OnDestroy {
   constructor(private readonly http: ng_http.HttpClient) {
 
     this._whenTokenChanged = new BehaviorSubject<string>(null);
-    this._whenLoggedUserChanged = new BehaviorSubject<DTOs.IUserJWTData>(null);
+    this._whenLoggedUserChanged = new BehaviorSubject<DTOs.IUserJWTPayload>(null);
     this._whenIsLoggedChanged = new BehaviorSubject<boolean>(false);
 
     this._subscriptions.push(this._whenTokenChanged.subscribe(value => {
-      this._whenLoggedUserChanged.next(value != null ? jwt_decode<DTOs.IUserJWTData>(value) : null);
+      this._whenLoggedUserChanged.next(value != null ? jwt_decode<DTOs.IUserJWTPayload>(value) : null);
       this._whenIsLoggedChanged.next(this.IsLogged);
     }));
 
@@ -41,7 +41,7 @@ export class AuthService implements OnDestroy {
   public get WhenTokenChanged() { return this._whenTokenChanged.asObservable(); }
 
   public get LoggedUser() { return this._whenLoggedUserChanged.getValue(); }
-  private readonly _whenLoggedUserChanged: BehaviorSubject<DTOs.IUserJWTData>;
+  private readonly _whenLoggedUserChanged: BehaviorSubject<DTOs.IUserJWTPayload>;
   public get WhenLoggedUserChanged() { return this._whenLoggedUserChanged.asObservable(); }
 
   public get IsLogged() { return this.Token != null; }
@@ -78,7 +78,7 @@ export class AuthService implements OnDestroy {
       .post<net.HttpMessage<string>>(endPoint, null, options)
       .pipe(
         tap((response) => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log("Login failed - server says: " + JSON.stringify(response.ErrorMessage));
           }
           else {

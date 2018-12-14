@@ -25,7 +25,7 @@ export class SideMenuComponent implements OnInit {
     this._subscriptions.push(this._authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
   }
 
-  private _userData: DTOs.IUserJWTData;
+  private _userData: DTOs.IUserJWTPayload;
   public get Username() { return this._userData != null ? this._userData.Username : null; }
 
   public get IsLogged() { return this._authService.IsLogged; }

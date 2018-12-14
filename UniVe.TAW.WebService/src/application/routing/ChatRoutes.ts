@@ -35,8 +35,8 @@ export default class ChatRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IChatDto[]>;
 
-                const currentUserJWTData = (request.user as DTOs.IUserJWTData);
-                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
+                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
 
                 const users = await User.getModel().find().exec();
 
@@ -47,7 +47,7 @@ export default class ChatRoutes extends RoutesBase {
 
                     if (!user._id.equals(currentUserObjectId)) {
                         const msgs = (user.SentMessages != null
-                            ? user.SentMessages.get(currentUserJWTData.Id)
+                            ? user.SentMessages.get(currentUserJWTPayload.Id)
                             : null);
                         const msgDtos = (msgs != null ? msgs : [])
                             .map(msg => ({
@@ -147,8 +147,8 @@ export default class ChatRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<DTOs.IChatMessageDto>;
 
-                const currentUserJWTData = (request.user as DTOs.IUserJWTData);
-                const senderUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
+                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const senderUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
                 const incMsg = request.body as DTOs.INewMessage;
 
                 if (!incMsg) {
@@ -228,8 +228,8 @@ export default class ChatRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatMessageDto>>;
 
-                const currentUserJWTData = (request.user as DTOs.IUserJWTData);
-                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTData.Id);
+                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
                 const otherUserHexId = request.params[RoutingParamKeys.userId];
                 const otherUserObjectId = new mongoose.Types.ObjectId(otherUserHexId);
 
@@ -255,7 +255,7 @@ export default class ChatRoutes extends RoutesBase {
                             }
                         }
                         if (otherUser.SentMessages) {
-                            const oum = otherUser.SentMessages.get(currentUserJWTData.Id);
+                            const oum = otherUser.SentMessages.get(currentUserJWTPayload.Id);
                             if (oum) {
                                 for (let m of oum) {
                                     messageDtos.push({
