@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "ionic serve",
+            "type": "shell",
+            "command": "ionic serve --address localhost --port=8100"
+        },
+        {
+            "label": "cordova run browser",
+            "type": "shell",
+            "command": "ionic",
+            "args": [
+                "cordova run browser"
+            ]
+        },
+        {
+            "label": "ionic cordova run android",
+            "type": "shell",
+            "command": "ionic cordova run android"
+        }
+    ]
+}
