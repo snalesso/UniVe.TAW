@@ -53,6 +53,7 @@ export class AuthService implements OnDestroy {
         'Content-Type': 'application/json'
       })
     };
+
     return this.http.post<net.HttpMessage<boolean>>(
       endPoint,
       signupRequest,

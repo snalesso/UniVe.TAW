@@ -112,6 +112,7 @@ export default class GameRoutes extends RoutesBase {
             '/logout',
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
+
                 const jwtUser = (request.user as DTOs.IUserJWTData);
                 let responseData: net.HttpMessage<boolean>;
 

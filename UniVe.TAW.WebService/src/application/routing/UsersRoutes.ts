@@ -90,7 +90,7 @@ export default class UsersRoutes extends RoutesBase {
             });
 
         this._router.get(
-            '/rankings',//:' + RoutingParamKeys.userId,
+            '/rankings',
             //this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 

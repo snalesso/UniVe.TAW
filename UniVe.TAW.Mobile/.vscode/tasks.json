@@ -4,22 +4,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "ionic serve",
+            "label": "ionic cordova run browser",
             "type": "shell",
-            "command": "ionic serve --address localhost --port=8100"
-        },
-        {
-            "label": "cordova run browser",
-            "type": "shell",
-            "command": "ionic",
-            "args": [
-                "cordova run browser"
-            ]
+            "command": "ionic cordova run browser",
+            "options": {
+                "env": {
+                    "ServerAddress:": "127.0.0.1"
+                }
+            }
         },
         {
             "label": "ionic cordova run android",
             "type": "shell",
-            "command": "ionic cordova run android"
+            "command": "ionic cordova run android -l"
         }
     ]
 }
