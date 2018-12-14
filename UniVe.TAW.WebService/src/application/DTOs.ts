@@ -36,12 +36,6 @@ export interface IUserJWTPayload {
     BannedUtil: Date;
 }
 
-// export interface IMatchCreationRequestDto {
-//     constructor(
-//          PlayerId: string;
-//     }
-// }
-
 export interface IPendingMatchDto {
     Id: string;
     PlayerId: string;
