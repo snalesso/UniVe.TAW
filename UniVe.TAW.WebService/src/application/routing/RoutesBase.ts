@@ -33,15 +33,15 @@ export default abstract class RoutesBase {
     public get Router() { return this._router; }
 
     private isTokenRevokedCallback(
-        req: express.Request,
+        request: express.Request,
         payload: DTOs.IUserJWTPayload,
-        done: (err: any, revoked: boolean) => any) {
+        done: (errorMessage: string, revoked: boolean) => any) {
 
         User.getModel().findById(payload.Id)
             .then((user: User.IMongooseUser) => {
-                const error = user.BannedUntil == null ? null : "User banned";
+                const errMsg = user.BannedUntil ? "User banned" : null;
                 const isRevoked = user.BannedUntil != null;
-                return done(error, isRevoked);
+                return done(errMsg, isRevoked);
             })
             .catch((error: MongoError) => {
                 return done("Couldn't validate token", true);
