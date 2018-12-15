@@ -17,7 +17,12 @@ import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 export class SignupPage implements OnInit {
 
   public readonly Countries: { id: identity.Country, name: string }[];
-  public readonly SignupRequest = { Username: "_sergio", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy } as DTOs.ISignupRequestDto;
+  public readonly SignupRequest = {
+    //Username: "_sergioo",
+    //Password: "aaa",
+    // BirthDate: new Date('1993-03-16'),
+    CountryId: identity.Country.Undefined
+  } as DTOs.ISignupRequestDto;
 
   constructor(
     private readonly _authService: AuthService,

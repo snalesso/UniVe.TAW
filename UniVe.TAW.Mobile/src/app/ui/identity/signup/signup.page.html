@@ -47,9 +47,9 @@
 
     <ion-item>
       <ion-label>Country</ion-label>
-      <ion-select class="form-control" id="signup-form-countryId" name="country">
+      <ion-select class="form-control" id="signup-form-countryId" name="countrySelect" [(ngModel)]="SignupRequest.CountryId">
         <ion-select-option *ngFor="let country of Countries; index as i;" [attr.selected]="i == SignupRequest.CountryId ? true : null"
-          [value]="country.id">{{country.name}}</ion-select-option>
+          [value]="country.id">{{ i != 0 ? country.name : '' }}</ion-select-option>
       </ion-select>
     </ion-item>
 

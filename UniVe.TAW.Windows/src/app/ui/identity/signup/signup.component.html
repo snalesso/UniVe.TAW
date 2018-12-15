@@ -49,9 +49,9 @@
 
     <div class="form-group">
       <!-- <input type="" #country="ngModel" placeholder="Country"> -->
-      <select class="form-control" id="signup-form-countryId" name="country">
-        <option *ngFor="let country of Countries; index as i;" [attr.selected]="i == SignupRequest.CountryId ? true : null"
-          [value]="country.id">{{country.name}}</option>
+      <select class="form-control" id="signup-form-countryId" name="country" [(ngModel)]="SignupRequest.CountryId">
+        <option *ngFor="let country of Countries; index as i;" [ngValue]="country.id" [attr.selected]="i == SignupRequest.CountryId ? true : null">{{i
+          != 0 ? country.name : ''}}</option>
       </select>
     </div>
 

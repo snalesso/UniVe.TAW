@@ -16,7 +16,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class SignupComponent implements OnInit {
 
   public readonly Countries: { id: identity.Country, name: string }[];
-  public readonly SignupRequest = { /*Username: "Daedalus", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy*/ } as DTOs.ISignupRequestDto;
+  public readonly SignupRequest = { CountryId: identity.Country.Undefined } as DTOs.ISignupRequestDto;
 
   constructor(
     private readonly _authService: AuthService,
@@ -25,6 +25,7 @@ export class SignupComponent implements OnInit {
     this.Countries = Object.keys(identity.Country)
       .filter(countryName => !isNaN(identity.Country[countryName]))
       .map(countryName => ({ id: identity.Country[countryName], name: countryName }));
+    //this.Countries.unshift({ id: undefined, name: "" })
   }
 
   public RepeatedPassword: string;

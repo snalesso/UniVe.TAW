@@ -22,7 +22,10 @@ export class LoginComponent implements OnInit {
     private readonly _router: Router) {
   }
 
-  private _loginRequest = { /*Username: "Daedalus", Password: "aaa"*/ } as DTOs.ILoginCredentials;
+  private _loginRequest = {
+    // Username: "Daedalus",
+    // Password: "aaa"
+  } as DTOs.ILoginCredentials;
   public get LoginRequest() { return this._loginRequest; }
 
   private _responseError: string;
