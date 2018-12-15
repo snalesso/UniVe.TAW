@@ -6,6 +6,8 @@ import * as expressJwt from 'express-jwt';
 import * as DTOs from '../../application/DTOs';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import { MongoError } from 'mongodb';
+import *  as net from '../../infrastructure/net';
+import * as httpStatusCodes from 'http-status-codes';
 
 export default abstract class RoutesBase {
 
@@ -35,16 +37,16 @@ export default abstract class RoutesBase {
     private isTokenRevokedCallback(
         request: express.Request,
         payload: DTOs.IUserJWTPayload,
-        done: (errorMessage: string, revoked: boolean) => any) {
+        done: (errorMessage: net.IHttpResponseError, revoked: boolean) => any) {
 
         User.getModel().findById(payload.Id)
             .then((user: User.IMongooseUser) => {
-                const errMsg = user.BannedUntil ? "User banned" : null;
-                const isRevoked = user.BannedUntil != null;
-                return done(errMsg, isRevoked);
+                const error: net.IHttpResponseError = (!user || user.BannedUntil) ? { Message: "Invalid token", Status: httpStatusCodes.UNAUTHORIZED } : null;
+                const isRevoked = !user || !!user.BannedUntil;
+                return done(error, isRevoked);
             })
             .catch((error: MongoError) => {
-                return done("Couldn't validate token", true);
+                return done({ Message: "Couldn't validate token", Status: httpStatusCodes.INTERNAL_SERVER_ERROR }, true);
             });
     }
 }

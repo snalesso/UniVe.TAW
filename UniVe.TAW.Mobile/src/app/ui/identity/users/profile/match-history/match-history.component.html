@@ -15,8 +15,7 @@
       <span> VS </span>
       <a routerLink="/users/{{UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id}}" *ngIf="(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
         == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</a>
-      <span *ngIf="!(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">{{UserId
-        == ems.FirstPlayer.Id ? ems.SecondPlayer.Username : ems.FirstPlayer.Username}}</span>
+      <del *ngIf="!(UserId == ems.FirstPlayer.Id ? ems.SecondPlayer.Id : ems.FirstPlayer.Id)">Deleted User</del>
     </ion-card-title>
   </ion-card-header>
 </ion-card>

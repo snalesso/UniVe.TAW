@@ -4,6 +4,7 @@ import { AuthService } from '../../../services/auth.service';
 import * as jwt_decode from 'jwt-decode';
 import * as httpStatusCodes from 'http-status-codes';
 
+import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
@@ -34,11 +35,10 @@ export class LoginComponent implements OnInit {
   }
 
   public sendLoginRequest() {
-    // TODO: handle no response when server is down
     this._authService.login(this.LoginRequest)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             this._responseError = response.ErrorMessage;
           }
           else if (response.Content) {
@@ -46,7 +46,8 @@ export class LoginComponent implements OnInit {
           }
         },
         (response: HttpErrorResponse) => {
-          this._responseError = response.error.ErrorMessage ? response.error.ErrorMessage : response.statusText;
+          const httpMessage = response.error as net.HttpMessage<string>;
+          this._responseError = httpMessage ? httpMessage.ErrorMessage : response.message;
         });
   }
 

@@ -21,62 +21,62 @@ import { LoggedInGuardService } from './services/logged-in-guard.service';
 import { LoggedOutGuardService } from './services/logged-out-guard.service';
 
 const routes: Routes = [
-    { path: '', redirectTo: ViewsRoutingKeys.MatchFinder, pathMatch: 'full' },
-    {
-        path: ViewsRoutingKeys.Signup,
-        component: SignupComponent,
-        canActivate: [LoggedOutGuardService]
-    },
-    {
-        path: ViewsRoutingKeys.Login,
-        component: LoginComponent,
-        canActivate: [LoggedOutGuardService]
-    },
-    {
-        path: ViewsRoutingKeys.MatchFinder,
-        component: MatchFinderComponent,
-        canActivate: [LoggedInGuardService]
-    },
-    {
-        path: RoutingHelper.buildRoute([
-            new RouteStep(ViewsRoutingKeys.Match),
-            new RouteParam(RoutingParamKeys.matchId)
-        ]),
-        component: MatchComponent,
-        canActivate: [LoggedInGuardService]
-    },
-    {
-        path: ViewsRoutingKeys.Rankings,
-        component: RankingsComponent
-    },
-    {
-        path: RoutingHelper.buildRoute([
-            new RouteStep(ViewsRoutingKeys.Users),
-            new RouteParam(RoutingParamKeys.userId)
-        ]),
-        component: ProfileComponent
-    },
-    // {
-    //   path: RoutingHelper.buildRoute([
-    //     new RouteStep(ViewsRoutingKeys.Users),
-    //     new RouteStep(RoutingParamKeys.self)
-    //   ]),
-    //   component: ProfileComponent,
-    //   canActivate: [LoggedInGuardService]
-    // },
-    {
-        path: RoutingHelper.buildRoute([
-            new RouteStep(ViewsRoutingKeys.Chat)
-        ]),
-        component: ChatComponent,
-        canActivate: [LoggedInGuardService]
-    }
+  { path: '', redirectTo: ViewsRoutingKeys.MatchFinder, pathMatch: 'full' },
+  {
+    path: ViewsRoutingKeys.Signup,
+    component: SignupComponent,
+    canActivate: [LoggedOutGuardService]
+  },
+  {
+    path: ViewsRoutingKeys.Login,
+    component: LoginComponent,
+    canActivate: [LoggedOutGuardService]
+  },
+  {
+    path: ViewsRoutingKeys.MatchFinder,
+    component: MatchFinderComponent,
+    canActivate: [LoggedInGuardService]
+  },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Match),
+      new RouteParam(RoutingParamKeys.matchId)
+    ]),
+    component: MatchComponent,
+    canActivate: [LoggedInGuardService]
+  },
+  {
+    path: ViewsRoutingKeys.Rankings,
+    component: RankingsComponent
+  },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Users),
+      new RouteParam(RoutingParamKeys.userId)
+    ]),
+    component: ProfileComponent
+  },
+  // {
+  //   path: RoutingHelper.buildRoute([
+  //     new RouteStep(ViewsRoutingKeys.Users),
+  //     new RouteStep(RoutingParamKeys.self)
+  //   ]),
+  //   component: ProfileComponent,
+  //   canActivate: [LoggedInGuardService]
+  // },
+  {
+    path: RoutingHelper.buildRoute([
+      new RouteStep(ViewsRoutingKeys.Chat)
+    ]),
+    component: ChatComponent,
+    canActivate: [LoggedInGuardService]
+  }
 ];
 
 @NgModule({
-    imports: [
-        RouterModule.forRoot(routes, { useHash: false }),
-        SocketIoModule.forRoot({ url: ServiceConstants.ServerAddress, options: {} })],
-    exports: [RouterModule]
+  imports: [
+    RouterModule.forRoot(routes),
+    SocketIoModule.forRoot({ url: ServiceConstants.ServerAddress, options: {} })],
+  exports: [RouterModule]
 })
 export class AppRoutingModule { }

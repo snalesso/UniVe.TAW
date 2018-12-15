@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
+import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
@@ -84,7 +85,7 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
       .getEnemyTurnInfo(this._matchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
@@ -118,13 +119,17 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
             }
           }
         },
-        (error: ngHttp.HttpErrorResponse) => {
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
         });
   }
 
   ngOnDestroy(): void {
-    this._socketIOService.removeListener(this._youGotShotEvent);
-    this._youGotShotEvent = null;
+    if (this._youGotShotEvent) {
+      this._socketIOService.removeListener(this._youGotShotEvent);
+      this._youGotShotEvent = null;
+    }
   }
 
 }

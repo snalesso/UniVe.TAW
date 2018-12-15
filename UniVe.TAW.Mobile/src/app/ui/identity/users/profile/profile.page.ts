@@ -96,6 +96,10 @@ export class ProfilePage implements OnInit {
 
   public get WindPercent() { return this.Profile ? Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100) : null; }
 
+  public getCountryName(countryId: number) {
+    return identity.Country[countryId];
+  }
+
   public ban(hours: number) {
     this._identityService.ban(this._userId, hours)
       .subscribe(

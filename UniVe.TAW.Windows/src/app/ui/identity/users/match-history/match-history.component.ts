@@ -56,7 +56,10 @@ export class MatchHistoryComponent implements OnInit {
           response => {
             this._endedMatchSummaries = response.Content;
           },
-          (error: ngHttp.HttpErrorResponse) => { });
+          (response: ngHttp.HttpErrorResponse) => {
+            const httpMessage = response.error as net.HttpMessage<string>;
+            console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+          });
     }
   }
 

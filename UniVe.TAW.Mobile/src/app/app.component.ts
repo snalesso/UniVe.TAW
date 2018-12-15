@@ -60,7 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
             const alert = await this.alertController.create({
               buttons: ["Ok"],
               message: "You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss") +
-                "<br>" + "You will be logeed out.",
+                "<br>" + "You have been be logged out.",
               header: "You got banned!"
             });
             await alert.present();
@@ -74,8 +74,8 @@ export class AppComponent implements OnInit, OnDestroy {
           console.log("account deleted");
           const alert = await this.alertController.create({
             buttons: ["Ok"],
-            message: "Your account has been DELETED by the Admin! :O" + "<br>" + "WTF did you do??? BYE",
-            header: "ACCOUNT DELETED!"
+            message: "Your account has been DELETED!",
+            header: "Account DELETED"
           });
           await alert.present();
         });

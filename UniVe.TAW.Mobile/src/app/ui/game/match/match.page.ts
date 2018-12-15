@@ -133,7 +133,7 @@ export class MatchPage implements OnInit, OnDestroy {
                     header: "Match canceled"
                   });
                   await alert.present();
-                  this._router.navigate(["/match-finder"]);
+                  this._router.navigate([ViewsRoutingKeys.MatchFinder]);
                 });
 
               // //const x = await this._tabs.getSelected();
@@ -151,7 +151,7 @@ export class MatchPage implements OnInit, OnDestroy {
             }
           },
           (error: http.HttpErrorResponse) => {
-            this._router.navigate(["/match-finder"]);
+            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
           });
     }
   }

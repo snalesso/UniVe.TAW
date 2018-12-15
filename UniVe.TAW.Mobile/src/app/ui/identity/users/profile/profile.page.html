@@ -19,6 +19,11 @@
           <ion-badge color="secondary">{{["Player", "Mod", "Admin"][Profile.Roles - 1]}}</ion-badge>
         </h1>
 
+        <p>
+          <span *ngIf="Profile.Age >= 0">{{Profile.Age}} years </span>
+          <span *ngIf="Profile.CountryId">from {{getCountryName(Profile.CountryId)}}</span>
+        </p>
+
       </ion-col>
     </ion-row>
 

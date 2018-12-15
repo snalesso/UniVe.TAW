@@ -91,7 +91,7 @@ export default class GameRoutes extends RoutesBase {
 
                     console.log(chalk.green("Login SUCCESSFUL for ") + user.Username + " (id: " + user._id.toHexString() + ", token: " + token + ")");
 
-                    responseData = new net.HttpMessage<string>(token);
+                    responseData = new net.HttpMessage(token);
                     return response
                         .status(httpStatusCodes.OK)
                         .json(responseData);
@@ -107,12 +107,12 @@ export default class GameRoutes extends RoutesBase {
                 let responseData: net.HttpMessage<boolean>;
 
                 if (!jwtUser) {
-                    responseData = new net.HttpMessage<boolean>(false, "You need to be logged in to log out.");
+                    responseData = new net.HttpMessage(false, "You need to be logged in to log out.");
                     return response
                         .status(httpStatusCodes.BAD_REQUEST)
                         .json(responseData);
                 } else {
-                    responseData = new net.HttpMessage<boolean>(true);
+                    responseData = new net.HttpMessage(true);
                     return response
                         .status(httpStatusCodes.OK)
                         .json(responseData);

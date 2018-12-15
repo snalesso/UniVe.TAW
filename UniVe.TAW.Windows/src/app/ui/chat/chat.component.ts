@@ -20,7 +20,9 @@ import { ChatService } from '../../services/chat.service';
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, OnDestroy {
+
+  private _youGotANewMessageEventKey: string;
 
   constructor(
     private readonly _authService: AuthService,
@@ -52,12 +54,19 @@ export class ChatComponent implements OnInit {
           (error: ngHttp.HttpErrorResponse) => { });
 
       this._socketIOService.on(
-        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id),
+        (this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id)),
         (newMessage: DTOs.IChatMessageDto) => {
           const chatsToUpdate = this.Chats.filter(chat => chat.Interlocutor.Id == newMessage.SenderId);
           for (let chat of chatsToUpdate)
             chat.Messages.push(newMessage);
         });
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this._youGotANewMessageEventKey) {
+      this._socketIOService.removeListener(this._youGotANewMessageEventKey);
+      this._youGotANewMessageEventKey = null;
     }
   }
 

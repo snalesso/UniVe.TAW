@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import * as $ from 'jquery';
 
 import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
+import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-signup',
@@ -44,7 +45,11 @@ export class SignupComponent implements OnInit {
         } else {
           this._router.navigate([ViewsRoutingKeys.Login]);
         }
-      });
+      },
+        (response: HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
   ngOnInit() {

@@ -33,11 +33,9 @@ export default class DataManager {
             try {
                 const playingMatch = await this.GetPlayingMatch(userId);
                 if (playingMatch != null) {
-                    playables.PlayingMatch = ({
-                        Id: playingMatch._id.toHexString(),
-                    } as DTOs.IMatchSnapshotDto);
+                    playables.PlayingMatchId = playingMatch._id.toHexString();
                 }
-                playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatch == null);
+                playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatchId == null);
                 // if can't create a match it means can't join, then it's useless to query joinable matches
                 if (!playables.CanCreateMatch) {
                     return playables;

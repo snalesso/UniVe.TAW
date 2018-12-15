@@ -182,7 +182,7 @@ export default class UsersRoutes extends RoutesBase {
                         let userDto: DTOs.IUserDto = {
                             Id: user.id,
                             Username: user.Username,
-                            Age: moment().diff(user.BirthDate, "years", false),
+                            Age: user.getAge(),
                             CountryId: user.CountryId,
                             Roles: user.Roles,
                             BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null
@@ -213,17 +213,16 @@ export default class UsersRoutes extends RoutesBase {
 
                 if (!loggedUser || loggedUser.Roles != identity.UserRoles.Admin || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
                     responseData = new net.HttpMessage(false, "You have no power here!");
-                    response
+                    return response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
-                    return;
                 }
 
                 const user = await User.getModel().findById(userId).exec();
                 if (!user) {
 
                     responseData = new net.HttpMessage(false, "User not found!");
-                    response
+                    return response
                         .status(httpStatusCodes.NOT_FOUND)
                         .json(responseData);
                 } else {
@@ -232,9 +231,8 @@ export default class UsersRoutes extends RoutesBase {
 
                     if (!deletedUser) {
                         responseData = new net.HttpMessage(false, "User deletion failed");
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR)
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
-                        return;
                     }
 
                     // immediately incapacitate user
@@ -289,8 +287,10 @@ export default class UsersRoutes extends RoutesBase {
                         }
                     }
 
+                    // TODO: notify removed chats
+
                     responseData = new net.HttpMessage(true);
-                    response
+                    return response
                         .status(httpStatusCodes.OK)
                         .json(responseData);
                 }
@@ -317,7 +317,7 @@ export default class UsersRoutes extends RoutesBase {
                                     let profileDto: DTOs.IUserProfile = {
                                         Id: user.id,
                                         Username: user.Username,
-                                        Age: moment().diff(user.BirthDate, "years", false),
+                                        Age: user.getAge(),
                                         CountryId: user.CountryId,
                                         Roles: user.Roles,
                                         BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null,
@@ -339,7 +339,7 @@ export default class UsersRoutes extends RoutesBase {
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage<DTOs.IUserProfile>(null, error.message);
+                        responseData = new net.HttpMessage(null, error.message);
                         response
                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
@@ -537,11 +537,11 @@ export default class UsersRoutes extends RoutesBase {
                                 WinnerId: em.WinnerId.toHexString(),
                                 FirstPlayer: {
                                     Id: fp != null ? fp._id.toHexString() : null,
-                                    Username: fp != null ? fp.Username : "<Deleted User>"
+                                    Username: fp != null ? fp.Username : null
                                 },
                                 SecondPlayer: {
                                     Id: sp != null ? sp._id.toHexString() : null,
-                                    Username: sp != null ? sp.Username : "<Deleted User>"
+                                    Username: sp != null ? sp.Username : null
                                 }
                             } as DTOs.IEndedMatchSummaryDto);
                         });

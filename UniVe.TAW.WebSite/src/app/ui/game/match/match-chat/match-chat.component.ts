@@ -8,7 +8,7 @@ import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DT
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
 import { AuthService } from '../../../../services/auth.service';
-import * as http from '@angular/common/http';
+import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import { ChatService } from '../../../../services/chat.service';
@@ -59,7 +59,10 @@ export class MatchChatComponent implements OnInit, OnDestroy {
           }
 
         },
-        (error: http.HttpErrorResponse) => { });
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
   ngOnDestroy(): void {

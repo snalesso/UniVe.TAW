@@ -7,6 +7,7 @@ import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
+import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
@@ -26,7 +27,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   private _firing: boolean = false;
   private _isRebuildingCells: boolean = true;
 
-  private _mue: string;
+  private _matchUpdatedeventKey: string;
 
   constructor(
     private readonly _router: Router,
@@ -72,7 +73,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
     this._gameService.singleShot(this._matchId, { Coord: cell.Coord } as game.ISingleShotMatchAction)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
@@ -92,7 +93,9 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
 
           this._firing = false;
         },
-        (error: ngHttp.HttpErrorResponse) => {
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
 
           this._firing = false;
         });
@@ -138,7 +141,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
       .getOwnTurnInfo(this._matchId)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
@@ -147,26 +150,27 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
           else {
             this._ownTurnInfo = response.Content;
 
-            if (!this._mue) {
-              this._mue = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
-              this._socketIOService.on(this._mue, (matchStarted: DTOs.IMatchStartedEventDto) => this.updateInfo());
+            if (!this._matchUpdatedeventKey) {
+              this._matchUpdatedeventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
+              this._socketIOService.on(this._matchUpdatedeventKey, (matchStarted: DTOs.IMatchStartedEventDto) => this.updateInfo());
             }
 
             this.rebuildGridCells();
           }
         },
-        (error: ngHttp.HttpErrorResponse) => {
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
         });
   }
 
   ngOnInit(): void {
-
     this.updateInfo();
-
   }
 
   ngOnDestroy(): void {
-    if (this._mue)
-      this._socketIOService.removeListener(this._mue);
+    if (this._matchUpdatedeventKey)
+      this._socketIOService.removeListener(this._matchUpdatedeventKey);
+    this._matchUpdatedeventKey = null;
   }
 }

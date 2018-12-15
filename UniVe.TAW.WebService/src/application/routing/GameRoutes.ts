@@ -11,6 +11,10 @@ import RoutesBase from './RoutesBase';
 import DataManager from '../DataManager';
 import PendingMatchesRoutes from './PendingMatchesRoutes';
 import MatchesRoutes from './MatchesRoutes';
+import * as User from '../../domain/models/mongodb/mongoose/User';
+import * as Match from '../../domain/models/mongodb/mongoose/Match';
+import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
+import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
 export default class GameRoutes extends RoutesBase {
 
@@ -28,23 +32,75 @@ export default class GameRoutes extends RoutesBase {
         this._router.get(
             "/playables",
             this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
+            async (request: express.Request, response: express.Response) => {
 
                 let responseData: net.HttpMessage<DTOs.IPlayablesDto> = null;
 
                 const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
-                DataManager.GetPlayables(userObjectId)
-                    .then(playables => {
 
-                        responseData = new net.HttpMessage(playables);
-                        response
-                            .status(httpStatusCodes.OK)
-                            .json(responseData);
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        console.log(error);
-                    });
+                const playables = {} as DTOs.IPlayablesDto;
+
+                try {
+                    const pendingMatch = await DataManager.GetPendingMatch(userObjectId);
+                    if (pendingMatch) {
+                        playables.PendingMatchId = pendingMatch.id;
+                    }
+                    try {
+                        const playingMatch = await DataManager.GetPlayingMatch(userObjectId);
+                        if (playingMatch != null) {
+                            playables.PlayingMatchId = playingMatch._id.toHexString();
+                        }
+                        playables.CanCreateMatch = (playables.PendingMatchId == null && playables.PlayingMatchId == null);
+                        // if can't create a match it means can't join, then it's useless to query joinable matches
+                        if (!playables.CanCreateMatch) {
+                            return response
+                                .status(httpStatusCodes.OK)
+                                .json(new net.HttpMessage(playables));
+                        }
+                        try {
+                            const joinableMatches = await PendingMatch.getModel()
+                                .find({ PlayerId: { $ne: userObjectId } })
+                                .populate({ path: "PlayerId", model: User.getModel() })
+                                .exec();
+
+                            playables.JoinableMatches = joinableMatches.map(jm => {
+                                const creator = (jm.PlayerId as any as User.IMongooseUser);
+                                return {
+                                    Id: jm._id.toHexString(),
+                                    Creator: {
+                                        Id: creator._id.toHexString(),
+                                        Username: creator.Username,
+                                        Age: creator.getAge(),
+                                        CountryId: creator.CountryId
+                                    }
+                                } as DTOs.IJoinableMatchDto;
+                            });
+
+                            return response
+                                .status(httpStatusCodes.OK)
+                                .json(new net.HttpMessage(playables));
+                        }
+                        catch (error) {
+                            const mongoError = error as mongodb.MongoError;
+                            console.log(mongoError.message);
+                            response.statusMessage = mongoError.message;
+                            return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                        }
+                    }
+                    catch (error_1) {
+                        const mongoError = error_1 as mongodb.MongoError;
+                        console.log(mongoError.message);
+                        response.statusMessage = mongoError.message;
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                    }
+                }
+                catch (error_2) {
+                    const mongoError = error_2 as mongodb.MongoError;
+                    console.log(mongoError.message);
+                    response.statusMessage = mongoError.message;
+                    return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR);
+                }
             }
         );
     }

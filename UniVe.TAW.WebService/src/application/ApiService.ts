@@ -139,12 +139,20 @@ export default class ApiService {
         this._expressApp.use(bodyParser.json());
         this._expressApp.use(cors());
 
-        // handles express-jwt invalid tokens
-        this._expressApp.use((error: net.IHttpResponseError, request: express.Request, response: express.Response, next: express.NextFunction) => {
-            console.log(chalk.red("Unhandled error: ") + error.Message);
-            return response
-                .status(error.Status)
-                .json(new net.HttpMessage(null, error.Message));
+        this._expressApp.use((error: expressJwt.UnauthorizedError | net.IHttpResponseError, request: express.Request, response: express.Response, next: express.NextFunction) => {
+
+            if (error instanceof expressJwt.UnauthorizedError) {
+                console.log(chalk.red("expressJwt.UnauthorizedError error: ") + error.message);
+                return response
+                    .status(error.status)
+                    .json(new net.HttpMessage(null, error.message));
+            }
+            else {
+                console.log(chalk.red("IHttpResponseError: ") + error.Message);
+                return response
+                    .status(error.Status)
+                    .json(new net.HttpMessage(null, error.Message));
+            }
         });
     }
 

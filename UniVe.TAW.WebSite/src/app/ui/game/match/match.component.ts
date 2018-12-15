@@ -24,6 +24,7 @@ export class MatchComponent implements OnInit, OnDestroy {
   private _matchStatus: DTOs.IOwnSideMatchStatus;
   private _matchStartedEventKey: string;
   private _matchEndedEventKey: string;
+  private _matchCanceledEventKey: string;
 
   constructor(
     private readonly _gameService: GameService,
@@ -82,13 +83,6 @@ export class MatchComponent implements OnInit, OnDestroy {
             }
             if (!this._matchStatus.EndDateTime) {
 
-              // this._matchUpdatedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
-              // this._socketIOService.once(
-              //   this._matchUpdatedEventKey,
-              //   (matchUpdatedEvent: DTOs.IMatchUpdatedEventDto) => {
-              //     this._matchStatus.IsMatchStarted = true;
-              //   });
-              //this._matchStatus.DidIWin = true;
               this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
               this._socketIOService.once(
                 this._matchEndedEventKey,
@@ -96,22 +90,21 @@ export class MatchComponent implements OnInit, OnDestroy {
                   if (this._matchStatus) {
                     this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
                     this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
-                    //alert("YOU " + (this.DidIWin ? "WON" : "LOST") + "!");
                   }
                 });
             }
 
             this._socketIOService.once(
-              ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled),
+              (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
               (event: any) => {
                 alert("This match has been canceled!");
-                this._router.navigate(["/match-finder"]);
+                this._router.navigate([ViewsRoutingKeys.MatchFinder]);
               }
             );
           }
         },
-        (error: http.HttpErrorResponse) => {
-          this._router.navigate(["/match-finder"]);
+        (response: http.HttpErrorResponse) => {
+          this._router.navigate([ViewsRoutingKeys.MatchFinder]);
         });
 
   }
@@ -125,6 +118,10 @@ export class MatchComponent implements OnInit, OnDestroy {
     if (this._matchEndedEventKey != null) {
       this._socketIOService.removeListener(this._matchEndedEventKey);
       this._matchEndedEventKey = null;
+    }
+    if (this._matchCanceledEventKey != null) {
+      this._socketIOService.removeListener(this._matchCanceledEventKey);
+      this._matchCanceledEventKey = null;
     }
   }
 

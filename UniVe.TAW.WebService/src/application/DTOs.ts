@@ -111,7 +111,7 @@ export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
 export interface IPlayablesDto {
     CanCreateMatch: boolean;
     PendingMatchId: string;
-    PlayingMatch: IMatchSnapshotDto;
+    PlayingMatchId: string;
     JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
 }
 

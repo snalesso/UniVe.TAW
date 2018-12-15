@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import * as $ from 'jquery';
 
 import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
+import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-signup',
@@ -13,8 +14,6 @@ import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
   styleUrls: ['./signup.component.css']
 })
 export class SignupComponent implements OnInit {
-
-  // TODO: make default BirthDate from code to UI binding work. Idea: https://stackoverflow.com/a/49690089/1790497
 
   public readonly Countries: { id: identity.Country, name: string }[];
   public readonly SignupRequest = { /*Username: "Daedalus", Password: "aaa", BirthDate: new Date('1993-03-16'), CountryId: identity.Country.Italy*/ } as DTOs.ISignupRequestDto;
@@ -38,15 +37,19 @@ export class SignupComponent implements OnInit {
   }
 
   public sendSignupRequest() {
-    // TODO: handle no response when server is down
+
     this._authService.signup(this.SignupRequest)
       .subscribe(response => {
-        if (response.HasError) {
+        if (response.ErrorMessage) {
           this.ResponseError = response.ErrorMessage;
         } else {
           this._router.navigate([ViewsRoutingKeys.Login]);
         }
-      });
+      },
+        (response: HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
   ngOnInit() {

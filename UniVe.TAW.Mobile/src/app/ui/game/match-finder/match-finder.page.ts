@@ -153,10 +153,10 @@ export class MatchFinderPage implements OnInit, OnDestroy {
                 });
 
             }
-            else if (this._playables.PlayingMatch) {
+            else if (this._playables.PlayingMatchId) {
 
               setTimeout(() => {
-                this._router.navigate([ViewsRoutingKeys.Match, this._playables.PlayingMatch.Id]);
+                this._router.navigate([ViewsRoutingKeys.Match, this._playables.PlayingMatchId]);
               }, 100);
             }
 

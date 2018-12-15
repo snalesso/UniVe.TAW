@@ -7,7 +7,8 @@ import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
-import { HttpErrorResponse } from '@angular/common/http';
+import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
+import * as ngHttp from '@angular/common/http';
 import * as httpStatusCodes from 'http-status-codes';
 import { AuthService } from '../../../../services/auth.service';
 import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
@@ -49,7 +50,7 @@ export class FleetConfiguratorComponent implements OnInit {
     return 0;
   }
 
-  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][]; // TODO: create ad-hoc type
+  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][];
   public get Cells() { return this._gridCells; }
 
   public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.IsConfigNeeded }
@@ -137,7 +138,7 @@ export class FleetConfiguratorComponent implements OnInit {
       .configMatch(this._matchId, this._shipPlacements)
       .subscribe(
         response => {
-          if (response.HasError) {
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
             this._canSubmitConfig = this._canRandomize = true;
           }
@@ -156,8 +157,8 @@ export class FleetConfiguratorComponent implements OnInit {
             }
           }
         },
-        (error: HttpErrorResponse) => {
-          switch (error.status) {
+        (response: ngHttp.HttpErrorResponse) => {
+          switch (response.status) {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
@@ -167,7 +168,10 @@ export class FleetConfiguratorComponent implements OnInit {
               break;
 
             default:
-              console.log("Unhandled response status code");
+
+              const httpMessage = response.error as net.HttpMessage<string>;
+              console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+
           }
         });
   }
@@ -179,18 +183,15 @@ export class FleetConfiguratorComponent implements OnInit {
 
   private updateMatchConfigStatus() {
 
-    // TODO: handle no resposne
-    // TODO: get config info only, anche determine at ngOnInit if it's visible or not
+    // TODO: add missing handles
     this._gameService
       .getMatchConfigStatus(this._matchId)
       .subscribe(
         (response) => {
-          if (response.HasError) {
-            // TODO: handle
+          if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else if (!response.Content) {
-            // TODO: handle
             console.log("The server returned null");
           }
           else {
@@ -203,8 +204,9 @@ export class FleetConfiguratorComponent implements OnInit {
               this._whenIsConfigNeededChanged.complete();
           }
         },
-        (error: HttpErrorResponse) => {
-          // TODO: handle
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
         });
   }
 }

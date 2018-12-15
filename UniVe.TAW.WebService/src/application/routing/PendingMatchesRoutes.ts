@@ -156,10 +156,9 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 if (!pendingMatchId) {
                     responseData = new net.HttpMessage(null, "Unable to find requested match");
-                    response
+                    return response
                         .status(httpStatusCodes.BAD_REQUEST)
                         .json(responseData);
-                    return;
                 }
 
                 const pendingMatch = await PendingMatch.getModel().findById(pendingMatchId).exec();
@@ -167,10 +166,9 @@ export default class PendingMatchesRoutes extends RoutesBase {
                 if (!PendingMatch) {
                     console.log(chalk.red("Could not find requested pending match"));
                     responseData = new net.HttpMessage(null, "Unable to find requested pending match.");
-                    response
+                    return response
                         .status(httpStatusCodes.NOT_FOUND)
                         .json(responseData);
-                    return;
                 }
 
                 console.log(chalk.green("Pending match identified"));
@@ -181,23 +179,22 @@ export default class PendingMatchesRoutes extends RoutesBase {
                 // ensure the pending match is not trying to be joined by the same player who created it
                 if (pendingMatch.PlayerId.equals(jwtUserObjectId)) {
                     responseData = new net.HttpMessage(null, "You cannot join your own match! -.-\"");
-                    response
+                    return response
                         .status(httpStatusCodes.FORBIDDEN)
                         .json(responseData);
-
-                    return;
                 }
 
                 const removedPendingMatch = await pendingMatch.remove();
                 if (!removedPendingMatch) {
                     responseData = new net.HttpMessage(null, "Could not delete pending match.");
-                    response
+                    return response
                         .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                         .json(responseData);
-                    return;
                 }
 
                 console.log(chalk.green("PendingMatch (id: " + removedPendingMatch._id.toHexString() + ") deleted"));
+
+                this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
 
                 const newMatchSkel = {
                     FirstPlayerSide: {
@@ -225,10 +222,9 @@ export default class PendingMatchesRoutes extends RoutesBase {
                     console.log(chalk.red("SHITSTORM: PendingMatch found & deleted BUT couldn't create the Match D:"));
 
                     responseData = new net.HttpMessage(null, "PendingMatch deleted but couldn't create the Match D:");
-                    response
+                    return response
                         .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                         .json(responseData);
-                    return;
                 }
 
                 const matchHexId = match._id.toHexString();
@@ -246,10 +242,8 @@ export default class PendingMatchesRoutes extends RoutesBase {
                         MatchId: matchHexId
                     } as DTOs.IPendingMatchJoinedEventDto);
 
-                //this._socketIOServer.emit(ServiceEventKeys.PendingMatchJoined, { MatchId: matchHexId } as DTOs.IMatchReadyEventDto);
-
                 responseData = new net.HttpMessage(matchHexId);
-                response
+                return response
                     .status(httpStatusCodes.CREATED)
                     .json(responseData);
             }

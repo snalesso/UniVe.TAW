@@ -13,6 +13,8 @@ import ServiceEventKeys from '../../../../assets/unive.taw.webservice/applicatio
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { IdentityService } from '../../../services/identity.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 
 @Component({
   selector: 'app-rankings',
@@ -38,7 +40,11 @@ export class RankingsComponent implements OnInit {
       .subscribe(response => {
 
         this._rankings = response.Content;
-      });
+      },
+        (response: HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
 }

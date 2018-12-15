@@ -14,6 +14,7 @@ import * as ngxSocketIO from 'ngx-socket-io';
 import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
 import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
+import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import UserRole from './UserRole';
 import { BehaviorSubject, Observable } from 'rxjs';
 import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
@@ -101,13 +102,20 @@ export class ProfileComponent implements OnInit {
 
   public get WindPercent() { return this.Profile ? Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100) : null; }
 
+  public getCountryName(countryId: number) {
+    return identity.Country[countryId];
+  }
+
   public ban(hours: number) {
     this._identityService.ban(this._userId, hours)
       .subscribe(
         response => {
           this._userProfile.BannedUntil = response.Content;
         },
-        (error: ngHttp.HttpErrorResponse) => { });
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
   public unban() {
@@ -121,7 +129,10 @@ export class ProfileComponent implements OnInit {
         response => {
           this._userProfile.Roles = response.Content;
         },
-        (error: ngHttp.HttpErrorResponse) => { });
+        (response: ngHttp.HttpErrorResponse) => {
+          const httpMessage = response.error as net.HttpMessage<string>;
+          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+        });
   }
 
   public deleteUser() {
@@ -148,7 +159,10 @@ export class ProfileComponent implements OnInit {
             const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
             this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
           },
-          (error: ngHttp.HttpErrorResponse) => { });
+          (response: ngHttp.HttpErrorResponse) => {
+            const httpMessage = response.error as net.HttpMessage<string>;
+            console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+          });
 
       if (this._authService.IsLogged && !this.IsItMe) {
 
@@ -170,7 +184,10 @@ export class ProfileComponent implements OnInit {
                   this._banOptions.push({ Text: "Forever", BanHours: -1 });
               }
             },
-            (error: ngHttp.HttpErrorResponse) => { });
+            (response: ngHttp.HttpErrorResponse) => {
+              const httpMessage = response.error as net.HttpMessage<string>;
+              console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+            });
       }
     });
   }

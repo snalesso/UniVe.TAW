@@ -7,6 +7,11 @@
 
         <h1>{{Profile.Username}} <span class="badge badge-info">{{["Player", "Mod", "Admin"][Profile.Roles - 1]}}</span></h1>
 
+        <p>
+          <span *ngIf="Profile.Age >= 0">{{Profile.Age}} years </span>
+          <span *ngIf="Profile.CountryId">from {{getCountryName(Profile.CountryId)}}</span>
+        </p>
+
       </div>
     </div>
 
