@@ -16,13 +16,16 @@ import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import UserRole from './UserRole';
 import ViewsRoutingKeys from 'src/app/ViewsRoutingKeys';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss']
 })
-export class ProfilePage implements OnInit {
+export class ProfilePage implements OnInit, OnDestroy {
+
+  private readonly _subscriptions: Subscription[] = [];
 
   private _userId: string;
 
@@ -136,42 +139,50 @@ export class ProfilePage implements OnInit {
 
   ngOnInit() {
 
-    this._activatedRoute.paramMap.subscribe(params => {
+    this._subscriptions.push(
+      this._activatedRoute.paramMap.subscribe(params => {
 
-      this._userId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
+        this._userId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
 
-      this._identityService.getUserProfile(this._userId)
-        .subscribe(
-          response => {
-            this._userProfile = response.Content;
-            const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
-            this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
-          },
-          (error: ngHttp.HttpErrorResponse) => { });
-
-      if (this._authService.IsLogged && !this.IsItMe) {
-
-        this._identityService.getUserPowers(this._authService.LoggedUser.Id)
+        this._identityService.getUserProfile(this._userId)
           .subscribe(
             response => {
-              this._userPowers = response.Content;
-
-              this._banOptions = [];
-
-              if (this._userPowers) {
-                if (this._userPowers.CanTemporarilyBan) {
-                  this._banOptions.push({ Text: "1 hour", BanHours: 1 });
-                  this._banOptions.push({ Text: "1 day", BanHours: 24 });
-                  this._banOptions.push({ Text: "1 week", BanHours: 24 * 7 });
-                  this._banOptions.push({ Text: "1 month", BanHours: 24 * 31 });
-                }
-                if (this._userPowers.CanPermaBan)
-                  this._banOptions.push({ Text: "Forever", BanHours: -1 });
-              }
+              this._userProfile = response.Content;
+              const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
+              this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
             },
             (error: ngHttp.HttpErrorResponse) => { });
-      }
-    });
+
+        if (this._authService.IsLogged && !this.IsItMe) {
+
+          this._identityService.getUserPowers(this._authService.LoggedUser.Id)
+            .subscribe(
+              response => {
+                this._userPowers = response.Content;
+
+                this._banOptions = [];
+
+                if (this._userPowers) {
+                  if (this._userPowers.CanTemporarilyBan) {
+                    this._banOptions.push({ Text: "1 hour", BanHours: 1 });
+                    this._banOptions.push({ Text: "1 day", BanHours: 24 });
+                    this._banOptions.push({ Text: "1 week", BanHours: 24 * 7 });
+                    this._banOptions.push({ Text: "1 month", BanHours: 24 * 31 });
+                  }
+                  if (this._userPowers.CanPermaBan)
+                    this._banOptions.push({ Text: "Forever", BanHours: -1 });
+                }
+              },
+              (error: ngHttp.HttpErrorResponse) => { });
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    for (let sub of this._subscriptions) {
+      sub.unsubscribe();
+    }
   }
 
 }

@@ -34,9 +34,6 @@ export class MatchComponent implements OnInit, OnDestroy {
     private readonly _socketIOService: ngxSocketIO.Socket) {
 
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
-
-    if (!this._matchId)
-      this._router.navigate([ViewsRoutingKeys.Root]);
   }
 
   public get IsWaitingForEnemyToConfig() { return this._matchStatus != null && !this._matchStatus.IsConfigNeeded && !this._matchStatus.IsMatchStarted; }
@@ -60,53 +57,57 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this._gameService.getOwnSideMatchStatus(this._matchId)
-      .subscribe(
-        response => {
-          if (response.ErrorMessage) {
-            console.log(response.ErrorMessage);
-          }
-          else if (!response.Content) {
-            console.log("getOwnSideMatchStatus returned null");
-          }
-          else {
-            this._matchStatus = response.Content;
-
-            if (!this._matchStatus.IsMatchStarted) {
-
-              this._matchStartedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchStarted);
-              this._socketIOService.once(
-                this._matchStartedEventKey,
-                (matchStartedEvent: DTOs.IMatchStartedEventDto) => {
-                  this._matchStatus.IsMatchStarted = true;
-                });
+    if (!this._matchId) {
+      this._router.navigate([ViewsRoutingKeys.Root]);
+    }
+    else {
+      this._gameService.getOwnSideMatchStatus(this._matchId)
+        .subscribe(
+          response => {
+            if (response.ErrorMessage) {
+              console.log(response.ErrorMessage);
             }
-            if (!this._matchStatus.EndDateTime) {
-
-              this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
-              this._socketIOService.once(
-                this._matchEndedEventKey,
-                (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
-                  if (this._matchStatus) {
-                    this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
-                    this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
-                  }
-                });
+            else if (!response.Content) {
+              console.log("getOwnSideMatchStatus returned null");
             }
+            else {
+              this._matchStatus = response.Content;
 
-            this._socketIOService.once(
-              (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
-              (event: any) => {
-                alert("This match has been canceled!");
-                this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+              if (!this._matchStatus.IsMatchStarted) {
+
+                this._matchStartedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchStarted);
+                this._socketIOService.once(
+                  this._matchStartedEventKey,
+                  (matchStartedEvent: DTOs.IMatchStartedEventDto) => {
+                    this._matchStatus.IsMatchStarted = true;
+                  });
               }
-            );
-          }
-        },
-        (response: http.HttpErrorResponse) => {
-          this._router.navigate([ViewsRoutingKeys.MatchFinder]);
-        });
+              if (!this._matchStatus.EndDateTime) {
 
+                this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
+                this._socketIOService.once(
+                  this._matchEndedEventKey,
+                  (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
+                    if (this._matchStatus) {
+                      this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
+                      this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
+                    }
+                  });
+              }
+
+              this._socketIOService.once(
+                (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
+                (event: any) => {
+                  alert("This match has been canceled!");
+                  this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+                }
+              );
+            }
+          },
+          (response: http.HttpErrorResponse) => {
+            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+          });
+    }
   }
 
   ngOnDestroy(): void {

@@ -16,7 +16,7 @@ import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import UserRole from './UserRole';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
 
 @Component({
@@ -24,7 +24,9 @@ import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
+
+  private readonly _subscriptions: Subscription[] = [];
 
   private _userId: string;
 
@@ -148,48 +150,56 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit() {
 
-    this._activatedRoute.paramMap.subscribe(params => {
+    this._subscriptions.push(
+      this._activatedRoute.paramMap.subscribe(params => {
 
-      this._userId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
+        this._userId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.userId);
 
-      this._identityService.getUserProfile(this._userId)
-        .subscribe(
-          response => {
-            this._userProfile = response.Content;
-            const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
-            this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
-          },
-          (response: ngHttp.HttpErrorResponse) => {
-            const httpMessage = response.error as net.HttpMessage<string>;
-            console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
-          });
-
-      if (this._authService.IsLogged && !this.IsItMe) {
-
-        this._identityService.getUserPowers(this._authService.LoggedUser.Id)
+        this._identityService.getUserProfile(this._userId)
           .subscribe(
             response => {
-              this._userPowers = response.Content;
-
-              this._banOptions = [];
-
-              if (this._userPowers) {
-                if (this._userPowers.CanTemporarilyBan) {
-                  this._banOptions.push({ Text: "1 hour", BanHours: 1 });
-                  this._banOptions.push({ Text: "1 day", BanHours: 24 });
-                  this._banOptions.push({ Text: "1 week", BanHours: 24 * 7 });
-                  this._banOptions.push({ Text: "1 month", BanHours: 24 * 31 });
-                }
-                if (this._userPowers.CanPermaBan)
-                  this._banOptions.push({ Text: "Forever", BanHours: -1 });
-              }
+              this._userProfile = response.Content;
+              const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
+              this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
             },
             (response: ngHttp.HttpErrorResponse) => {
               const httpMessage = response.error as net.HttpMessage<string>;
               console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
             });
-      }
-    });
+
+        if (this._authService.IsLogged && !this.IsItMe) {
+
+          this._identityService.getUserPowers(this._authService.LoggedUser.Id)
+            .subscribe(
+              response => {
+                this._userPowers = response.Content;
+
+                this._banOptions = [];
+
+                if (this._userPowers) {
+                  if (this._userPowers.CanTemporarilyBan) {
+                    this._banOptions.push({ Text: "1 hour", BanHours: 1 });
+                    this._banOptions.push({ Text: "1 day", BanHours: 24 });
+                    this._banOptions.push({ Text: "1 week", BanHours: 24 * 7 });
+                    this._banOptions.push({ Text: "1 month", BanHours: 24 * 31 });
+                  }
+                  if (this._userPowers.CanPermaBan)
+                    this._banOptions.push({ Text: "Forever", BanHours: -1 });
+                }
+              },
+              (response: ngHttp.HttpErrorResponse) => {
+                const httpMessage = response.error as net.HttpMessage<string>;
+                console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+              });
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    for (let sub of this._subscriptions) {
+      sub.unsubscribe();
+    }
   }
 
 }
