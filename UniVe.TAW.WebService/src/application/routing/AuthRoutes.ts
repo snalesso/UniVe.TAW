@@ -97,27 +97,5 @@ export default class GameRoutes extends RoutesBase {
                         .json(responseData);
                 }
             });
-
-        this._router.post(
-            '/logout',
-            this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
-
-                const jwtUser = (request.user as DTOs.IUserJWTPayload);
-                let responseData: net.HttpMessage<boolean>;
-
-                if (!jwtUser) {
-                    responseData = new net.HttpMessage(false, "You need to be logged in to log out.");
-                    return response
-                        .status(httpStatusCodes.BAD_REQUEST)
-                        .json(responseData);
-                } else {
-                    responseData = new net.HttpMessage(true);
-                    return response
-                        .status(httpStatusCodes.OK)
-                        .json(responseData);
-                }
-            });
-
     }
 }
