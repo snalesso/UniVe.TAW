@@ -35,10 +35,8 @@
     "chalk": "^2.4.1",
     "del": "^3.0.0",
     "gulp": "^4.0.0",
-    "gulp-cli": "^2.0.1",
     "gulp-print": "^5.0.0",
     "gulp-typescript": "^5.0.0",
-    "typescript": "^3.2.2",
-    "vinyl-paths": "^2.1.0"
+    "typescript": "^3.2.2"
   }
 }

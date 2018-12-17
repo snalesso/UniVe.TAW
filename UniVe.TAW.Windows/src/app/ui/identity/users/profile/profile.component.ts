@@ -102,7 +102,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // @Output()
   // public get WhenUserIdChanged(): Observable<string> { return this._whenUserIdChanged; }
 
-  public get WindPercent() { return this.Profile ? Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100) : null; }
+  public get WindPercent() {
+
+    if (this.Profile && (this.Profile.WinsCount + this.Profile.LossesCount) > 0)
+      return Math.round(this.Profile.WinsCount / (this.Profile.WinsCount + this.Profile.LossesCount) * 100);
+
+    return 0;
+  }
 
   public getCountryName(countryId: number) {
     return identity.Country[countryId];

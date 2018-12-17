@@ -21,7 +21,6 @@ import * as DTOs from '../DTOs';
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
 import * as MatchSettings from '../../domain/models/mongodb/mongoose/MatchSettings';
-//import * as BattleFieldSettings from '../../domain/models/mongodb/mongoose/BattleFieldSettings';
 import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlayerSide';
 import * as ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import { IMongooseShipTypeAvailability } from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
@@ -63,14 +62,14 @@ export default class MatchesRoutes extends RoutesBase {
                                 ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
                             } as game.IMatchSettings
                         };
-                        responseData = new net.HttpMessage<DTOs.IMatchDto>(matchDto);
-                        response
+                        responseData = new net.HttpMessage(matchDto);
+                        return response
                             .status(httpStatusCodes.OK)
                             .json(matchDto);
                     })
                     .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage<DTOs.IMatchDto>(null, error.message);
-                        response
+                        responseData = new net.HttpMessage(null, error.message);
+                        return response
                             .status(httpStatusCodes.NOT_FOUND)
                             .json(responseData);
                     });
@@ -95,8 +94,7 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
 
                         const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
@@ -113,11 +111,11 @@ export default class MatchesRoutes extends RoutesBase {
                             } as DTOs.IOwnSideMatchConfigStatus;
 
                             responseData = new net.HttpMessage(ownMatchSideConfigStatusDto);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                            return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
                             responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -125,7 +123,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     })
             });
 
@@ -148,13 +146,11 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
                         else if (!match.FirstPlayerSide.PlayerId.equals(userObjectId) && !match.SecondPlayerSide.PlayerId.equals(userObjectId)) {
                             responseData = new net.HttpMessage(null, "You are not authorized to intervene in this match");
-                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
 
                         const wasConfigSuccessful = match.configFleet(userObjectId, request.body as IMongooseShipPlacement[]);
@@ -187,14 +183,14 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (wasConfigSuccessful) {
                             responseData = new net.HttpMessage(ownSideMatchConfigStatus);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                            return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
                             responseData = new net.HttpMessage(
                                 ownSideMatchConfigStatus,
                                 "Match is already configured and cannot be changed");
 
-                            response.status(httpStatusCodes.LOCKED).json(responseData);
+                            return response.status(httpStatusCodes.LOCKED).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -202,7 +198,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.OK).json(responseData);
+                        return response.status(httpStatusCodes.OK).json(responseData);
                     });
             }
         );
@@ -228,8 +224,7 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
 
                         const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
@@ -247,11 +242,11 @@ export default class MatchesRoutes extends RoutesBase {
                             } as DTOs.IOwnSideMatchStatus;
 
                             responseData = new net.HttpMessage(ownSideMatchStatusDto);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                            return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
                             responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -259,7 +254,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     });
             });
 
@@ -284,8 +279,7 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
 
                         const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
@@ -322,11 +316,11 @@ export default class MatchesRoutes extends RoutesBase {
                             } as DTOs.IOwnTurnInfoDto;
 
                             responseData = new net.HttpMessage(ownViewOfEnemySideDto);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                            return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
                             responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -334,7 +328,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     });
             });
 
@@ -356,8 +350,7 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
 
                         try {
@@ -443,7 +436,7 @@ export default class MatchesRoutes extends RoutesBase {
                         catch (ex) {
                             console.log(chalk.red(ex));
                             responseData = new net.HttpMessage(null, JSON.stringify(ex));
-                            response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                            return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -451,7 +444,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     })
             });
 
@@ -476,8 +469,7 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (!match) {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
-                            response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                            return;
+                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
 
                         const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
@@ -521,11 +513,11 @@ export default class MatchesRoutes extends RoutesBase {
                             } as DTOs.IEnemyTurnInfoDto;
 
                             responseData = new net.HttpMessage(ownViewOfOwnSideDto);
-                            response.status(httpStatusCodes.OK).json(responseData);
+                            return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
                             responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            response.status(httpStatusCodes.FORBIDDEN).json(responseData);
+                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
@@ -533,7 +525,7 @@ export default class MatchesRoutes extends RoutesBase {
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
-                        response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
+                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     });
             });
 

@@ -3,7 +3,6 @@ import * as undertaker from 'undertaker';
 import gulpPrint from 'gulp-print';
 import chalk from 'chalk';
 var del = require('del');
-//var vinylPaths = require('vinyl-paths');
 import * as path from 'path';
 
 interface IExportBatch {

@@ -20,8 +20,6 @@ import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
-import * as cors from 'cors';
-import SocketIOService from '../services/SocketIOService';
 import ServiceEventKeys from '../services/ServiceEventKeys';
 
 export default class UsersRoutes extends RoutesBase {
@@ -54,7 +52,7 @@ export default class UsersRoutes extends RoutesBase {
                     newUser.save()
                         .then(result => {
                             console.log("user created: " + JSON.stringify(result));
-                            responseData = new net.HttpMessage<boolean>(true);
+                            responseData = new net.HttpMessage(true);
                             response
                                 .status(httpStatusCodes.CREATED)
                                 .json(responseData);
@@ -80,7 +78,7 @@ export default class UsersRoutes extends RoutesBase {
                                             statusCode = httpStatusCodes.INTERNAL_SERVER_ERROR;
                                             break;
                                     }
-                                    responseData = new net.HttpMessage<boolean>(false, errMsg);
+                                    responseData = new net.HttpMessage(false, errMsg);
                                     response
                                         .status(statusCode)
                                         .json(responseData);
@@ -426,7 +424,9 @@ export default class UsersRoutes extends RoutesBase {
                         await pm.remove();
                     }
 
-                    this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                    if (pendingMatches.length > 0) {
+                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                    }
 
                     const userModel = User.getModel();
                     const playingMatches = await Match.getModel()

@@ -7,6 +7,6 @@ export class HttpMessage<T> {
 }
 
 export interface IHttpResponseError {
-    Message: string;
-    Status: number;
+    readonly Message: string;
+    readonly Status: number;
 }

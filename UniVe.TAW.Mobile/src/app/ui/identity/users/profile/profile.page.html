@@ -20,7 +20,8 @@
         </h1>
 
         <p>
-          <span *ngIf="Profile.Age >= 0">{{Profile.Age}} years </span>
+          <span *ngIf="Profile.Age >= 0">{{Profile.Age}} years</span>
+          <span *ngIf="Profile.Age >= 0 && Profile.CountryId">&nbsp;</span>
           <span *ngIf="Profile.CountryId">from {{getCountryName(Profile.CountryId)}}</span>
         </p>
 

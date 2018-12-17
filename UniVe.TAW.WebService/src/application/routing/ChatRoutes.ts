@@ -12,7 +12,6 @@ import * as identity from '../../infrastructure/identity';
 import * as utils_2_8 from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
-import * as UserToUserChatMessages from '../../domain/models/mongodb/mongoose/UserToUserChatMessages';
 
 import * as DTOs from '../DTOs';
 import RoutingParamKeys from './RoutingParamKeys';
@@ -153,9 +152,7 @@ export default class ChatRoutes extends RoutesBase {
 
                 if (!incMsg) {
                     responseData = new net.HttpMessage(null, "Invalid messages format");
-                    response.status(httpStatusCodes.BAD_REQUEST).json(responseData);
-                    return;
-
+                    return response.status(httpStatusCodes.BAD_REQUEST).json(responseData);
                 }
 
                 const senderUser = await User.getModel().findById(senderUserObjectId).exec();
@@ -164,20 +161,18 @@ export default class ChatRoutes extends RoutesBase {
 
                     if (!senderUser) {
                         responseData = new net.HttpMessage(null, "Sender user not found");
-                        response
+                        return response
                             .status(httpStatusCodes.BAD_REQUEST)
                             .json(responseData);
-                        return;
                     }
 
                     const loggedMsg = senderUser.logMessage(new mongoose.Types.ObjectId(incMsg.AddresseeId), incMsg.Text);
 
                     if (!loggedMsg) {
                         responseData = new net.HttpMessage(null, "Message logging failed");
-                        response
+                        return response
                             .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
-                        return;
                     }
 
                     await senderUser.save();
@@ -215,7 +210,7 @@ export default class ChatRoutes extends RoutesBase {
                     console.log(ex);
 
                     responseData = new net.HttpMessage(null, "Exception caught: " + ex);
-                    response
+                    return response
                         .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                         .json(responseData);
                 }
@@ -226,7 +221,7 @@ export default class ChatRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<ReadonlyArray<DTOs.IChatMessageDto>>;
+                let responseData: net.HttpMessage<DTOs.IChatMessageDto[]>;
 
                 const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
