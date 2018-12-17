@@ -49,7 +49,7 @@ export class AuthService implements OnDestroy {
 
   public signup(signupRequest: DTOs.ISignupRequestDto): Observable<net.HttpMessage<boolean>> {
 
-    const endPoint = ServiceConstants.ServerAddress + "/users/signup";
+    const endPoint = ServiceConstants.ServerAddress + "/users";
     const options = {
       headers: new ng_http.HttpHeaders({
         'Content-Type': 'application/json'

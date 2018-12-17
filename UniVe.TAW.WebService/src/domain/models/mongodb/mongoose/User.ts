@@ -12,15 +12,15 @@ export interface IMongooseUser extends mongoose.Document {
     readonly RegistrationDate: Date,
     BirthDate: Date,
     CountryId: identity.Country,
-    Roles: identity.UserRoles,
+    Role: identity.UserRole,
     Salt: string,
     Digest: string,
     SentMessages: Map<String, ChatMessage.IMongooseChatMessage[]>,
     BannedUntil: Date,
-    setPassword: (pwd: string) => void,
-    validatePassword: (pwd: string) => boolean,
-    getAge: () => number,
-    logMessage: (addresseeId: mongoose.Types.ObjectId, text: string) => ChatMessage.IMongooseChatMessage
+    setPassword(pwd: string): void,
+    validatePassword(pwd: string): boolean,
+    getAge(): number,
+    logMessage(addresseeId: mongoose.Types.ObjectId, text: string): ChatMessage.IMongooseChatMessage
 }
 
 // TODO: consider using 'passport-local-mongoose' (https://github.com/saintedlama/passport-local-mongoose)
@@ -41,10 +41,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: Date.now
     },
-    Roles: {
+    Role: {
         type: mongoose.Schema.Types.Number,
         required: true,
-        default: identity.UserRoles.Player
+        default: identity.UserRole.Player
     },
     CountryId: {
         type: mongoose.Schema.Types.Number,

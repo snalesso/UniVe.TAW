@@ -17,7 +17,7 @@ import * as BattleFieldCell from '../../domain/models/mongodb/mongoose/BattleFie
 import * as MatchPlayerSide from '../../domain/models/mongodb/mongoose/MatchPlayerSide';
 import * as ShipTypeAvailability from '../../domain/models/mongodb/mongoose/ShipTypeAvailability';
 import * as ShipPlacement from '../../domain/models/mongodb/mongoose/ShipPlacement';
-import { Country, UserRoles } from '../../infrastructure/identity';
+import { Country, UserRole } from '../../infrastructure/identity';
 import moment = require('moment');
 
 export default class DBUtils {
@@ -94,11 +94,11 @@ export default class DBUtils {
                     Username: un,
                     CountryId: countries[utils.getRandomInt(0, countries.length - 1)],
                     BirthDate: moment().add(utils.getRandomInt(10, 80) * -1, "years").toDate(),
-                    Roles: (ui == 0) ?
-                        UserRoles.Admin
+                    Role: (ui == 0) ?
+                        UserRole.Administrator
                         : (ui <= 3)
-                            ? UserRoles.Moderator
-                            : UserRoles.Player
+                            ? UserRole.Moderator
+                            : UserRole.Player
                 } as User.IMongooseUser);
 
             newUser.setPassword("aaa");

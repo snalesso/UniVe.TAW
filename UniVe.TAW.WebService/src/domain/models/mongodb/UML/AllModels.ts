@@ -55,7 +55,7 @@
 //     readonly RegistrationDate: Date,
 //     BirthDate: Date,
 //     CountryId: identity.Country,
-//     Roles: identity.UserRoles,
+//     Role: identity.UserRole,
 //     Salt: string,
 //     Digest: string,
 //     SentMessages: Map<String, IMongooseChatMessage[]>,

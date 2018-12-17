@@ -17,7 +17,7 @@ export interface IUserDto {
     Age: number;
     CountryId: enums.Country;
     BannedUntil: Date;
-    Roles: enums.UserRoles;
+    Role: enums.UserRole;
 }
 
 export interface ISimpleUserDto {
@@ -197,7 +197,7 @@ export interface IUserBanRequest {
 }
 
 export interface IUserPowers {
-    readonly Roles: enums.UserRoles;
+    readonly Role: enums.UserRole;
     readonly CanTemporarilyBan: boolean;
     readonly CanPermaBan: boolean;
     readonly CanAssignRoles: boolean;
@@ -226,7 +226,8 @@ export interface IEndedMatchSummaryDto {
     readonly WinnerId: string;
 }
 
+/** Cannot POST only the new role value */
 export interface IRoleAssignmentRequestDto {
-    readonly UserId: string;
-    readonly NewRole: identity.UserRoles;
+    //readonly UserId: string;
+    readonly NewRole: identity.UserRole;
 }

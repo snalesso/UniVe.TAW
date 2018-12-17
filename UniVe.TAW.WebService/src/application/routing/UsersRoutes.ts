@@ -29,23 +29,21 @@ export default class UsersRoutes extends RoutesBase {
         super(socketIOServer);
 
         this._router.post(
-            '/signup',
+            '/',
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
                 let responseData: net.HttpMessage<boolean>;
 
                 const signupReq = request.body as DTOs.ISignupRequestDto;
 
-                // TODO: test all branches
                 if (!signupReq) {
                     response.status(httpStatusCodes.FORBIDDEN);
                 } else {
-                    //let feawfw = signupReq as User.IMongoUser;
                     let newUserSkel = {} as utilsV2_8.Mutable<User.IMongooseUser>;
                     newUserSkel.Username = signupReq.Username.trim();
                     newUserSkel.CountryId = signupReq.CountryId;
                     newUserSkel.BirthDate = signupReq.BirthDate;
-                    newUserSkel.Roles = identity.UserRoles.Player;
+                    newUserSkel.Role = identity.UserRole.Player;
 
                     let newUser = User.create(newUserSkel);
                     newUser.setPassword(signupReq.Password);
@@ -89,7 +87,6 @@ export default class UsersRoutes extends RoutesBase {
 
         this._router.get(
             '/rankings',
-            //this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
                 //const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
@@ -127,7 +124,7 @@ export default class UsersRoutes extends RoutesBase {
                                 }
                             }
 
-                            if (userRanking.WinsCount > 0 && userRanking.LossesCount > 0) {
+                            if (userRanking.WinsCount + userRanking.LossesCount > 0) {
                                 userRanking.WinRatio = userRanking.WinsCount / (userRanking.WinsCount + userRanking.LossesCount) * 100;
                                 userRanking.WinRatio = Math.round(userRanking.WinRatio);
                             }
@@ -164,36 +161,51 @@ export default class UsersRoutes extends RoutesBase {
                     });
             });
 
-        // DONT NOT ADD ROUTES WHICH DONT BEGIN WITH "/:" AFTER THIS ONE +++++++++++++++++++++++++++++++++++++
-
         this._router.get(
             '/:' + RoutingParamKeys.userId,
-            this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                const userId = request.params[RoutingParamKeys.userId];
-                let responseData: net.HttpMessage<DTOs.IUserDto> = null;
+                const userHexId = request.params[RoutingParamKeys.userId];
+                const userObjectId = new mongoose.Types.ObjectId(userHexId);
+                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
 
                 User.getModel()
-                    .findById(userId)
+                    .findById(userHexId)
                     .then((user) => {
-                        let userDto: DTOs.IUserDto = {
-                            Id: user.id,
-                            Username: user.Username,
-                            Age: user.getAge(),
-                            CountryId: user.CountryId,
-                            Roles: user.Roles,
-                            BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null
-                        };
-                        responseData = new net.HttpMessage<DTOs.IUserDto>(userDto);
-                        response
-                            .status(httpStatusCodes.OK)
-                            .json(responseData);
+
+                        if (user) {
+                            EndedMatch.getModel()
+                                .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
+                                .then(userEndedMatches => {
+
+                                    let profileDto: DTOs.IUserProfile = {
+                                        Id: user.id,
+                                        Username: user.Username,
+                                        Age: user.getAge(),
+                                        CountryId: user.CountryId,
+                                        Role: user.Role,
+                                        BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null,
+                                        WinsCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => em.WinnerId.equals(userObjectId)).length : 0,
+                                        LossesCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => !em.WinnerId.equals(userObjectId)).length : 0
+                                    };
+
+                                    responseData = new net.HttpMessage(profileDto);
+                                    response
+                                        .status(httpStatusCodes.OK)
+                                        .json(responseData);
+                                });
+                        }
+                        else {
+                            responseData = new net.HttpMessage(null, "user not found");
+                            response
+                                .status(httpStatusCodes.NOT_FOUND)
+                                .json(responseData);
+                        }
                     })
                     .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage<DTOs.IUserDto>(null, error.message);
+                        responseData = new net.HttpMessage(null, error.message);
                         response
-                            .status(httpStatusCodes.OK)
+                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
                             .json(responseData);
                     });
             });
@@ -209,7 +221,7 @@ export default class UsersRoutes extends RoutesBase {
                 const jwtUser = (request.user as DTOs.IUserJWTPayload);
                 const loggedUser = await User.getModel().findById(jwtUser.Id).exec();
 
-                if (!loggedUser || loggedUser.Roles != identity.UserRoles.Admin || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
+                if (!loggedUser || loggedUser.Role != identity.UserRole.Administrator || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
                     responseData = new net.HttpMessage(false, "You have no power here!");
                     return response
                         .status(httpStatusCodes.UNAUTHORIZED)
@@ -242,11 +254,14 @@ export default class UsersRoutes extends RoutesBase {
                         .find({ PlayerId: new mongoose.Types.ObjectId(deletedUser._id.toHexString()) } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>)
                         .exec();
 
-                    for (let pm of pendingMatches) {
-                        await pm.remove();
-                    }
+                    if (pendingMatches.length > 0) {
 
-                    this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                        for (let pm of pendingMatches) {
+                            await pm.remove();
+                        }
+
+                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                    }
 
                     const userModel = User.getModel();
                     const playingMatches = await Match.getModel()
@@ -295,56 +310,6 @@ export default class UsersRoutes extends RoutesBase {
             });
 
         this._router.get(
-            "/:" + RoutingParamKeys.userId + "/profile",
-            //this._jwtValidator,
-            (request: express.Request, response: express.Response, next: express.NextFunction) => {
-
-                const userHexId = request.params[RoutingParamKeys.userId];
-                const userObjectId = new mongoose.Types.ObjectId(userHexId);
-                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
-
-                User.getModel()
-                    .findById(userHexId)
-                    .then((user) => {
-
-                        if (user) {
-                            EndedMatch.getModel()
-                                .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
-                                .then(userEndedMatches => {
-
-                                    let profileDto: DTOs.IUserProfile = {
-                                        Id: user.id,
-                                        Username: user.Username,
-                                        Age: user.getAge(),
-                                        CountryId: user.CountryId,
-                                        Roles: user.Roles,
-                                        BannedUntil: user.BannedUntil != null && user.BannedUntil >= new Date() ? user.BannedUntil : null,
-                                        WinsCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => em.WinnerId.equals(userObjectId)).length : 0,
-                                        LossesCount: (userEndedMatches && userEndedMatches.length > 0) ? userEndedMatches.filter(em => !em.WinnerId.equals(userObjectId)).length : 0
-                                    };
-
-                                    responseData = new net.HttpMessage(profileDto);
-                                    response
-                                        .status(httpStatusCodes.OK)
-                                        .json(responseData);
-                                });
-                        }
-                        else {
-                            responseData = new net.HttpMessage(null, "user not found");
-                            response
-                                .status(httpStatusCodes.NOT_FOUND)
-                                .json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        responseData = new net.HttpMessage(null, error.message);
-                        response
-                            .status(httpStatusCodes.INTERNAL_SERVER_ERROR)
-                            .json(responseData);
-                    });
-            });
-
-        this._router.get(
             '/:' + RoutingParamKeys.userId + '/powers',
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
@@ -356,11 +321,11 @@ export default class UsersRoutes extends RoutesBase {
                     .findById(userId)
                     .then((user) => {
                         let powers: DTOs.IUserPowers = {
-                            Roles: user.Roles,
-                            CanDeleteUser: user.Roles == identity.UserRoles.Admin,
-                            CanAssignRoles: user.Roles == identity.UserRoles.Admin,
-                            CanPermaBan: user.Roles == identity.UserRoles.Admin,
-                            CanTemporarilyBan: (user.Roles == identity.UserRoles.Admin || user.Roles == identity.UserRoles.Moderator)
+                            Role: user.Role,
+                            CanDeleteUser: user.Role == identity.UserRole.Administrator,
+                            CanAssignRoles: user.Role == identity.UserRole.Administrator,
+                            CanPermaBan: user.Role == identity.UserRole.Administrator,
+                            CanTemporarilyBan: (user.Role == identity.UserRole.Administrator || user.Role == identity.UserRole.Moderator)
                         };
                         responseData = new net.HttpMessage(powers);
                         response
@@ -391,9 +356,9 @@ export default class UsersRoutes extends RoutesBase {
 
                 // admin can do anything
                 // mods can operate on simple players only
-                if (currUser.Roles == identity.UserRoles.Admin
-                    || (currUser.Roles == identity.UserRoles.Moderator
-                        && userToBan.Roles == identity.UserRoles.Player)) {
+                if (currUser.Role == identity.UserRole.Administrator
+                    || (currUser.Role == identity.UserRole.Moderator
+                        && userToBan.Role == identity.UserRole.Player)) {
 
                     userToBan.BannedUntil =
                         banReq.BanDurationHours >= 0
@@ -407,7 +372,7 @@ export default class UsersRoutes extends RoutesBase {
 
                     userToBan.save();
 
-                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToBan.id, ServiceEventKeys.BanUpdated), userToBan.BannedUntil);
+                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToBan.id, ServiceEventKeys.UserBanned), userToBan.BannedUntil);
 
                     responseData = new net.HttpMessage(userToBan.BannedUntil);
                     response
@@ -420,11 +385,12 @@ export default class UsersRoutes extends RoutesBase {
                         .find({ PlayerId: new mongoose.Types.ObjectId(userToBan._id.toHexString()) } as utilsV2_8.Mutable<PendingMatch.IMongoosePendingMatch>)
                         .exec();
 
-                    for (let pm of pendingMatches) {
-                        await pm.remove();
-                    }
-
                     if (pendingMatches.length > 0) {
+
+                        for (let pm of pendingMatches) {
+                            await pm.remove();
+                        }
+
                         this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
                     }
 
@@ -467,24 +433,24 @@ export default class UsersRoutes extends RoutesBase {
 
                 const jwtUser = (request.user as DTOs.IUserJWTPayload);
 
-                let responseData: net.HttpMessage<identity.UserRoles>;
+                let responseData: net.HttpMessage<identity.UserRole>;
 
-                const userToAssignRolesHexId = request.params[RoutingParamKeys.userId];
-                const newRoleAssignment = request.body as DTOs.IRoleAssignmentRequestDto;
+                const userToAssignRoleHexId = request.params[RoutingParamKeys.userId];
+                const roleAssignmentRequest = request.body as DTOs.IRoleAssignmentRequestDto;
 
                 const currUser = await User.getModel().findById(jwtUser.Id).exec();
-                const userToAssignRoles = await User.getModel().findById(userToAssignRolesHexId).exec();
+                const userToAssignRole = await User.getModel().findById(userToAssignRoleHexId).exec();
 
                 // admin can do anything
                 // mods can operate on simple players only
-                if (currUser.Roles != identity.UserRoles.Admin) {
+                if (currUser.Role != identity.UserRole.Administrator) {
                     responseData = new net.HttpMessage(null, "You have no power here");
                     response
                         .status(httpStatusCodes.UNAUTHORIZED)
                         .json(responseData);
                     return;
                 }
-                else if (userToAssignRoles.Roles == newRoleAssignment.NewRole) {
+                else if (userToAssignRole.Role == roleAssignmentRequest.NewRole) {
                     responseData = new net.HttpMessage(null, "Target user is already on the same role");
                     response
                         .status(httpStatusCodes.BAD_REQUEST)
@@ -492,13 +458,14 @@ export default class UsersRoutes extends RoutesBase {
                     return;
                 }
                 else {
-                    userToAssignRoles.Roles = newRoleAssignment.NewRole;
+                    userToAssignRole.Role = roleAssignmentRequest.NewRole;
 
-                    userToAssignRoles.save();
+                    userToAssignRole.save();
 
-                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToAssignRoles.id, ServiceEventKeys.RolesUpdated), userToAssignRoles.Roles);
+                    // TODO: send full user powers instead
+                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToAssignRole.id, ServiceEventKeys.UserRoleUpdated), userToAssignRole.Role);
 
-                    responseData = new net.HttpMessage(userToAssignRoles.Roles);
+                    responseData = new net.HttpMessage(userToAssignRole.Role);
                     response
                         .status(httpStatusCodes.OK)
                         .json(responseData);

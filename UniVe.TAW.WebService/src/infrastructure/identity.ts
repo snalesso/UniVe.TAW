@@ -1,8 +1,8 @@
 // FLAGS
-export enum UserRoles {
+export enum UserRole {
     Player = 1, //1 << 0,
     Moderator = 2, //1 << 1,
-    Admin = Player | Moderator // ~(~0 << 2) // all
+    Administrator = 3 //Player | Moderator // ~(~0 << 2) // all
 }
 
 export enum Country {

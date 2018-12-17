@@ -50,8 +50,8 @@ export class ProfilePage implements OnInit, OnDestroy {
       : null;
   }
 
-  private readonly _userRoles: UserRole[] = [{ Name: "Mod", Value: identity.UserRoles.Moderator }, { Name: "Player", Value: identity.UserRoles.Player }];
-  public get UserRoles() { return this._userRoles; }
+  private readonly _assignableUserRoles: UserRole[] = [{ Name: "Mod", Value: identity.UserRole.Moderator }, { Name: "Player", Value: identity.UserRole.Player }];
+  public get AssignableUserRoles() { return this._assignableUserRoles; }
 
   public get Powers() { return this._userPowers; }
 
@@ -63,7 +63,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   public get CanBeModerated() {
     return !this.IsItMe
       && this._userPowers
-      && (this._userPowers.Roles > this._userProfile.Roles)
+      && (this._userPowers.Role > this._userProfile.Role)
       && (this._userPowers.CanAssignRoles
         || this._userPowers.CanTemporarilyBan
         || this._userPowers.CanPermaBan);
@@ -72,8 +72,8 @@ export class ProfilePage implements OnInit, OnDestroy {
   public get CanPromote() {
     return !this.IsItMe
       && this._userPowers
-      && (this._userPowers.Roles >= identity.UserRoles.Admin)
-      && (this.Profile.Roles < identity.UserRoles.Admin)
+      && (this._userPowers.Role >= identity.UserRole.Administrator)
+      && (this.Profile.Role < identity.UserRole.Administrator)
       && this._userPowers.CanAssignRoles;
   }
 
@@ -81,8 +81,8 @@ export class ProfilePage implements OnInit, OnDestroy {
     return !this.IsItMe
       && this._userPowers
       && this._userPowers.CanAssignRoles
-      && this._userPowers.Roles == identity.UserRoles.Admin
-      && this._userProfile.Roles < identity.UserRoles.Admin;
+      && this._userPowers.Role == identity.UserRole.Administrator
+      && this._userProfile.Role < identity.UserRole.Administrator;
   }
 
   public get CanBeDeleted() {
@@ -122,12 +122,12 @@ export class ProfilePage implements OnInit, OnDestroy {
     this.ban(0);
   }
 
-  public assignRole(userRole: identity.UserRoles) {
+  public assignRole(userRole: identity.UserRole) {
 
     this._identityService.assignRole(this._userId, userRole)
       .subscribe(
         response => {
-          this._userProfile.Roles = response.Content;
+          this._userProfile.Role = response.Content;
         },
         (error: ngHttp.HttpErrorResponse) => { });
   }
@@ -154,7 +154,7 @@ export class ProfilePage implements OnInit, OnDestroy {
           .subscribe(
             response => {
               this._userProfile = response.Content;
-              const cur = this.UserRoles.filter(ur => ur.Value == this._userProfile.Roles);
+              const cur = this.AssignableUserRoles.filter(ur => ur.Value == this._userProfile.Role);
               this.SelectedUserRole = (cur && cur.length) > 0 ? cur[0] : null;
             },
             (error: ngHttp.HttpErrorResponse) => { });

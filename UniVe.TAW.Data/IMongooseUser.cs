@@ -12,7 +12,7 @@ namespace UniVe.TAW.Data
         DateTime RegistrationDate { get; }
         DateTime BirthDate { get; set; }
         identity.Country CountryId { get; set; }
-        Roles: identity.UserRoles { get; set; }
+        Role: identity.UserRole { get; set; }
     Salt: string{ get; set; }
 Digest: string{ get; set; }
     SentMessages: Map<String, ChatMessage.IMongooseChatMessage[]>{ get; set; }

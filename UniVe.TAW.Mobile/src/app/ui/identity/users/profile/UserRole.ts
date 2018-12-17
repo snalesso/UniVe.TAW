@@ -3,7 +3,7 @@ import * as identity from '../../../../../assets/unive.taw.webservice/infrastruc
 export default class UserRole {
 
     public constructor(
-        public readonly Value: identity.UserRoles,
+        public readonly Value: identity.UserRole,
         public readonly Name: string
     ) { }
 }

@@ -21,12 +21,12 @@ export interface IMongooseMatch extends mongoose.Document {
     InActionPlayerId: mongoose.Types.ObjectId,
     FirstPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
-    areBothConfigured: () => boolean,
-    configFleet: (playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
+    areBothConfigured(): boolean,
+    configFleet(playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean,
     /** returns true if a ship was hit, false if water, exception if it was already hit */
-    fire: (firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord) => boolean,
-    getOwnerMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide,
-    getEnemyMatchPlayerSide: (playerId: mongoose.Types.ObjectId) => MatchPlayerSide.IMongooseMatchPlayerSide
+    fire(firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord): boolean,
+    getOwnerMatchPlayerSide(playerId: mongoose.Types.ObjectId): MatchPlayerSide.IMongooseMatchPlayerSide,
+    getEnemyMatchPlayerSide(playerId: mongoose.Types.ObjectId): MatchPlayerSide.IMongooseMatchPlayerSide
 }
 
 const matchSchema = new mongoose.Schema({
@@ -203,7 +203,7 @@ matchSchema.methods.configFleet = function (
 
     const sideToConfig = this.getOwnerMatchPlayerSide(playerId);
     // TODO: ensure settings compliance
-    if (shipPlacements == null || shipPlacements.length <= 0 /*|| fleetConfig.every(sp => sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
+    if (shipPlacements == null || shipPlacements.length <= 0 /*|| fleetConfig.every(sp : sp.Coord.X < 0 && sp.Coord.X > this.Settings)*/)
         throw new Error("Fleet config does not comply with match settings!");
 
     const wasFleetConfigSuccessful = sideToConfig.configFleet(this.Settings as MatchSettings.IMongooseMatchSettings, shipPlacements);

@@ -28,7 +28,7 @@ export class IdentityService {
   }
 
   public getUserProfile(userId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/profile";
+    const endPoint = ServiceConstants.ServerAddress + "/users/" + userId;
     const options = {
       headers: new ng_http.HttpHeaders()
         .set('Content-Type', 'application/json')
@@ -97,7 +97,7 @@ export class IdentityService {
     return this._http.post<net.HttpMessage<Date>>(endPoint, { BanDurationHours: 0, UserId: userId } as DTOs.IUserBanRequest, options);
   }
 
-  public assignRole(userId: string, newRole: identity.UserRoles) {
+  public assignRole(userId: string, newRole: identity.UserRole) {
     const endPoint = ServiceConstants.ServerAddress + "/users/" + userId + "/role";
     const options = {
       headers: new ng_http.HttpHeaders({
@@ -106,7 +106,7 @@ export class IdentityService {
       })
     };
 
-    return this._http.post<net.HttpMessage<identity.UserRoles>>(endPoint, { NewRole: newRole, UserId: userId } as DTOs.IRoleAssignmentRequestDto, options);
+    return this._http.post<net.HttpMessage<identity.UserRole>>(endPoint, { NewRole: newRole } as DTOs.IRoleAssignmentRequestDto, options);
   }
 
   public deleteUser(userId: string) {

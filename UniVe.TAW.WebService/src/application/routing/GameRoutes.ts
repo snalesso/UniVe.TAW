@@ -26,7 +26,6 @@ export default class GameRoutes extends RoutesBase {
         super(socketIOServer);
 
         this._router.use("/pendingMatches", (this._pendingMatchesRoutes = new PendingMatchesRoutes(this._socketIOServer)).Router);
-
         this._router.use("/matches", (this._matchesRoutes = new MatchesRoutes(this._socketIOServer)).Router);
 
         this._router.get(

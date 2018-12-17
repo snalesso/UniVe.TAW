@@ -9,8 +9,8 @@ export default class ServiceEventKeys {
     public static readonly MatchEnded = "MatchEnded";
     public static readonly MatchCanceled = "MatchCanceled";
     public static readonly YouGotANewMessage = "YouGotANewMessage";
-    public static readonly BanUpdated = "BanUpdated";
-    public static readonly RolesUpdated = "RolesUpdated";
+    public static readonly UserBanned = "UserBanned";
+    public static readonly UserRoleUpdated = "UserRoleUpdated";
     public static readonly UserDeleted = "UserDeleted";
 
     public static pendingMatchJoined(subscribingUserId: string, pendingMatchid: string) {

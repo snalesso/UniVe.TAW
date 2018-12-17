@@ -16,11 +16,11 @@ import * as utils_2_8 from '../../../../infrastructure/utils-2.8';
 export interface IMongooseMatchPlayerSide extends mongoose.Document {
     readonly PlayerId: mongoose.Types.ObjectId,
     BattleFieldCells: ServerSideBattleFieldCell.IMongooseBattleFieldCell[][],
-    isConfigured: (matchSettings: MatchSettings.IMongooseMatchSettings) => boolean,
-    configFleet: (matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]) => boolean,
+    isConfigured(matchSettings: MatchSettings.IMongooseMatchSettings): boolean,
+    configFleet(matchSettings: MatchSettings.IMongooseMatchSettings, shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean,
     /** returns true if hit, false if water, exception if it was already hit */
-    receiveFire: (coord: game.Coord) => boolean,
-    areAllShipsHit: () => boolean
+    receiveFire(coord: game.Coord): boolean,
+    areAllShipsHit(): boolean
 }
 
 const matchPlayerSideSchema = new mongoose.Schema(

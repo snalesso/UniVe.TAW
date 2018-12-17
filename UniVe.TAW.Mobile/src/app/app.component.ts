@@ -19,7 +19,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private _accountBannedEventKey: string;
   private _accountDeletedEventKey: string;
-  private _accountRolesUpdatedEventKey: string;
+  private _accountUserRoleUpdatedEventKey: string;
 
   constructor(
     private platform: Platform,
@@ -52,7 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this._authService.IsLogged) {
 
       this._socketIOService.once(
-        (this._accountBannedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.BanUpdated)),
+        (this._accountBannedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserBanned)),
         async (userBannedUntil: Date) => {
           if (userBannedUntil) {
             this._authService.logout();
@@ -81,8 +81,8 @@ export class AppComponent implements OnInit, OnDestroy {
         });
 
       this._socketIOService.once(
-        (this._accountRolesUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.RolesUpdated)),
-        (newRole: identity.UserRoles) => {
+        (this._accountUserRoleUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserRoleUpdated)),
+        (newRole: identity.UserRole) => {
           location.reload();
         });
     }
@@ -98,9 +98,9 @@ export class AppComponent implements OnInit, OnDestroy {
       this._socketIOService.removeListener(this._accountDeletedEventKey);
       this._accountDeletedEventKey = null;
     }
-    if (this._accountRolesUpdatedEventKey) {
-      this._socketIOService.removeListener(this._accountRolesUpdatedEventKey);
-      this._accountRolesUpdatedEventKey = null;
+    if (this._accountUserRoleUpdatedEventKey) {
+      this._socketIOService.removeListener(this._accountUserRoleUpdatedEventKey);
+      this._accountUserRoleUpdatedEventKey = null;
     }
   }
 
