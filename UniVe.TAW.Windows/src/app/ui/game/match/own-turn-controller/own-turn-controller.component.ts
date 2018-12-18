@@ -169,8 +169,9 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._matchUpdatedeventKey)
+    if (this._matchUpdatedeventKey) {
       this._socketIOService.removeListener(this._matchUpdatedeventKey);
-    this._matchUpdatedeventKey = null;
+      this._matchUpdatedeventKey = null;
+    }
   }
 }

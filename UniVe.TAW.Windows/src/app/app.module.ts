@@ -19,7 +19,6 @@ import { WebviewDirective } from './directives/webview.directive';
 
 // components
 import { AppComponent } from './app.component';
-import { HomeComponent } from './components/home/home.component';
 import { SignupComponent } from './ui/identity/signup/signup.component';
 import { LoginComponent } from './ui/identity/login/login.component';
 import { HeaderComponent } from './ui/navigation/header/header.component';
@@ -45,7 +44,6 @@ export function HttpLoaderFactory(http: HttpClient) {
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
     WebviewDirective,
     SignupComponent,
     LoginComponent,

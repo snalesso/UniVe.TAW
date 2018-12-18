@@ -68,7 +68,8 @@ export default class MatchesRoutes extends RoutesBase {
                                 IsConfigNeeded: !ownSide.isConfigured(match.Settings),
                                 IsMatchStarted: match.StartDateTime != null,
                                 Enemy: { Id: enemy._id.toHexString(), Username: enemy.Username },
-                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId)
+                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId),
+                                DoIOwnMove: match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId)
                             } as DTOs.IOwnSideMatchStatus;
 
                             responseData = new net.HttpMessage(ownSideMatchStatusDto);
@@ -330,7 +331,7 @@ export default class MatchesRoutes extends RoutesBase {
                             } as DTOs.IAttackResultDto;
 
                             // TODO: this event forces a FULL reload of the enemy field from server, create an ad hoc event which just tells "enemy hit water, its your turn"
-                            this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
+                            //this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
 
                             this._socketIOServer.emit(
                                 ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.YouGotShot),

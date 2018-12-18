@@ -152,7 +152,9 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
 
             if (!this._matchUpdatedeventKey) {
               this._matchUpdatedeventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
-              this._socketIOService.on(this._matchUpdatedeventKey, (matchStarted: DTOs.IMatchStartedEventDto) => this.updateInfo());
+              this._socketIOService.on(this._matchUpdatedeventKey, () => {
+                this.updateInfo();
+              });
             }
 
             this.rebuildGridCells();
@@ -169,8 +171,9 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._matchUpdatedeventKey)
+    if (this._matchUpdatedeventKey) {
       this._socketIOService.removeListener(this._matchUpdatedeventKey);
-    this._matchUpdatedeventKey = null;
+      this._matchUpdatedeventKey = null;
+    }
   }
 }

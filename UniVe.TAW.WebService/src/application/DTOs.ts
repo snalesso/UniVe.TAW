@@ -56,6 +56,7 @@ export interface IOwnSideMatchStatus {
     IsMatchStarted: boolean;
     EndDateTime: Date;
     DidIWin: boolean;
+    DoIOwnMove: boolean;
 }
 
 export interface IMatchConfigStatus {
