@@ -56,10 +56,9 @@ export interface IOwnSideMatchStatus {
     IsMatchStarted: boolean;
     EndDateTime: Date;
     DidIWin: boolean;
-    DoIOwnMove: boolean;
 }
 
-export interface IOwnSideMatchConfigStatus {
+export interface IMatchConfigStatus {
     IsConfigNeeded: boolean;
     Settings: game.IMatchSettings;
 }
@@ -137,9 +136,8 @@ export interface IMatchEndedEventDto extends IMatchEventDto {
 }
 
 export interface IAttackResultDto {
-    readonly NewEnemyField: ReadonlyArray<ReadonlyArray<game_client.EnemyBattleFieldCellStatus>>;
     readonly EnemyFieldCellChanges: ReadonlyArray<game_client.IEnemyBattleFieldCell>;
-    readonly StillOwnsMove: boolean;
+    readonly DoIOwnMove: boolean;
     //readonly IsMatchEnded: boolean;
 }
 

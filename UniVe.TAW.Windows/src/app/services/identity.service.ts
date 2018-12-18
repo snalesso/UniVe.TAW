@@ -106,7 +106,7 @@ export class IdentityService {
       })
     };
 
-    return this._http.post<net.HttpMessage<identity.UserRole>>(endPoint, newRole, options);
+    return this._http.post<net.HttpMessage<identity.UserRole>>(endPoint, { NewRole: newRole } as DTOs.IRoleAssignmentRequestDto, options);
   }
 
   public deleteUser(userId: string) {

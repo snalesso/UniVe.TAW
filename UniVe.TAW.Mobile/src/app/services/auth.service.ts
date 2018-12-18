@@ -10,6 +10,8 @@ import ServiceConstants from './ServiceConstants';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
+//import chalk from 'chalk';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,11 +55,10 @@ export class AuthService implements OnDestroy {
         'Content-Type': 'application/json'
       })
     };
-
     return this.http.post<net.HttpMessage<boolean>>(
       endPoint,
       signupRequest,
-      options)
+      options);
   }
 
   public login(credentials: DTOs.ILoginCredentials)/*: Observable<net.HttpMessage<string>>*/ {
@@ -77,7 +78,7 @@ export class AuthService implements OnDestroy {
       .pipe(
         tap((response) => {
           if (response.ErrorMessage) {
-            console.log("Login failed - server says: " + JSON.stringify(response.ErrorMessage));
+            console.log("Login failed - server says: " + response.ErrorMessage);
           }
           else {
             this.storeToken(response.Content);

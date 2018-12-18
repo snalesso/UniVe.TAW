@@ -7,11 +7,9 @@ import * as game from '../../assets/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from './ServiceConstants';
 
-//import * as $ from 'jquery';
 import { Observable } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
-//import 'socket.io-client';
 import * as ngxSocketIO from 'ngx-socket-io';
 
 @Injectable({
@@ -70,15 +68,16 @@ export class GameService {
     return this._http.put<net.HttpMessage<string>>(endPoint, null, options);
   }
 
-  public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
-    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/config";
+  public getMatchStatus(matchId: string) {
+    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId;
     const options = {
-      headers: new ng_http.HttpHeaders()
-        .set('Content-Type', 'application/json')
-        .set('Authorization', 'Bearer ' + this._authService.Token)
+      headers: new ng_http.HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this._authService.Token
+      })
     };
 
-    return this._http.post<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, fleetConfig, options);
+    return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchStatus>>(endPoint, options);
   }
 
   public getMatchConfigStatus(matchId: string) {
@@ -90,7 +89,18 @@ export class GameService {
       })
     };
 
-    return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchConfigStatus>>(endPoint, options);
+    return this._http.get<net.HttpMessage<DTOs.IMatchConfigStatus>>(endPoint, options);
+  }
+
+  public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
+    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/config";
+    const options = {
+      headers: new ng_http.HttpHeaders()
+        .set('Content-Type', 'application/json')
+        .set('Authorization', 'Bearer ' + this._authService.Token)
+    };
+
+    return this._http.post<net.HttpMessage<boolean>>(endPoint, fleetConfig, options);
   }
 
   public getOwnTurnInfo(matchId: string) {
@@ -103,18 +113,6 @@ export class GameService {
     };
 
     return this._http.get<net.HttpMessage<DTOs.IOwnTurnInfoDto>>(endPoint, options);
-  }
-
-  public getOwnSideMatchStatus(matchId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/ownSideStatus";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this._authService.Token
-      })
-    };
-
-    return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchStatus>>(endPoint, options);
   }
 
   public singleShot(matchId: string, singleShot: game.ISingleShotMatchAction) {

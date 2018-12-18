@@ -87,7 +87,7 @@ export class OwnTurnControllerComponent implements OnInit, OnDestroy {
             }
             this._isRebuildingCells = false;
 
-            this._ownTurnInfo.OwnsMove = response.Content.StillOwnsMove;
+            this._ownTurnInfo.OwnsMove = response.Content.DoIOwnMove;
             //this.rebuildGridCells();
           }
 

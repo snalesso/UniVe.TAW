@@ -441,8 +441,7 @@ export default class UsersRoutes extends RoutesBase {
                 const currUser = await User.getModel().findById(jwtUser.Id).exec();
                 const userToAssignRole = await User.getModel().findById(userToAssignRoleHexId).exec();
 
-                // admin can do anything
-                // mods can operate on simple players only
+                // only admins can assign roles
                 if (currUser.Role != identity.UserRole.Administrator) {
                     responseData = new net.HttpMessage(null, "You have no power here");
                     response

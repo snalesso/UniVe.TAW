@@ -61,7 +61,7 @@ export class MatchComponent implements OnInit, OnDestroy {
       this._router.navigate([ViewsRoutingKeys.Root]);
     }
     else {
-      this._gameService.getOwnSideMatchStatus(this._matchId)
+      this._gameService.getMatchStatus(this._matchId)
         .subscribe(
           response => {
             if (response.ErrorMessage) {

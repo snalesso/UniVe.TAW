@@ -16,7 +16,7 @@
             }
         },
         {
-            "label": "Export dependencies to other projects",
+            "label": "Export dependencies",
             "command": "gulp export-dependencies",
             "type": "shell",
             "dependsOn": "Transpile"

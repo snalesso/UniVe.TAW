@@ -24,7 +24,7 @@
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ],
-            "preLaunchTask": "Export dependencies to other projects",
+            "preLaunchTask": "Export dependencies",
             "envFile": "${workspaceFolder}/.env",
             "internalConsoleOptions": "openOnSessionStart",
         },

@@ -42,18 +42,18 @@ export class FleetConfiguratorComponent implements OnInit {
   @Output()
   public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged; }
 
-  private _ownMatchSideConfigStatus: DTOs.IOwnSideMatchConfigStatus;
+  private _matchConfigStatus: DTOs.IMatchConfigStatus;
 
   public get BattleFieldWidth(): number {
-    if (this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.Settings != null)
-      return this._ownMatchSideConfigStatus.Settings.BattleFieldWidth;
+    if (this._matchConfigStatus != null && this._matchConfigStatus.Settings != null)
+      return this._matchConfigStatus.Settings.BattleFieldWidth;
     return 0;
   }
 
   private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][];
   public get Cells() { return this._gridCells; }
 
-  public get IsConfigNeeded(): boolean { return this._ownMatchSideConfigStatus != null && this._ownMatchSideConfigStatus.IsConfigNeeded }
+  public get IsConfigNeeded(): boolean { return this._matchConfigStatus != null && this._matchConfigStatus.IsConfigNeeded }
 
   private _canRandomize: boolean = false;
   public get CanRandomize(): boolean { return this._canRandomize; }
@@ -63,10 +63,10 @@ export class FleetConfiguratorComponent implements OnInit {
 
   private rebuildGridCells() {
     if (this._gridCells == null) {
-      this._gridCells = new Array(this._ownMatchSideConfigStatus.Settings.BattleFieldWidth);
-      for (let x = 0; x < this._ownMatchSideConfigStatus.Settings.BattleFieldWidth; x++) {
-        this._gridCells[x] = new Array(this._ownMatchSideConfigStatus.Settings.BattleFieldHeight);
-        for (let y = 0; y < this._ownMatchSideConfigStatus.Settings.BattleFieldHeight; y++) {
+      this._gridCells = new Array(this._matchConfigStatus.Settings.BattleFieldWidth);
+      for (let x = 0; x < this._matchConfigStatus.Settings.BattleFieldWidth; x++) {
+        this._gridCells[x] = new Array(this._matchConfigStatus.Settings.BattleFieldHeight);
+        for (let y = 0; y < this._matchConfigStatus.Settings.BattleFieldHeight; y++) {
           this._gridCells[x][y] = { Coord: new game.Coord(x, y), ShipType: game.ShipType.NoShip };
         }
       }
@@ -94,7 +94,7 @@ export class FleetConfiguratorComponent implements OnInit {
     let rOrient: game.Orientation;
     let rPlacement: game.ShipPlacement;
 
-    for (let avShip of this._ownMatchSideConfigStatus.Settings.ShipTypeAvailabilities) {
+    for (let avShip of this._matchConfigStatus.Settings.ShipTypeAvailabilities) {
       for (let i = 0; i < avShip.Count; i++) {
         sortedShipsTypesToPlace.push(avShip.ShipType);
       }
@@ -106,13 +106,13 @@ export class FleetConfiguratorComponent implements OnInit {
       do {
         rOrient = utils.getRandomBoolean() ? game.Orientation.Vertical : game.Orientation.Horizontal;
         do {
-          rx = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
-          ry = utils.getRandomInt(0, this._ownMatchSideConfigStatus.Settings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
+          rx = utils.getRandomInt(0, this._matchConfigStatus.Settings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this._matchConfigStatus.Settings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
         } while (this._gridCells[rx][ry].ShipType != game.ShipType.NoShip);
 
         rPlacement = new game.ShipPlacement(shipTypeToPlace, new game.Coord(rx, ry), rOrient);
 
-      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._ownMatchSideConfigStatus.Settings));
+      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._matchConfigStatus.Settings));
 
       this._shipPlacements.push(rPlacement);
     }
@@ -143,17 +143,12 @@ export class FleetConfiguratorComponent implements OnInit {
             this._canSubmitConfig = this._canRandomize = true;
           }
           else {
-            if (!response.Content) {
-              console.log("Match config failed");
-            }
-            else {
-              this._ownMatchSideConfigStatus = response.Content;
-              this._whenIsConfigNeededChanged.next(this._ownMatchSideConfigStatus.IsConfigNeeded);
-              this._canSubmitConfig = this._canRandomize = this._ownMatchSideConfigStatus.IsConfigNeeded;
+            this._matchConfigStatus.IsConfigNeeded = (response.Content == false);
+            this._whenIsConfigNeededChanged.next(this._matchConfigStatus.IsConfigNeeded);
+            this._canSubmitConfig = this._canRandomize = this._matchConfigStatus.IsConfigNeeded;
 
-              if (!this._ownMatchSideConfigStatus.IsConfigNeeded) {
-                this._whenIsConfigNeededChanged.complete();
-              }
+            if (!this._matchConfigStatus.IsConfigNeeded) {
+              this._whenIsConfigNeededChanged.complete();
             }
           }
         },
@@ -162,7 +157,7 @@ export class FleetConfiguratorComponent implements OnInit {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
-              this._ownMatchSideConfigStatus.IsConfigNeeded = false;
+              this._matchConfigStatus.IsConfigNeeded = false;
               this._whenIsConfigNeededChanged.next(true);
               this._whenIsConfigNeededChanged.complete();
               break;
@@ -195,10 +190,10 @@ export class FleetConfiguratorComponent implements OnInit {
             console.log("The server returned null");
           }
           else {
-            this._ownMatchSideConfigStatus = response.Content;
-            this._whenIsConfigNeededChanged.next(this._ownMatchSideConfigStatus.IsConfigNeeded);
+            this._matchConfigStatus = response.Content;
+            this._whenIsConfigNeededChanged.next(this._matchConfigStatus.IsConfigNeeded);
 
-            if (this._ownMatchSideConfigStatus.IsConfigNeeded)
+            if (this._matchConfigStatus.IsConfigNeeded)
               this.randomizeFleet();
             else
               this._whenIsConfigNeededChanged.complete();
