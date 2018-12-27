@@ -16,14 +16,17 @@ import * as Match from '../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../domain/models/mongodb/mongoose/EndedMatch';
 import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 
-import * as DTOs from './DTOs';
+import * as identityDTOs from './DTOs/identity';
+import * as gameDTOs from './DTOs/game';
+import * as chatDTOs from './DTOs/chat';
+
 import chalk from 'chalk';
 
 export default class DataManager {
 
     public static async GetPlayables(userId: mongoose.Types.ObjectId) {
 
-        const playables = {} as DTOs.IPlayablesDto;
+        const playables = {} as gameDTOs.IPlayablesDto;
 
         try {
             const pendingMatch = await this.GetPendingMatch(userId);
@@ -56,24 +59,24 @@ export default class DataManager {
                                 Age: creator.getAge(),
                                 CountryId: creator.CountryId
                             }
-                        } as DTOs.IJoinableMatchDto;
+                        } as gameDTOs.IJoinableMatchDto;
                     });
 
                     return playables;
                 }
                 catch (error) {
                     console.log(error);
-                    return null as DTOs.IPlayablesDto;
+                    return null as gameDTOs.IPlayablesDto;
                 }
             }
             catch (error_1) {
                 console.log(error_1);
-                return null as DTOs.IPlayablesDto;
+                return null as gameDTOs.IPlayablesDto;
             }
         }
         catch (error_2) {
             console.log(error_2);
-            return null as DTOs.IPlayablesDto;
+            return null as gameDTOs.IPlayablesDto;
         }
     }
 

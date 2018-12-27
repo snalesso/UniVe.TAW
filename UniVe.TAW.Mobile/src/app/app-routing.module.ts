@@ -7,8 +7,8 @@ import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
 import ServiceConstants from './services/ServiceConstants';
 import { RoutingHelper, RouteStep, RouteParam } from './Routing';
 import RoutingParamKeys from '../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import { LoggedOutGuardService } from './services/logged-out-guard.service';
-import { LoggedInGuardService } from './services/logged-in-guard.service';
+import { LoggedOutGuard } from './guards/logged-out.guard';
+import { LoggedInGuard } from './guards/logged-in.guard';
 import { ProfilePage } from './ui/identity/users/profile/profile.page';
 
 const routes: Routes = [
@@ -20,22 +20,22 @@ const routes: Routes = [
   {
     path: ViewsRoutingKeys.Signup,
     component: SignupPage,
-    canActivate: [LoggedOutGuardService]
+    canActivate: [LoggedOutGuard]
   },
   {
     path: ViewsRoutingKeys.Login,
     component: LoginPage,
-    canActivate: [LoggedOutGuardService]
+    canActivate: [LoggedOutGuard]
   },
   {
     path: ViewsRoutingKeys.MatchFinder,
     loadChildren: './ui/game/match-finder/match-finder.module#MatchFinderPageModule',
-    canActivate: [LoggedInGuardService]
+    canActivate: [LoggedInGuard]
   },
   {
     path: ViewsRoutingKeys.Chat,
     loadChildren: './ui/chat/chat.module#ChatPageModule',
-    canActivate: [LoggedInGuardService]
+    canActivate: [LoggedInGuard]
   },
   {
     path: RoutingHelper.buildRoute([
@@ -43,7 +43,7 @@ const routes: Routes = [
       new RouteParam(RoutingParamKeys.matchId)
     ]),
     loadChildren: './ui/game/match/match.module#MatchPageModule',
-    canActivate: [LoggedInGuardService]
+    canActivate: [LoggedInGuard]
   },
   {
     path: ViewsRoutingKeys.Rankings,
@@ -55,7 +55,7 @@ const routes: Routes = [
   //     new RouteStep(RoutingParamKeys.self)
   //   ]),
   //   component: ProfilePage,
-  //   canActivate: [LoggedInGuardService]
+  //   canActivate: [LoggedInGuard]
   // },
   {
     path: RoutingHelper.buildRoute([

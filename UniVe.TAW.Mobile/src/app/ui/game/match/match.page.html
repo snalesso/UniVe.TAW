@@ -39,15 +39,14 @@
       </ion-content>
     </ion-tab>
 
-    <ion-tab tab="enemy-turn-controller-tab">
+    <ion-tab tab="own-field-controller-tab">
       <ion-content *ngIf="AreTurnControllersVisible">
-        <app-enemy-turn-controller></app-enemy-turn-controller>
+        <app-own-field-controller> </app-own-field-controller>
       </ion-content>
     </ion-tab>
-
-    <ion-tab tab="own-turn-controller-tab">
+    <ion-tab tab="enemy-field-controller-tab">
       <ion-content *ngIf="AreTurnControllersVisible">
-        <app-own-turn-controller></app-own-turn-controller>
+        <app-enemy-field-controller></app-enemy-field-controller>
       </ion-content>
     </ion-tab>
 
@@ -72,12 +71,12 @@
         <ion-icon name="boat"></ion-icon>
       </ion-tab-button>
 
-      <ion-tab-button tab="enemy-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+      <ion-tab-button tab="own-field-controller-tab" *ngIf="AreTurnControllersVisible">
         <ion-label>Defend</ion-label>
         <ion-icon name="heart"></ion-icon>
       </ion-tab-button>
 
-      <ion-tab-button tab="own-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+      <ion-tab-button tab="enemy-field-controller-tab" *ngIf="AreTurnControllersVisible">
         <ion-label>Attack {{EnemyUsername}}</ion-label>
         <ion-icon name="locate"></ion-icon>
       </ion-tab-button>

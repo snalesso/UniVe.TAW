@@ -24,7 +24,11 @@ const exportBatches: IExportBatch[] = [
             "/infrastructure/game.client.ts",
             "/infrastructure/chat.ts",
             "/infrastructure/utils.ts",
-            "/application/DTOs.ts",
+
+            "/application/DTOs/identity.ts",
+            "/application/DTOs/game.ts",
+            "/application/DTOs/chat.ts",
+
             "/application/routing/RoutingParamKeys.ts",
             "/application/services/ServiceEventKeys.ts"
         ],
@@ -40,7 +44,11 @@ const exportBatches: IExportBatch[] = [
             "/infrastructure/game.client.ts",
             "/infrastructure/chat.ts",
             "/infrastructure/utils.ts",
-            "/application/DTOs.ts",
+
+            "/application/DTOs/identity.ts",
+            "/application/DTOs/game.ts",
+            "/application/DTOs/chat.ts",
+
             "/application/routing/RoutingParamKeys.ts",
             "/application/services/ServiceEventKeys.ts"
         ],
@@ -56,7 +64,11 @@ const exportBatches: IExportBatch[] = [
             "/infrastructure/game.client.ts",
             "/infrastructure/chat.ts",
             "/infrastructure/utils.ts",
-            "/application/DTOs.ts",
+
+            "/application/DTOs/identity.ts",
+            "/application/DTOs/game.ts",
+            "/application/DTOs/chat.ts",
+
             "/application/routing/RoutingParamKeys.ts",
             "/application/services/ServiceEventKeys.ts"
         ],

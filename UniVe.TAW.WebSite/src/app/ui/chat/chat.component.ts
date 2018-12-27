@@ -5,7 +5,11 @@ import * as game from '../../../assets/unive.taw.webservice/infrastructure/game'
 import * as game_client from '../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../services/ServiceConstants';
 import RoutingParamKeys from '../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';

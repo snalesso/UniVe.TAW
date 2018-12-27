@@ -16,7 +16,10 @@ import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
@@ -34,7 +37,7 @@ export default class UsersRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<boolean>;
 
-                const signupReq = request.body as DTOs.ISignupRequestDto;
+                const signupReq = request.body as identityDTOs.ISignupRequestDto;
 
                 if (!signupReq) {
                     response.status(httpStatusCodes.FORBIDDEN);
@@ -89,9 +92,9 @@ export default class UsersRoutes extends RoutesBase {
             '/rankings',
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                //const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                //const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 //const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
-                let responseData: net.HttpMessage<DTOs.IUserRanking[]> = null;
+                let responseData: net.HttpMessage<identityDTOs.IUserRanking[]> = null;
 
                 Promise
                     .all([
@@ -101,11 +104,11 @@ export default class UsersRoutes extends RoutesBase {
                     .then(queries => {
                         const [users, endedMatches] = queries;
 
-                        let rankings: DTOs.IUserRanking[] = [];
+                        let rankings: identityDTOs.IUserRanking[] = [];
 
                         for (let user of users) {
 
-                            let userRanking: DTOs.IUserRanking = {
+                            let userRanking: identityDTOs.IUserRanking = {
                                 Id: user._id.toHexString(),
                                 Username: user.Username,
                                 WinsCount: 0,
@@ -167,7 +170,7 @@ export default class UsersRoutes extends RoutesBase {
 
                 const userHexId = request.params[RoutingParamKeys.userId];
                 const userObjectId = new mongoose.Types.ObjectId(userHexId);
-                let responseData: net.HttpMessage<DTOs.IUserProfile> = null;
+                let responseData: net.HttpMessage<identityDTOs.IUserProfile> = null;
 
                 User.getModel()
                     .findById(userHexId)
@@ -178,7 +181,7 @@ export default class UsersRoutes extends RoutesBase {
                                 .find({ $or: [{ "FirstPlayerSide.PlayerId": userHexId }, { "SecondPlayerSide.PlayerId": userHexId }] })
                                 .then(userEndedMatches => {
 
-                                    let profileDto: DTOs.IUserProfile = {
+                                    let profileDto: identityDTOs.IUserProfile = {
                                         Id: user.id,
                                         Username: user.Username,
                                         Age: user.getAge(),
@@ -218,7 +221,7 @@ export default class UsersRoutes extends RoutesBase {
                 const userId = request.params[RoutingParamKeys.userId];
                 let responseData: net.HttpMessage<boolean> = null;
 
-                const jwtUser = (request.user as DTOs.IUserJWTPayload);
+                const jwtUser = (request.user as identityDTOs.IUserJWTPayload);
                 const loggedUser = await User.getModel().findById(jwtUser.Id).exec();
 
                 if (!loggedUser || loggedUser.Role != identity.UserRole.Administrator || (loggedUser.BannedUntil != null || loggedUser.BannedUntil < new Date())) {
@@ -315,12 +318,12 @@ export default class UsersRoutes extends RoutesBase {
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
                 const userId = request.params[RoutingParamKeys.userId];
-                let responseData: net.HttpMessage<DTOs.IUserPowers> = null;
+                let responseData: net.HttpMessage<identityDTOs.IUserPowers> = null;
 
                 User.getModel()
                     .findById(userId)
                     .then((user) => {
-                        let powers: DTOs.IUserPowers = {
+                        let powers: identityDTOs.IUserPowers = {
                             Role: user.Role,
                             CanDeleteUser: user.Role == identity.UserRole.Administrator,
                             CanAssignRoles: user.Role == identity.UserRole.Administrator,
@@ -345,11 +348,11 @@ export default class UsersRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response) => {
 
-                const jwtUser = (request.user as DTOs.IUserJWTPayload);
+                const jwtUser = (request.user as identityDTOs.IUserJWTPayload);
 
                 let responseData: net.HttpMessage<Date>;
 
-                const banReq = request.body as DTOs.IUserBanRequest;
+                const banReq = request.body as identityDTOs.IUserBanRequest;
 
                 const currUser = await User.getModel().findById(jwtUser.Id).exec();
                 const userToBan = await User.getModel().findById(banReq.UserId).exec();
@@ -431,12 +434,12 @@ export default class UsersRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response) => {
 
-                const jwtUser = (request.user as DTOs.IUserJWTPayload);
+                const jwtUser = (request.user as identityDTOs.IUserJWTPayload);
 
                 let responseData: net.HttpMessage<identity.UserRole>;
 
                 const userToAssignRoleHexId = request.params[RoutingParamKeys.userId];
-                const roleAssignmentRequest = request.body as DTOs.IRoleAssignmentRequestDto;
+                const roleAssignmentRequest = request.body as identityDTOs.IRoleAssignmentRequestDto;
 
                 const currUser = await User.getModel().findById(jwtUser.Id).exec();
                 const userToAssignRole = await User.getModel().findById(userToAssignRoleHexId).exec();
@@ -477,7 +480,7 @@ export default class UsersRoutes extends RoutesBase {
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
                 const userHexId = request.params[RoutingParamKeys.userId];
-                let responseData: net.HttpMessage<DTOs.IEndedMatchSummaryDto[]> = null;
+                let responseData: net.HttpMessage<gameDTOs.IEndedMatchSummaryDto[]> = null;
 
                 const userModel = User.getModel();
 
@@ -509,7 +512,7 @@ export default class UsersRoutes extends RoutesBase {
                                     Id: sp != null ? sp._id.toHexString() : null,
                                     Username: sp != null ? sp.Username : null
                                 }
-                            } as DTOs.IEndedMatchSummaryDto);
+                            } as gameDTOs.IEndedMatchSummaryDto);
                         });
 
                         emDtos = emDtos.sort((a, b) => {

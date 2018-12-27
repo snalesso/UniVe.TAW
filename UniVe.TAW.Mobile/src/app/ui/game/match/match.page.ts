@@ -93,9 +93,9 @@ export class MatchPage implements OnInit, OnDestroy {
                     this._matchStatus.DoIOwnMove = matchStartedEvent.InActionPlayerId == this._authService.LoggedUser.Id;
 
                     if (this._matchStatus.DoIOwnMove)
-                      this._tabs.select("own-turn-controller-tab");
+                      this._tabs.select("enemy-field-controller-tab");
                     else
-                      this._tabs.select("enemy-turn-controller-tab");
+                      this._tabs.select("own-field-controller-tab");
 
                   });
               }
@@ -142,9 +142,9 @@ export class MatchPage implements OnInit, OnDestroy {
                 this._tabs.select("fleet-configurator-tab");
               } else if (this.AreTurnControllersVisible) {
                 if (this._matchStatus.DoIOwnMove)
-                  this._tabs.select("own-turn-controller-tab");
+                  this._tabs.select("enemy-field-controller-tab");
                 else
-                  this._tabs.select("enemy-turn-controller-tab");
+                  this._tabs.select("own-field-controller-tab");
               }
               //}, 200);
               // // console.log(x);

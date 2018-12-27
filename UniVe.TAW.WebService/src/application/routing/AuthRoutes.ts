@@ -11,7 +11,10 @@ import * as utils from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
 
@@ -77,7 +80,7 @@ export default class GameRoutes extends RoutesBase {
                         .json(responseData);
                 }
                 else {
-                    let jwtPayload: DTOs.IUserJWTPayload = {
+                    let jwtPayload: identityDTOs.IUserJWTPayload = {
                         Id: user._id.toHexString(),
                         Username: user.Username,
                         BannedUtil: user.BannedUntil

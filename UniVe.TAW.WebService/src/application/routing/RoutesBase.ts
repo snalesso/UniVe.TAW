@@ -3,7 +3,11 @@ import * as socketio from 'socket.io';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import * as expressJwt from 'express-jwt';
-import * as DTOs from '../../application/DTOs';
+
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import { MongoError } from 'mongodb';
 import *  as net from '../../infrastructure/net';
@@ -36,7 +40,7 @@ export default abstract class RoutesBase {
 
     private isTokenRevokedCallback(
         request: express.Request,
-        payload: DTOs.IUserJWTPayload,
+        payload: identityDTOs.IUserJWTPayload,
         done: (errorMessage: net.IHttpResponseError, revoked: boolean) => any) {
 
         User.getModel().findById(payload.Id)

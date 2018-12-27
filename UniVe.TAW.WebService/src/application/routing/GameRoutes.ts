@@ -6,7 +6,10 @@ import * as socketio from 'socket.io';
 
 import * as net from '../../infrastructure/net';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import RoutesBase from './RoutesBase';
 import DataManager from '../DataManager';
 import PendingMatchesRoutes from './PendingMatchesRoutes';
@@ -33,12 +36,12 @@ export default class GameRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response) => {
 
-                let responseData: net.HttpMessage<DTOs.IPlayablesDto> = null;
+                let responseData: net.HttpMessage<gameDTOs.IPlayablesDto> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
 
-                const playables = {} as DTOs.IPlayablesDto;
+                const playables = {} as gameDTOs.IPlayablesDto;
 
                 try {
                     const pendingMatch = await DataManager.GetPendingMatch(userObjectId);
@@ -73,7 +76,7 @@ export default class GameRoutes extends RoutesBase {
                                         Age: creator.getAge(),
                                         CountryId: creator.CountryId
                                     }
-                                } as DTOs.IJoinableMatchDto;
+                                } as gameDTOs.IJoinableMatchDto;
                             });
 
                             return response

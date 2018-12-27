@@ -1,11 +1,15 @@
-import { Component, OnInit, Output, EventEmitter, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, /*AfterViewInit, AfterContentInit*/ } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as ngHttp from '@angular/common/http';
@@ -24,8 +28,6 @@ import { startWith } from 'rxjs/operators';
 // TODO: rename to match-setup
 export class FleetConfiguratorComponent implements OnInit {
 
-  private readonly _matchId: string;
-
   private _shipPlacements: game.ShipPlacement[] = [];
 
   constructor(
@@ -33,48 +35,47 @@ export class FleetConfiguratorComponent implements OnInit {
     private readonly _activatedRoute: ActivatedRoute,
     private readonly _gameService: GameService,
     private readonly _authService: AuthService) {
-
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
-    //this.WhenToggleChanged.subscribe(v => console.log("fc - toggle - " + v));
   }
 
-  private _whenIsConfigNeededChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  private _matchId: string;;
+  @Input()
+  public set MatchId(value: string) { this._matchId = value; }
+  public get MatchId() { return this._matchId; }
+
+  private _matchSettings: game.IMatchSettings;
+  @Input()
+  public set MatchSettings(value: game.IMatchSettings) { this._matchSettings = value; }
+  public get MatchSettings() { return this._matchSettings; }
+
+  private _whenIsConfiguredChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
   @Output()
-  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfigNeededChanged; }
+  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfiguredChanged; }
 
-  private _matchConfigStatus: DTOs.IMatchConfigStatus;
+  private _cells: game_client.IOwnBattleFieldCell[][];
+  public get Cells() { return this._cells; }
 
-  public get BattleFieldWidth(): number {
-    if (this._matchConfigStatus != null && this._matchConfigStatus.Settings != null)
-      return this._matchConfigStatus.Settings.BattleFieldWidth;
-    return 0;
-  }
+  public get BattleFieldWidth(): number { return this.MatchSettings.BattleFieldWidth; }
 
-  private _gridCells: { Coord: game.Coord, ShipType: game.ShipType }[][];
-  public get Cells() { return this._gridCells; }
+  private _isRandomizing: boolean = false;
+  public get CanRandomize(): boolean { return !this._isRandomizing && !this._isSubmittingConfig; }
 
-  public get IsConfigNeeded(): boolean { return this._matchConfigStatus != null && this._matchConfigStatus.IsConfigNeeded }
-
-  private _canRandomize: boolean = false;
-  public get CanRandomize(): boolean { return this._canRandomize; }
-
-  private _canSubmitConfig: boolean = false;
-  public get CanSubmitConfig(): boolean { return this._canSubmitConfig && this.IsConfigNeeded; }
+  private _isSubmittingConfig: boolean = false;
+  public get CanSubmitConfig(): boolean { return !this._isSubmittingConfig && !this._isRandomizing; }
 
   private rebuildGridCells() {
-    if (this._gridCells == null) {
-      this._gridCells = new Array(this._matchConfigStatus.Settings.BattleFieldWidth);
-      for (let x = 0; x < this._matchConfigStatus.Settings.BattleFieldWidth; x++) {
-        this._gridCells[x] = new Array(this._matchConfigStatus.Settings.BattleFieldHeight);
-        for (let y = 0; y < this._matchConfigStatus.Settings.BattleFieldHeight; y++) {
-          this._gridCells[x][y] = { Coord: new game.Coord(x, y), ShipType: game.ShipType.NoShip };
+    if (this._cells == null) {
+      this._cells = new Array(this.MatchSettings.BattleFieldWidth);
+      for (let x = 0; x < this.MatchSettings.BattleFieldWidth; x++) {
+        this._cells[x] = new Array(this.MatchSettings.BattleFieldHeight);
+        for (let y = 0; y < this.MatchSettings.BattleFieldHeight; y++) {
+          this._cells[x][y] = { Coord: new game.Coord(x, y), ShipType: game.ShipType.NoShip, Status: game_client.OwnBattleFieldCellStatus.Untouched };
         }
       }
     }
     else {
-      for (let x = 0; x < this._gridCells.length; x++) {
-        for (let y = 0; y < this._gridCells[x].length; y++) {
-          this._gridCells[x][y].ShipType = game.ShipType.NoShip;
+      for (let x = 0; x < this._cells.length; x++) {
+        for (let y = 0; y < this._cells[x].length; y++) {
+          this._cells[x][y].ShipType = game.ShipType.NoShip;
         }
       }
     }
@@ -83,7 +84,7 @@ export class FleetConfiguratorComponent implements OnInit {
 
   public randomizeFleet() {
 
-    this._canRandomize = this._canSubmitConfig = false;
+    this._isRandomizing = true;
 
     this.rebuildGridCells();
 
@@ -94,7 +95,7 @@ export class FleetConfiguratorComponent implements OnInit {
     let rOrient: game.Orientation;
     let rPlacement: game.ShipPlacement;
 
-    for (let avShip of this._matchConfigStatus.Settings.ShipTypeAvailabilities) {
+    for (let avShip of this.MatchSettings.ShipTypeAvailabilities) {
       for (let i = 0; i < avShip.Count; i++) {
         sortedShipsTypesToPlace.push(avShip.ShipType);
       }
@@ -106,13 +107,13 @@ export class FleetConfiguratorComponent implements OnInit {
       do {
         rOrient = utils.getRandomBoolean() ? game.Orientation.Vertical : game.Orientation.Horizontal;
         do {
-          rx = utils.getRandomInt(0, this._matchConfigStatus.Settings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
-          ry = utils.getRandomInt(0, this._matchConfigStatus.Settings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
-        } while (this._gridCells[rx][ry].ShipType != game.ShipType.NoShip);
+          rx = utils.getRandomInt(0, this.MatchSettings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this.MatchSettings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
+        } while (this._cells[rx][ry].ShipType != game.ShipType.NoShip);
 
         rPlacement = new game.ShipPlacement(shipTypeToPlace, new game.Coord(rx, ry), rOrient);
 
-      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._matchConfigStatus.Settings));
+      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this.MatchSettings));
 
       this._shipPlacements.push(rPlacement);
     }
@@ -122,44 +123,44 @@ export class FleetConfiguratorComponent implements OnInit {
     for (let sp of this._shipPlacements) {
       coords = game.FleetValidator.getShipPlacementCoords(sp);
       for (let coord of coords) {
-        this._gridCells[coord.X][coord.Y].ShipType = sp.Type;
+        this._cells[coord.X][coord.Y].ShipType = sp.Type;
       }
     }
 
-    this._canRandomize = this._canSubmitConfig = true;
+    this._isRandomizing = false;
   }
 
-  public submitMatchConfig(): void {
+  public submitConfig(): void {
 
-    this._canSubmitConfig = this._canRandomize = false;
+    this._isSubmittingConfig = true;
 
-    // TODO: handle no resposne
     this._gameService
       .configMatch(this._matchId, this._shipPlacements)
       .subscribe(
         response => {
           if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
-            this._canSubmitConfig = this._canRandomize = true;
           }
           else {
-            this._matchConfigStatus.IsConfigNeeded = (response.Content == false);
-            this._whenIsConfigNeededChanged.next(this._matchConfigStatus.IsConfigNeeded);
-            this._canSubmitConfig = this._canRandomize = this._matchConfigStatus.IsConfigNeeded;
-
-            if (!this._matchConfigStatus.IsConfigNeeded) {
-              this._whenIsConfigNeededChanged.complete();
+            this._whenIsConfiguredChanged.next(response.Content);
+            if (response.Content) {
+              this._whenIsConfiguredChanged.complete();
             }
           }
+
+          this._isSubmittingConfig = false;
         },
         (response: ngHttp.HttpErrorResponse) => {
+
+          this._isSubmittingConfig = false;
+
           switch (response.status) {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
-              this._matchConfigStatus.IsConfigNeeded = false;
-              this._whenIsConfigNeededChanged.next(true);
-              this._whenIsConfigNeededChanged.complete();
+
+              this._whenIsConfiguredChanged.next(true);
+              this._whenIsConfiguredChanged.complete();
               break;
 
             default:
@@ -172,36 +173,6 @@ export class FleetConfiguratorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // console.log("ngOnInit");
-    this.updateMatchConfigStatus();
-  }
-
-  private updateMatchConfigStatus() {
-
-    // TODO: add missing handles
-    this._gameService
-      .getMatchConfigStatus(this._matchId)
-      .subscribe(
-        (response) => {
-          if (response.ErrorMessage) {
-            console.log(response.ErrorMessage);
-          }
-          else if (!response.Content) {
-            console.log("The server returned null");
-          }
-          else {
-            this._matchConfigStatus = response.Content;
-            this._whenIsConfigNeededChanged.next(this._matchConfigStatus.IsConfigNeeded);
-
-            if (this._matchConfigStatus.IsConfigNeeded)
-              this.randomizeFleet();
-            else
-              this._whenIsConfigNeededChanged.complete();
-          }
-        },
-        (response: ngHttp.HttpErrorResponse) => {
-          const httpMessage = response.error as net.HttpMessage<string>;
-          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
-        });
+    this.randomizeFleet();
   }
 }
