@@ -1,14 +1,17 @@
-export default class ServiceEventKeys {
+export default class Events {
 
     public static readonly PendingMatchesChanged = "PendingMatchesChanged";
     public static readonly PendingMatchJoined = "PendingMatchJoined";
-    public static readonly MatchReady = "MatchReady";
+
+    //public static readonly MatchReady = "MatchReady";
     public static readonly MatchStarted = "MatchStarted";
-    public static readonly MatchUpdated = "MatchUpdated";
+    //public static readonly MatchUpdated = "MatchUpdated";
     public static readonly YouGotShot = "YouGotShot";
-    public static readonly MatchEnded = "MatchEnded";
+    //public static readonly MatchEnded = "MatchEnded";
     public static readonly MatchCanceled = "MatchCanceled";
+
     public static readonly YouGotANewMessage = "YouGotANewMessage";
+
     public static readonly UserBanned = "UserBanned";
     public static readonly UserRoleUpdated = "UserRoleUpdated";
     public static readonly UserDeleted = "UserDeleted";

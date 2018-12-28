@@ -11,7 +11,7 @@ import * as utils from '../../infrastructure/utils';
 import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
@@ -101,8 +101,8 @@ export default class MatchesRoutes extends RoutesBase {
                                 StartDateTime: match.StartDateTime,
                                 EndDateTime: match.EndDateTime,
 
-                                CanFire: match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId),
-                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId),
+                                CanFire: !!match.StartDateTime && !match.EndDateTime && match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId),
+                                DidIWin: !!match.EndDateTime && match.InActionPlayerId.equals(userObjectId),
 
                                 OwnSide: {
                                     IsConfigured: ownSide.isConfigured(match.Settings),
@@ -113,13 +113,15 @@ export default class MatchesRoutes extends RoutesBase {
                                         Id: enemy._id.toHexString(),
                                         Username: enemy.Username
                                     },
-                                    Cells: enemySide.BattleFieldCells.map(col => col.map(row =>
-                                        (!row.FireReceivedDateTime
-                                            ? (game_client.EnemyBattleFieldCellStatus.Unknown)
-                                            : (row.ShipType == game.ShipType.NoShip
-                                                ? game_client.EnemyBattleFieldCellStatus.Water
-                                                : game_client.EnemyBattleFieldCellStatus.HitShip))))
-
+                                    Cells: enemySide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((row, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!row.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (row.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
                                 }
 
                             } as gameDTOs.IMatchDto;
@@ -189,16 +191,54 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (match.StartDateTime) {
                             this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
+                                Events.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), matchHexId, Events.MatchStarted),
                                 {
-                                    InActionPlayerId: match.InActionPlayerId.toHexString(),
-                                    StartDateTime: match.StartDateTime
+                                    CanFire: match.InActionPlayerId.equals(match.FirstPlayerSide.PlayerId),
+                                    StartDateTime: match.StartDateTime,
+                                    OwnCells: match.FirstPlayerSide.BattleFieldCells.map(
+                                        (col, colIndex) =>
+                                            col.map(
+                                                (cell, rowIndex) => ({
+                                                    Coord: { X: colIndex, Y: rowIndex },
+                                                    ShipType: cell.ShipType,
+                                                    Status: (cell.FireReceivedDateTime)
+                                                        ? game_client.OwnBattleFieldCellStatus.Hit
+                                                        : game_client.OwnBattleFieldCellStatus.Untouched
+                                                } as game_client.IOwnBattleFieldCell))),
+                                    EnemyCells: match.SecondPlayerSide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((cell, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!cell.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (cell.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
                                 } as gameDTOs.IMatchStartedEventDto);
                             this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
+                                Events.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), matchHexId, Events.MatchStarted),
                                 {
-                                    InActionPlayerId: match.InActionPlayerId.toHexString(),
-                                    StartDateTime: match.StartDateTime
+                                    CanFire: match.InActionPlayerId.equals(match.SecondPlayerSide.PlayerId),
+                                    StartDateTime: match.StartDateTime,
+                                    OwnCells: match.SecondPlayerSide.BattleFieldCells.map(
+                                        (col, colIndex) =>
+                                            col.map(
+                                                (cell, rowIndex) => ({
+                                                    Coord: { X: colIndex, Y: rowIndex },
+                                                    ShipType: cell.ShipType,
+                                                    Status: (cell.FireReceivedDateTime)
+                                                        ? game_client.OwnBattleFieldCellStatus.Hit
+                                                        : game_client.OwnBattleFieldCellStatus.Untouched
+                                                } as game_client.IOwnBattleFieldCell))),
+                                    EnemyCells: match.FirstPlayerSide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((row, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!row.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (row.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
                                 } as gameDTOs.IMatchStartedEventDto);
                         }
                     })
@@ -255,7 +295,7 @@ export default class MatchesRoutes extends RoutesBase {
                             } as gameDTOs.IAttackResultDto;
 
                             this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.YouGotShot),
+                                Events.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), Events.YouGotShot),
                                 {
                                     OwnFieldCellChanges: enemyCellChanges.map(change => ({
                                         Coord: change.Coord,
@@ -265,8 +305,8 @@ export default class MatchesRoutes extends RoutesBase {
                                                 ? game_client.OwnBattleFieldCellStatus.Untouched
                                                 : game_client.OwnBattleFieldCellStatus.Hit
                                     } as game_client.IOwnBattleFieldCell)),
-                                    IsOwnTurn: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(loggedUserObjectId),
-                                    DidILose: match.EndDateTime && match.InActionPlayerId.equals(enemyField.PlayerId),
+                                    CanFire: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(enemyField.PlayerId),
+                                    DidILose: (match.StartDateTime != null) && (match.EndDateTime != null) && match.InActionPlayerId.equals(loggedUserObjectId),
                                     MatchEndDateTime: match.EndDateTime
                                 } as gameDTOs.IYouGotShotEventDto);
 
@@ -308,7 +348,7 @@ export default class MatchesRoutes extends RoutesBase {
                         }
                         catch (ex) {
                             console.log(chalk.red(ex));
-                            responseData = new net.HttpMessage(null, JSON.stringify(ex));
+                            responseData = new net.HttpMessage(null, (ex as mongodb.MongoError).message);
                             return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                         }
                     })

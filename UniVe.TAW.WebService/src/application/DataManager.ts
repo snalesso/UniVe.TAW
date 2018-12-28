@@ -10,7 +10,7 @@ import * as game_client from '../infrastructure/game.client';
 import * as utils from '../infrastructure/utils';
 import * as utilsV2_8 from '../infrastructure/utils-2.8';
 
-import ServiceEventKeys from './services/ServiceEventKeys';
+import Events from './Events';
 import * as User from '../domain/models/mongodb/mongoose/User';
 import * as Match from '../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../domain/models/mongodb/mongoose/EndedMatch';

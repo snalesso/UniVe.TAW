@@ -21,7 +21,7 @@ import * as PendingMatch from '../domain/models/mongodb/mongoose/PendingMatch';
 import * as net from '../infrastructure/net';
 import * as utils from '../infrastructure/utils';
 
-import ServiceEventKeys from './services/ServiceEventKeys';
+import Events from './Events';
 import DBUtils from './services/DBUtils';
 import passport = require('passport');
 import * as jwt from 'jsonwebtoken';
@@ -85,33 +85,33 @@ export default class ApiService {
                 async () => {
                     console.log(chalk.green("mongoose connected to " + this._dbUrl));
 
-                    // await DBUtils.deleteEverything();
+                    await DBUtils.deleteEverything();
 
-                    // await DBUtils.generateFakeData(
-                    //     [
-                    //         // admin
-                    //         "Daedalus",
-                    //         // mods
-                    //         "Horus",
-                    //         "Osiride",
-                    //         "Anubi",
-                    //         // players
-                    //         "Pippo",
-                    //         "Pluto",
-                    //         "Puffetta",
-                    //         "Paperino",
-                    //         "Minnie",
-                    //         "Topolino",
-                    //         "Bambee",
-                    //         "Cenerentola",
-                    //         // bannable
-                    //         "TrollKing",
-                    //         "Furfante",
-                    //         "Canaglia",
-                    //         "Farabutto"
-                    //     ],
-                    //     300,
-                    //     false);
+                    await DBUtils.generateFakeData(
+                        [
+                            // admin
+                            "Daedalus",
+                            // mods
+                            "Horus",
+                            "Osiride",
+                            "Anubi",
+                            // players
+                            "Pippo",
+                            "Pluto",
+                            "Puffetta",
+                            "Paperino",
+                            "Minnie",
+                            "Topolino",
+                            "Bambee",
+                            "Cenerentola",
+                            // bannable
+                            "TrollKing",
+                            "Furfante",
+                            "Canaglia",
+                            "Farabutto"
+                        ],
+                        0,
+                        false);
 
                     this.ConfigRoutes();
                     this.ConfigMiddlewares();

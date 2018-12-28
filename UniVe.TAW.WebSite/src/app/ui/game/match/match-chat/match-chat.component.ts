@@ -14,7 +14,7 @@ import * as game from '../../../../../assets/unive.taw.webservice/infrastructure
 import { AuthService } from '../../../../services/auth.service';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { ChatService } from '../../../../services/chat.service';
 
 @Component({
@@ -27,9 +27,6 @@ export class MatchChatComponent implements OnInit, OnDestroy {
   private _youGotANewMessageEventKey: string;
 
   constructor(
-    // private readonly _gameService: GameService,
-    // private readonly _router: Router,
-    // private readonly _activatedRoute: ActivatedRoute,
     private readonly _authService: AuthService,
     private readonly _chatService: ChatService,
     private readonly _socketIOService: ngxSocketIO.Socket) { }
@@ -54,7 +51,7 @@ export class MatchChatComponent implements OnInit, OnDestroy {
 
           if (!this._youGotANewMessageEventKey) {
 
-            this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id);
+            this._youGotANewMessageEventKey = Events.chatEventForUser(Events.YouGotANewMessage, this._authService.LoggedUser.Id);
             this._socketIOService.on(
               this._youGotANewMessageEventKey,
               (newMessage: chatDTOs.IChatMessageDto) => {

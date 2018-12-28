@@ -14,7 +14,7 @@ import * as chatDTOs from '../../../../../assets/unive.taw.webservice/applicatio
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../services/auth.service';
 
@@ -25,7 +25,7 @@ import { AuthService } from '../../../../services/auth.service';
 })
 export class OwnFieldControllerComponent implements OnInit, OnDestroy {
 
-  private readonly _matchId: string;
+  private _youGotShotEventKey: string;
 
   constructor(
     private readonly _router: Router,
@@ -33,21 +33,15 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
     private readonly _gameService: GameService,
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
-
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
   @Input()
-  public MatchSettings: game.IMatchSettings;
+  public MatchInfo: gameDTOs.IMatchDto;
 
-  @Input()
-  public OwnSideInfo: gameDTOs.IMatchOwnSideDto;
+  public get Cells() { return this.MatchInfo.OwnSide.Cells; }
+  public get BattleFieldWidth(): number { return this.MatchInfo.Settings ? this.MatchInfo.Settings.BattleFieldWidth : 0; }
 
-  public get Cells() { return this.OwnSideInfo.Cells; }
-
-  public get BattleFieldWidth(): number { return this.MatchSettings.BattleFieldWidth; }
-
-  public get Username() { return this._authService.IsLogged ? this._authService.LoggedUser.Username : null; }
+  public get MyUsername() { return this._authService.IsLogged ? this._authService.LoggedUser.Username : null; }
 
   public getCellStatusUIClass(cell: game_client.IOwnBattleFieldCell): string {
 
@@ -73,9 +67,28 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    if (!this.MatchInfo.EndDateTime) {
+
+      this._youGotShotEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this.MatchInfo.Id, Events.YouGotShot);
+      this._socketIOService.on(
+        this._youGotShotEventKey,
+        (youGotShotEvent: gameDTOs.IYouGotShotEventDto) => {
+          for (let change of youGotShotEvent.OwnFieldCellChanges) {
+            this.MatchInfo.OwnSide.Cells[change.Coord.X][change.Coord.Y].Status = change.Status;
+          }
+          this.MatchInfo.CanFire = youGotShotEvent.CanFire;
+          this.MatchInfo.EndDateTime = youGotShotEvent.MatchEndDateTime;
+          this.MatchInfo.DidIWin = !!youGotShotEvent.MatchEndDateTime ? !youGotShotEvent.DidILose : undefined;
+        });
+    }
   }
 
   ngOnDestroy(): void {
+    if (this._youGotShotEventKey) {
+      this._socketIOService.removeListener(this._youGotShotEventKey);
+      this._youGotShotEventKey = null;
+    }
   }
 
 }

@@ -11,7 +11,7 @@ import * as utils from '../../infrastructure/utils';
 import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
@@ -77,7 +77,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
                             .save()
                             .then((newPendingMatch) => {
 
-                                this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                                this._socketIOServer.emit(Events.PendingMatchesChanged);
 
                                 responseData = new net.HttpMessage(newPendingMatch.id);
                                 response
@@ -130,7 +130,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
                             .status(httpStatusCodes.OK)
                             .json(responseData);
 
-                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                        this._socketIOServer.emit(Events.PendingMatchesChanged);
                     }
                     else {
                         responseData = new net.HttpMessage(false, "Could not delete pending match");
@@ -197,7 +197,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 console.log(chalk.green("PendingMatch (id: " + removedPendingMatch._id.toHexString() + ") deleted"));
 
-                this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                this._socketIOServer.emit(Events.PendingMatchesChanged);
 
                 const newMatchSkel = {
                     FirstPlayerSide: {
@@ -237,7 +237,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
                 console.log("Created match: " + match.id);
 
                 this._socketIOServer.emit(
-                    ServiceEventKeys.pendingMatchJoined(
+                    Events.pendingMatchJoined(
                         pendingMatch.PlayerId.toHexString(),
                         pendingMatch._id.toHexString())
                     , {

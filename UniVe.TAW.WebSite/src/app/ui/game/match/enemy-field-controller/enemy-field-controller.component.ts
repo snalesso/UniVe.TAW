@@ -14,7 +14,7 @@ import * as utils from '../../../../../assets/unive.taw.webservice/infrastructur
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../services/auth.service';
 
@@ -25,10 +25,8 @@ import { AuthService } from '../../../../services/auth.service';
 })
 export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
 
-  private readonly _matchId: string;
-
   private _firing: boolean = false;
-  private _isUpdatingField: boolean = true;
+  private _isUpdatingFieldCells: boolean = false;
 
   constructor(
     private readonly _router: Router,
@@ -36,34 +34,18 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
     private readonly _gameService: GameService,
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
-
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  private _matchSettings: game.IMatchSettings;
   @Input()
-  public set MatchSettings(value: game.IMatchSettings) { this._matchSettings = value; }
-  public get MatchSettings() { return this._matchSettings; }
+  public MatchInfo: gameDTOs.IMatchDto;
 
-  private _enemySide: gameDTOs.IMatchEnemySideDto;
-  @Input()
-  public set EnemySide(value: gameDTOs.IMatchEnemySideDto) { this._enemySide = value; }
-  public get EnemySide() { return this._enemySide; }
+  public get EnemyId() { return this.MatchInfo ? this.MatchInfo.EnemySide.Player.Id : undefined; }
+  public get EnemyUsername(): string { return this.MatchInfo ? this.MatchInfo.EnemySide.Player.Username : undefined; }
 
-  public get Cells() { return this.EnemySide.Cells; }
+  public get Cells() { return this.MatchInfo.EnemySide.Cells; }
+  public get BattleFieldWidth(): number { return !!this.MatchInfo && !!this.MatchInfo.Settings ? this.MatchInfo.Settings.BattleFieldWidth : 0; }
 
-  @Input()
-  @Output()
-  public IsMyTurn: boolean;
-
-  public get EnemyId() { return this.EnemySide ? this.EnemySide.Player.Id : undefined; }
-  public get EnemyUsername(): string { return this.EnemySide ? this.EnemySide.Player.Username : undefined; }
-
-  public get BattleFieldWidth(): number { return this.MatchSettings ? this.MatchSettings.BattleFieldWidth : 0; }
-
-  public get IsEnabled(): boolean { return this.IsMyTurn && !this._isUpdatingField && !this._firing; }
-
-  public get CanFire(): boolean { return this.IsMyTurn && !this._firing && !this._isUpdatingField; }
+  public get CanFire(): boolean { return !!this.MatchInfo && this.MatchInfo.CanFire && !this._firing && !this._isUpdatingFieldCells; }
 
   public fire(cell: game_client.IEnemyBattleFieldCell) {
 
@@ -78,7 +60,7 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this._gameService.singleShot(this._matchId, { Coord: cell.Coord } as game.ISingleShotMatchAction)
+    this._gameService.singleShot(this.MatchInfo.Id, { Coord: cell.Coord } as game.ISingleShotMatchAction)
       .subscribe(
         response => {
           if (response.ErrorMessage) {
@@ -89,15 +71,17 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
           }
           else {
 
-            this._isUpdatingField = true;
+            this._isUpdatingFieldCells = true;
 
             for (let change of response.Content.EnemyFieldCellChanges) {
-              this.Cells[change.Coord.X][change.Coord.Y] = change.Status;
+              this.MatchInfo.EnemySide.Cells[change.Coord.X][change.Coord.Y].Status = change.Status;
             }
 
-            this._isUpdatingField = false;
+            this.MatchInfo.CanFire = response.Content.CanFireAgain;
+            this.MatchInfo.EndDateTime = response.Content.MatchEndDateTime;
+            this.MatchInfo.DidIWin = !!response.Content.MatchEndDateTime ? response.Content.DidWin : undefined;
 
-            this._ownTurnInfo.OwnsMove = response.Content.DoIOwnMove;
+            this._isUpdatingFieldCells = false;
           }
 
           this._firing = false;

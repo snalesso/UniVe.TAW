@@ -30,7 +30,7 @@ const exportBatches: IExportBatch[] = [
             "/application/DTOs/chat.ts",
 
             "/application/routing/RoutingParamKeys.ts",
-            "/application/services/ServiceEventKeys.ts"
+            "/application/Events.ts"
         ],
         destFolderName: exportDestFolderName
     },
@@ -50,7 +50,7 @@ const exportBatches: IExportBatch[] = [
             "/application/DTOs/chat.ts",
 
             "/application/routing/RoutingParamKeys.ts",
-            "/application/services/ServiceEventKeys.ts"
+            "/application/Events.ts"
         ],
         destFolderName: exportDestFolderName
     },
@@ -70,7 +70,7 @@ const exportBatches: IExportBatch[] = [
             "/application/DTOs/chat.ts",
 
             "/application/routing/RoutingParamKeys.ts",
-            "/application/services/ServiceEventKeys.ts"
+            "/application/Events.ts"
         ],
         destFolderName: exportDestFolderName
     }

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../assets/unive.taw.webservice/application/Events';
 import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
 import { Router, CanActivate } from '@angular/router';
 import * as moment from 'moment';
@@ -32,7 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this._authService.IsLogged) {
 
       this._socketIOService.once(
-        (this._userBannedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserBanned)),
+        (this._userBannedEventKey = Events.userEvent(this._authService.LoggedUser.Id, Events.UserBanned)),
         (userBannedUntil: Date) => {
           if (userBannedUntil) {
             console.log("banned");
@@ -44,7 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
         });
 
       this._socketIOService.once(
-        (this._accountDeletedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserDeleted)),
+        (this._accountDeletedEventKey = Events.userEvent(this._authService.LoggedUser.Id, Events.UserDeleted)),
         () => {
           console.log("account deleted");
           this._authService.logout();
@@ -52,7 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
         });
 
       this._socketIOService.once(
-        (this._accountUserRoleUpdatedEventKey = ServiceEventKeys.userEvent(this._authService.LoggedUser.Id, ServiceEventKeys.UserRoleUpdated)),
+        (this._accountUserRoleUpdatedEventKey = Events.userEvent(this._authService.LoggedUser.Id, Events.UserRoleUpdated)),
         (newRole: identity.UserRole) => {
           console.log("role updated");
           location.reload();

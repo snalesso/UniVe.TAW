@@ -13,7 +13,7 @@ import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/D
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../assets/unive.taw.webservice/application/Events';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { IdentityService } from '../../../services/identity.service';

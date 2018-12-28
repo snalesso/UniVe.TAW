@@ -14,7 +14,7 @@ import * as game from '../../../../assets/unive.taw.webservice/infrastructure/ga
 import { AuthService } from '../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../assets/unive.taw.webservice/application/Events';
 
 @Component({
   selector: 'app-match',
@@ -25,10 +25,8 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   private readonly _matchId: string;
 
-  private _matchStatus: gameDTOs.IMatchDto;
+  private _matchInfo: gameDTOs.IMatchDto;
   private _matchStartedEventKey: string;
-  private _youGotShotEventKey: string;
-  //private _matchEndedEventKey: string;
   private _matchCanceledEventKey: string;
 
   constructor(
@@ -41,29 +39,18 @@ export class MatchComponent implements OnInit, OnDestroy {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  public get MatchId() { return this._matchId; }
+  public get MatchInfo() { return this._matchInfo; }
 
-  public get MatchSettings() { return this._matchStatus ? this._matchStatus.Settings : undefined; }
+  public get IsMatchConfigVisible() { return !!this._matchInfo && !this._matchInfo.OwnSide.IsConfigured; }
+  public get AreFieldsVisible() { return !!this._matchInfo ? !!this._matchInfo.StartDateTime : false; }
+  public get IsWaitingForEnemyToConfig() { return !!this._matchInfo ? !this._matchInfo.StartDateTime && this._matchInfo.OwnSide.IsConfigured : false; }
+  public get IsChatVisible() { return !!this._matchInfo; }
 
-  public get OwnSideInfo() { return this._matchStatus ? this._matchStatus.OwnSide : undefined; }
+  public get EnemyId(): string { return !!this._matchInfo ? this._matchInfo.EnemySide.Player.Id : undefined; }
+  public get EnemyUsername(): string { return !!this._matchInfo ? this._matchInfo.EnemySide.Player.Username : undefined; }
 
-  public get EnemySideInfo() { return this._matchStatus ? this._matchStatus.EnemySide : undefined; }
-
-  public get IsMatchStarted() { return this._matchStatus ? !!this._matchStatus.StartDateTime : undefined; }
-
-  public get IsMatchEnded(): boolean { return this._matchStatus ? !!this._matchStatus.EndDateTime : undefined; }
-
-  public get IsWaitingForEnemyToConfig() { return !this.IsMatchStarted && this._matchStatus.OwnSide.IsConfigured == true; }
-
-  public get EnemyId(): string { return this._matchStatus ? this._matchStatus.EnemySide.Player.Id : undefined; }
-
-  public get EnemyUsername(): string { return this._matchStatus ? this._matchStatus.EnemySide.Player.Username : undefined; }
-
-  public get DidIWin(): boolean { return this.IsMatchEnded ? this._matchStatus.DidIWin : undefined; }
-
-  public handleWhenIsConfiguredChanged(value: boolean) {
-    this._matchStatus.OwnSide.IsConfigured = value;
-  }
+  public get IsWinnerBannerVissible(): boolean { return !!this._matchInfo && !!this._matchInfo.EndDateTime; }
+  public get DidIWin(): boolean { return (!!this._matchInfo && !!this._matchInfo.EndDateTime) ? this._matchInfo.DidIWin : undefined; }
 
   ngOnInit() {
 
@@ -81,41 +68,24 @@ export class MatchComponent implements OnInit, OnDestroy {
               console.log("returned null");
             }
             else {
-              this._matchStatus = response.Content;
+              this._matchInfo = response.Content;
 
-              if (!this._matchStatus.StartDateTime) {
+              if (!this._matchInfo.StartDateTime) {
 
-                this._matchStartedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchStarted);
+                this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted);
                 this._socketIOService.once(
                   this._matchStartedEventKey,
                   (matchStartedEvent: gameDTOs.IMatchStartedEventDto) => {
-                    this._matchStatus.StartDateTime = matchStartedEvent.StartDateTime;
+                    this._matchInfo.StartDateTime = matchStartedEvent.StartDateTime;
+                    this._matchInfo.OwnSide.Cells = matchStartedEvent.OwnCells;
+                    this._matchInfo.EnemySide.Cells = matchStartedEvent.EnemyCells;
+                    this._matchInfo.CanFire = matchStartedEvent.CanFire;
                   });
               }
-              if (!this._matchStatus.EndDateTime) {
-
-                this._youGotShotEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.YouGotShot);
-                this._socketIOService.on(
-                  this._youGotShotEventKey,
-                  (youGotShotEvent: gameDTOs.IYouGotShotEventDto) => {
-                    for (let change of youGotShotEvent.OwnFieldCellChanges) {
-                      this._matchStatus.OwnSide.Cells[change.Coord.X][change.Coord.Y].Status = change.Status;
-                    }
-                    this._matchStatus.CanFire = youGotShotEvent.IsOwnTurn;
-                  });
-
-                // this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
-                // this._socketIOService.once(
-                //   this._matchEndedEventKey,
-                //   (matchEndedEvent: gameDTOs.IMatchEndedEventDto) => {
-                //     if (this._matchStatus) {
-                //       this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
-                //       this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
-                //     }
-                //   });
+              if (!this._matchInfo.EndDateTime) {
 
                 this._socketIOService.once(
-                  (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
+                  (this._matchCanceledEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchCanceled)),
                   (event: any) => {
                     alert("This match has been canceled!");
                     this._router.navigate([ViewsRoutingKeys.MatchFinder]);
@@ -124,7 +94,7 @@ export class MatchComponent implements OnInit, OnDestroy {
             }
           },
           (response: http.HttpErrorResponse) => {
-            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+            this._router.navigate([ViewsRoutingKeys.Root]);
           });
     }
   }
@@ -134,14 +104,6 @@ export class MatchComponent implements OnInit, OnDestroy {
       this._socketIOService.removeListener(this._matchStartedEventKey);
       this._matchStartedEventKey = null;
     }
-    if (this._youGotShotEventKey) {
-      this._socketIOService.removeListener(this._youGotShotEventKey);
-      this._youGotShotEventKey = null;
-    }
-    // if (this._matchEndedEventKey != null) {
-    //   this._socketIOService.removeListener(this._matchEndedEventKey);
-    //   this._matchEndedEventKey = null;
-    // }
     if (this._matchCanceledEventKey != null) {
       this._socketIOService.removeListener(this._matchCanceledEventKey);
       this._matchCanceledEventKey = null;

@@ -6,11 +6,15 @@ import * as game from '../../../../../assets/unive.taw.webservice/infrastructure
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../services/auth.service';
 
@@ -21,12 +25,7 @@ import { AuthService } from '../../../../services/auth.service';
 })
 export class OwnFieldControllerComponent implements OnInit, OnDestroy {
 
-  private readonly _matchId: string;
-
-  private _enemyTurnInfo: DTOs.IEnemyTurnInfoDto;
-  //private _isRebuildingCells: boolean = true;
-  private _youGotShotEvent: string;
-  //private _matchEndedEvent: string;
+  private _youGotShotEventKey: string;
 
   constructor(
     private readonly _router: Router,
@@ -34,27 +33,15 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
     private readonly _gameService: GameService,
     private readonly _authService: AuthService,
     private readonly _socketIOService: ngxSocketIO.Socket) {
-
-    this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  public get BattleFieldWidth(): number { return (this._enemyTurnInfo && this._enemyTurnInfo.MatchSettings) ? this._enemyTurnInfo.MatchSettings.BattleFieldWidth : 0; }
+  @Input()
+  public MatchInfo: gameDTOs.IMatchDto;
 
-  //private _gridCells: game_client.IOwnBattleFieldCell[][];
-  public get Cells() {
+  public get Cells() { return this.MatchInfo.OwnSide.Cells; }
+  public get BattleFieldWidth(): number { return this.MatchInfo.Settings ? this.MatchInfo.Settings.BattleFieldWidth : 0; }
 
-    if (!this._enemyTurnInfo || !this._enemyTurnInfo.OwnField)
-      return null;
-
-    return this._enemyTurnInfo.OwnField;
-  }
-
-  public get Username() { return this._authService.IsLogged ? this._authService.LoggedUser.Username : "My field"; }
-
-  private get IsEnemyTurn(): boolean { return this._enemyTurnInfo != null ? this._enemyTurnInfo.OwnsMove : false; }
-
-  // private _winnerId: string;
-  // public get WinnerId(): string { return this._winnerId; }
+  public get MyUsername() { return this._authService.IsLogged ? this._authService.LoggedUser.Username : null; }
 
   public getCellStatusUIClass(cell: game_client.IOwnBattleFieldCell): string {
 
@@ -81,54 +68,26 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this._gameService
-      .getEnemyTurnInfo(this._matchId)
-      .subscribe(
-        response => {
-          if (response.ErrorMessage) {
-            console.log(response.ErrorMessage);
-          }
-          else if (!response.Content) {
-            console.log("The server returned null");
-          }
-          else {
-            this._enemyTurnInfo = response.Content;
+    if (!this.MatchInfo.EndDateTime) {
 
-            if (!this._enemyTurnInfo.MatchEndedDateTime) {
-
-              // "you got shot" subscription
-              if (!this._youGotShotEvent) {
-                this._youGotShotEvent = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.YouGotShot);
-                this._socketIOService.on(
-                  this._youGotShotEvent,
-                  (youGotShotEvent: DTOs.IYouGotShotEventDto) => {
-                    for (let change of youGotShotEvent.OwnFieldCellChanges) {
-                      //(this._enemyTurnInfo.OwnField as game_client.IOwnBattleFieldCell[][])[change.Coord.X][change.Coord.Y] = change;
-                      this._enemyTurnInfo.OwnField[change.Coord.X][change.Coord.Y].Status = change.Status;
-                    }
-                  });
-              }
-
-              // // match ended subscription
-              // this._socketIOService.once(
-              //   ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded),
-              //   (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
-              //     this._enemyTurnInfo.MatchEndedDateTime = matchEndedEvent.EndDateTime;
-              //     this._winnerId = matchEndedEvent.WinnerId;
-              //   });
-            }
+      this._youGotShotEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this.MatchInfo.Id, Events.YouGotShot);
+      this._socketIOService.on(
+        this._youGotShotEventKey,
+        (youGotShotEvent: gameDTOs.IYouGotShotEventDto) => {
+          for (let change of youGotShotEvent.OwnFieldCellChanges) {
+            this.MatchInfo.OwnSide.Cells[change.Coord.X][change.Coord.Y].Status = change.Status;
           }
-        },
-        (response: ngHttp.HttpErrorResponse) => {
-          const httpMessage = response.error as net.HttpMessage<string>;
-          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
+          this.MatchInfo.CanFire = youGotShotEvent.CanFire;
+          this.MatchInfo.EndDateTime = youGotShotEvent.MatchEndDateTime;
+          this.MatchInfo.DidIWin = !!youGotShotEvent.MatchEndDateTime ? !youGotShotEvent.DidILose : undefined;
         });
+    }
   }
 
   ngOnDestroy(): void {
-    if (this._youGotShotEvent) {
-      this._socketIOService.removeListener(this._youGotShotEvent);
-      this._youGotShotEvent = null;
+    if (this._youGotShotEventKey) {
+      this._socketIOService.removeListener(this._youGotShotEventKey);
+      this._youGotShotEventKey = null;
     }
   }
 

@@ -22,7 +22,7 @@ import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
 import * as cors from 'cors';
 import * as ChatMessage from '../../domain/models/mongodb/mongoose/ChatMessage';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 
 export default class ChatRoutes extends RoutesBase {
 
@@ -202,11 +202,11 @@ export default class ChatRoutes extends RoutesBase {
                         .json(responseData);
 
                     this._socketIOServer.emit(
-                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId, senderId),
+                        Events.chatEventForUser(Events.YouGotANewMessage, incMsg.AddresseeId, senderId),
                         addresseeMessageDto);
 
                     this._socketIOServer.emit(
-                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId),
+                        Events.chatEventForUser(Events.YouGotANewMessage, incMsg.AddresseeId),
                         addresseeMessageDto);
                 }
                 catch (ex) {

@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
@@ -16,7 +19,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class SignupComponent implements OnInit {
 
   public readonly Countries: { id: identity.Country, name: string }[];
-  public readonly SignupRequest = { CountryId: identity.Country.Undefined } as DTOs.ISignupRequestDto;
+  public readonly SignupRequest = { CountryId: identity.Country.Undefined } as identityDTOs.ISignupRequestDto;
 
   constructor(
     private readonly _authService: AuthService,

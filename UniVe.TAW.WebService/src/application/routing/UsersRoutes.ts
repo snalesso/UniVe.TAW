@@ -23,7 +23,7 @@ import * as chatDTOs from '../DTOs/chat';
 import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 
 export default class UsersRoutes extends RoutesBase {
 
@@ -249,7 +249,7 @@ export default class UsersRoutes extends RoutesBase {
                     }
 
                     // immediately incapacitate user
-                    this._socketIOServer.emit(ServiceEventKeys.userEvent(deletedUser._id.toHexString(), ServiceEventKeys.UserDeleted));
+                    this._socketIOServer.emit(Events.userEvent(deletedUser._id.toHexString(), Events.UserDeleted));
 
                     // delete matches
 
@@ -263,7 +263,7 @@ export default class UsersRoutes extends RoutesBase {
                             await pm.remove();
                         }
 
-                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                        this._socketIOServer.emit(Events.PendingMatchesChanged);
                     }
 
                     const userModel = User.getModel();
@@ -284,10 +284,10 @@ export default class UsersRoutes extends RoutesBase {
                         const fp = pm.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
                         const sp = pm.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
                         this._socketIOServer.emit(
-                            ServiceEventKeys.matchEventForUser(
+                            Events.matchEventForUser(
                                 fp != null ? fp._id.toHexString() : sp._id.toHexString(),
                                 pm._id.toHexString(),
-                                ServiceEventKeys.MatchCanceled));
+                                Events.MatchCanceled));
                     }
 
                     // delete chats
@@ -375,7 +375,7 @@ export default class UsersRoutes extends RoutesBase {
 
                     userToBan.save();
 
-                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToBan.id, ServiceEventKeys.UserBanned), userToBan.BannedUntil);
+                    this._socketIOServer.emit(Events.userEvent(userToBan.id, Events.UserBanned), userToBan.BannedUntil);
 
                     responseData = new net.HttpMessage(userToBan.BannedUntil);
                     response
@@ -394,7 +394,7 @@ export default class UsersRoutes extends RoutesBase {
                             await pm.remove();
                         }
 
-                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                        this._socketIOServer.emit(Events.PendingMatchesChanged);
                     }
 
                     const userModel = User.getModel();
@@ -415,10 +415,10 @@ export default class UsersRoutes extends RoutesBase {
                         const fp = pm.FirstPlayerSide.PlayerId as any as User.IMongooseUser;
                         const sp = pm.SecondPlayerSide.PlayerId as any as User.IMongooseUser;
                         this._socketIOServer.emit(
-                            ServiceEventKeys.matchEventForUser(
+                            Events.matchEventForUser(
                                 fp._id.equals(userToBan._id) ? sp._id.toHexString() : fp._id.toHexString(),
                                 pm._id.toHexString(),
-                                ServiceEventKeys.MatchCanceled));
+                                Events.MatchCanceled));
                     }
 
                 } else {
@@ -465,7 +465,7 @@ export default class UsersRoutes extends RoutesBase {
                     userToAssignRole.save();
 
                     // TODO: send full user powers instead
-                    this._socketIOServer.emit(ServiceEventKeys.userEvent(userToAssignRole.id, ServiceEventKeys.UserRoleUpdated), userToAssignRole.Role);
+                    this._socketIOServer.emit(Events.userEvent(userToAssignRole.id, Events.UserRoleUpdated), userToAssignRole.Role);
 
                     responseData = new net.HttpMessage(userToAssignRole.Role);
                     response

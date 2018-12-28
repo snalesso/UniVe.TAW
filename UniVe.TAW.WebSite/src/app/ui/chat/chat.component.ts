@@ -13,7 +13,7 @@ import * as chatDTOs from '../../../assets/unive.taw.webservice/application/DTOs
 import * as utils from '../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../assets/unive.taw.webservice/application/Events';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { IdentityService } from '../../services/identity.service';
@@ -58,7 +58,7 @@ export class ChatComponent implements OnInit, OnDestroy {
           (error: ngHttp.HttpErrorResponse) => { });
 
       this._socketIOService.on(
-        (this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id)),
+        (this._youGotANewMessageEventKey = Events.chatEventForUser(Events.YouGotANewMessage, this._authService.LoggedUser.Id)),
         (newMessage: chatDTOs.IChatMessageDto) => {
           const chatsToUpdate = this.Chats.filter(chat => chat.Interlocutor.Id == newMessage.SenderId);
           for (let chat of chatsToUpdate)

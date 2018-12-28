@@ -37,24 +37,14 @@ export class FleetConfiguratorComponent implements OnInit {
     private readonly _authService: AuthService) {
   }
 
-  private _matchId: string;;
+  private _matchInfo: gameDTOs.IMatchDto;
   @Input()
-  public set MatchId(value: string) { this._matchId = value; }
-  public get MatchId() { return this._matchId; }
-
-  private _matchSettings: game.IMatchSettings;
-  @Input()
-  public set MatchSettings(value: game.IMatchSettings) { this._matchSettings = value; }
-  public get MatchSettings() { return this._matchSettings; }
-
-  private _whenIsConfiguredChanged: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
-  @Output()
-  public get WhenIsConfigNeededChanged(): Observable<boolean> { return this._whenIsConfiguredChanged; }
+  public set MatchInfo(value: gameDTOs.IMatchDto) { this._matchInfo = value; }
 
   private _cells: game_client.IOwnBattleFieldCell[][];
   public get Cells() { return this._cells; }
 
-  public get BattleFieldWidth(): number { return this.MatchSettings.BattleFieldWidth; }
+  public get BattleFieldWidth(): number { return this._matchInfo.Settings.BattleFieldWidth; }
 
   private _isRandomizing: boolean = false;
   public get CanRandomize(): boolean { return !this._isRandomizing && !this._isSubmittingConfig; }
@@ -64,10 +54,10 @@ export class FleetConfiguratorComponent implements OnInit {
 
   private rebuildGridCells() {
     if (this._cells == null) {
-      this._cells = new Array(this.MatchSettings.BattleFieldWidth);
-      for (let x = 0; x < this.MatchSettings.BattleFieldWidth; x++) {
-        this._cells[x] = new Array(this.MatchSettings.BattleFieldHeight);
-        for (let y = 0; y < this.MatchSettings.BattleFieldHeight; y++) {
+      this._cells = new Array(this._matchInfo.Settings.BattleFieldWidth);
+      for (let x = 0; x < this._matchInfo.Settings.BattleFieldWidth; x++) {
+        this._cells[x] = new Array(this._matchInfo.Settings.BattleFieldHeight);
+        for (let y = 0; y < this._matchInfo.Settings.BattleFieldHeight; y++) {
           this._cells[x][y] = { Coord: new game.Coord(x, y), ShipType: game.ShipType.NoShip, Status: game_client.OwnBattleFieldCellStatus.Untouched };
         }
       }
@@ -95,7 +85,7 @@ export class FleetConfiguratorComponent implements OnInit {
     let rOrient: game.Orientation;
     let rPlacement: game.ShipPlacement;
 
-    for (let avShip of this.MatchSettings.ShipTypeAvailabilities) {
+    for (let avShip of this._matchInfo.Settings.ShipTypeAvailabilities) {
       for (let i = 0; i < avShip.Count; i++) {
         sortedShipsTypesToPlace.push(avShip.ShipType);
       }
@@ -107,13 +97,13 @@ export class FleetConfiguratorComponent implements OnInit {
       do {
         rOrient = utils.getRandomBoolean() ? game.Orientation.Vertical : game.Orientation.Horizontal;
         do {
-          rx = utils.getRandomInt(0, this.MatchSettings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
-          ry = utils.getRandomInt(0, this.MatchSettings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
+          rx = utils.getRandomInt(0, this._matchInfo.Settings.BattleFieldWidth - (rOrient == game.Orientation.Horizontal ? shipTypeToPlace : 1));
+          ry = utils.getRandomInt(0, this._matchInfo.Settings.BattleFieldHeight - (rOrient == game.Orientation.Vertical ? shipTypeToPlace : 1));
         } while (this._cells[rx][ry].ShipType != game.ShipType.NoShip);
 
         rPlacement = new game.ShipPlacement(shipTypeToPlace, new game.Coord(rx, ry), rOrient);
 
-      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this.MatchSettings));
+      } while (!game.FleetValidator.isValidShipPlacement(rPlacement, this._shipPlacements, this._matchInfo.Settings));
 
       this._shipPlacements.push(rPlacement);
     }
@@ -135,40 +125,34 @@ export class FleetConfiguratorComponent implements OnInit {
     this._isSubmittingConfig = true;
 
     this._gameService
-      .configMatch(this._matchId, this._shipPlacements)
+      .configMatch(this._matchInfo.Id, this._shipPlacements)
       .subscribe(
         response => {
           if (response.ErrorMessage) {
             console.log(response.ErrorMessage);
           }
           else {
-            this._whenIsConfiguredChanged.next(response.Content);
-            if (response.Content) {
-              this._whenIsConfiguredChanged.complete();
-            }
+            this._matchInfo.OwnSide.IsConfigured = response.Content;
           }
 
           this._isSubmittingConfig = false;
         },
         (response: ngHttp.HttpErrorResponse) => {
 
-          this._isSubmittingConfig = false;
-
           switch (response.status) {
 
             case httpStatusCodes.LOCKED:
               console.log("Match config failed: config is locked");
-
-              this._whenIsConfiguredChanged.next(true);
-              this._whenIsConfiguredChanged.complete();
+              this._matchInfo.OwnSide.IsConfigured = true;
               break;
 
             default:
-
               const httpMessage = response.error as net.HttpMessage<string>;
               console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
 
           }
+
+          this._isSubmittingConfig = false;
         });
   }
 

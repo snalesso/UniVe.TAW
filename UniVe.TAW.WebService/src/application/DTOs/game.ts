@@ -4,12 +4,14 @@ import * as identityDTOs from "./identity";
 
 export interface IJoinableMatchDto {
     Id: string;
-    Creator: identityDTOs.IUserDto;
+    Creator: identityDTOs.IUserDto; // TODO: add winratio
 }
 
-export interface IPendingMatchDto {
-    Id: string;
-    PlayerId: string;
+export interface IPlayablesDto {
+    CanCreateMatch: boolean;
+    PendingMatchId: string;
+    PlayingMatchId: string;
+    JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
 }
 
 // export interface IMatchConfigResultDto {
@@ -24,7 +26,7 @@ export interface IMatchOwnSideDto {
 
 export interface IMatchEnemySideDto {
     Player: identityDTOs.ISimpleUserDto;
-    Cells: game_client.EnemyBattleFieldCellStatus[][];
+    Cells: game_client.IEnemyBattleFieldCell[][];
 }
 
 export interface IMatchDto {
@@ -45,13 +47,6 @@ export interface IMatchDto {
 
 export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
 
-export interface IPlayablesDto {
-    CanCreateMatch: boolean;
-    PendingMatchId: string;
-    PlayingMatchId: string;
-    JoinableMatches: ReadonlyArray<IJoinableMatchDto>;
-}
-
 /** When both players joined but someone didn't config his fleet yet **/
 export interface IPendingMatchJoinedEventDto {
     readonly MatchId: string;
@@ -63,19 +58,15 @@ export interface IMatchEventDto {
 
 /** When both players joined the match and both configured their fleet */
 export interface IMatchStartedEventDto extends IMatchEventDto {
-    readonly InActionPlayerId: string;
     readonly StartDateTime: Date;
-}
-
-export interface IMatchEndedEventDto extends IMatchEventDto {
-    readonly EndDateTime: Date;
-    readonly WinnerId: string;
-    readonly IsResigned: boolean;
+    readonly CanFire: boolean;
+    readonly OwnCells: game_client.IOwnBattleFieldCell[][];
+    readonly EnemyCells: game_client.IEnemyBattleFieldCell[][];
 }
 
 export interface IYouGotShotEventDto extends IMatchEventDto {
     readonly OwnFieldCellChanges: ReadonlyArray<game_client.IOwnBattleFieldCell>;
-    readonly IsOwnTurn: boolean;
+    readonly CanFire: boolean;
     readonly MatchEndDateTime: Date;
     readonly DidILose: boolean;
 }
