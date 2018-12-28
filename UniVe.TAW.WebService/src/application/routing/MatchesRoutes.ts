@@ -330,8 +330,7 @@ export default class MatchesRoutes extends RoutesBase {
                                 DoIOwnMove: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(userObjectId)
                             } as DTOs.IAttackResultDto;
 
-                            // TODO: this event forces a FULL reload of the enemy field from server, create an ad hoc event which just tells "enemy hit water, its your turn"
-                            //this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
+                            this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
 
                             this._socketIOServer.emit(
                                 ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.YouGotShot),
@@ -369,11 +368,12 @@ export default class MatchesRoutes extends RoutesBase {
                                 let removedMatch = await match.remove();
 
                                 const mee = {
-                                    MatchId: endedMatch._id.toHexString(),
-                                    EndDateTime: endedMatch.EndDateTime,
-                                    WinnerId: endedMatch.WinnerId.toHexString(),
-                                    IsResigned: false
-                                } as DTOs.IMatchEndedEventDto;
+                                    InActionPlayerId: match.InActionPlayerId.toHexString(),
+                                    EndDateTime: match.EndDateTime,
+                                    IsResigned: false,
+                                    MatchId: match._id.toHexString(),
+                                    DidIWin: match.EndDateTime && match.InActionPlayerId.equals(userObjectId)
+                                } as DTOs.IMatchUpdatedEventDto;
 
                                 let matchEndedEventKey = ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded);
                                 this._socketIOServer.emit(matchEndedEventKey, mee);

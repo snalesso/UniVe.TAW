@@ -39,7 +39,6 @@ export interface IUserJWTPayload {
 export interface IPendingMatchDto {
     Id: string;
     PlayerId: string;
-    //CreationDateTime: Date;
 }
 
 export interface IMatchDto {
@@ -97,16 +96,7 @@ export interface IJoinableMatchDto {
     Creator: IUserDto;
 }
 
-//export type IBattleFieldSettingsDto = Partial<game.BattleFieldSettings>;
-
 export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
-
-// export interface IMatchSettingsDto {
-//     BattleFieldWidth: number;
-//     BattleFieldHeight: number;
-//     ShipTypeAvailabilities: ReadonlyArray<IShipTypeAvailabilityDto>; // Partial<game.ShipTypeAvailability>[];
-//     MinShipDistance: number;
-// }
 
 export interface IPlayablesDto {
     CanCreateMatch: boolean;
@@ -130,9 +120,10 @@ export interface IMatchStartedEventDto extends IMatchEventDto {
     readonly InActionPlayerId: string;
 }
 
-export interface IMatchEndedEventDto extends IMatchEventDto {
+export interface IMatchUpdatedEventDto extends IMatchEventDto {
+    readonly InActionPlayerId: string;
     readonly EndDateTime: Date;
-    readonly WinnerId: string;
+    readonly DidIWin: boolean;
     readonly IsResigned: boolean;
 }
 
@@ -147,10 +138,6 @@ export interface INewMessage {
     //readonly SenderId: string;
     readonly AddresseeId: string;
 }
-
-// export interface DeliveredMessage extends INewMessage {
-//     readonly Timestamp: Date;
-// }
 
 export interface IChatMessageDto {
     readonly IsMine: boolean;
@@ -172,10 +159,6 @@ export interface IChatDto {
 export interface IYouGotShotEventDto {
     readonly OwnFieldCellChanges: ReadonlyArray<game_client.IOwnBattleFieldCell>;
 }
-
-// export interface IMatchInfoDto extends IMatchDto {
-//     Settings: IMatchSettingsDto;
-// }
 
 export interface IUserProfile extends IUserDto {
     WinsCount: number;
@@ -201,8 +184,6 @@ export interface IUserPowers {
     readonly CanPermaBan: boolean;
     readonly CanAssignRoles: boolean;
     readonly CanDeleteUser: boolean;
-    //readonly CanPlay: boolean;
-    // readonly CanChat: boolean;
 }
 
 export interface IEndedMatchDto {

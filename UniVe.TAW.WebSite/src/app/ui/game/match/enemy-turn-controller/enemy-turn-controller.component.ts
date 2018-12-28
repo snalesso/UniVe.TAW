@@ -24,9 +24,7 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
   private readonly _matchId: string;
 
   private _enemyTurnInfo: DTOs.IEnemyTurnInfoDto;
-  //private _isRebuildingCells: boolean = true;
   private _youGotShotEvent: string;
-  //private _matchEndedEvent: string;
 
   constructor(
     private readonly _router: Router,
@@ -40,7 +38,6 @@ export class EnemyTurnControllerComponent implements OnInit, OnDestroy {
 
   public get BattleFieldWidth(): number { return (this._enemyTurnInfo && this._enemyTurnInfo.MatchSettings) ? this._enemyTurnInfo.MatchSettings.BattleFieldWidth : 0; }
 
-  //private _gridCells: game_client.IOwnBattleFieldCell[][];
   public get Cells() {
 
     if (!this._enemyTurnInfo || !this._enemyTurnInfo.OwnField)
