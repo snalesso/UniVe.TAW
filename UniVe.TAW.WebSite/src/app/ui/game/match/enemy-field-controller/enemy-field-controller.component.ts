@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../../services/game.service';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
@@ -27,11 +27,8 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
 
   private readonly _matchId: string;
 
-  private _ownTurnInfo: DTOs.IOwnTurnInfoDto;
   private _firing: boolean = false;
-  private _isRebuildingCells: boolean = true;
-
-  private _matchUpdatedeventKey: string;
+  private _isUpdatingField: boolean = true;
 
   constructor(
     private readonly _router: Router,
@@ -43,20 +40,30 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  public get EnemyId() { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Id : null; }
+  private _matchSettings: game.IMatchSettings;
+  @Input()
+  public set MatchSettings(value: game.IMatchSettings) { this._matchSettings = value; }
+  public get MatchSettings() { return this._matchSettings; }
 
-  public get EnemyUsername(): string { return (this._ownTurnInfo != null && this._ownTurnInfo.Enemy != null) ? this._ownTurnInfo.Enemy.Username : null; }
+  private _enemySide: gameDTOs.IMatchEnemySideDto;
+  @Input()
+  public set EnemySide(value: gameDTOs.IMatchEnemySideDto) { this._enemySide = value; }
+  public get EnemySide() { return this._enemySide; }
 
-  public get BattleFieldWidth(): number { return (this._ownTurnInfo && this._ownTurnInfo.MatchSettings) ? this._ownTurnInfo.MatchSettings.BattleFieldWidth : 0; }
+  public get Cells() { return this.EnemySide.Cells; }
 
-  private _gridCells: game_client.IEnemyBattleFieldCell[][];
-  public get Cells() { return this._gridCells; }
+  @Input()
+  @Output()
+  public IsMyTurn: boolean;
 
-  private get IsMyTurn(): boolean { return this._ownTurnInfo != null ? this._ownTurnInfo.OwnsMove : false; }
+  public get EnemyId() { return this.EnemySide ? this.EnemySide.Player.Id : undefined; }
+  public get EnemyUsername(): string { return this.EnemySide ? this.EnemySide.Player.Username : undefined; }
 
-  public get IsEnabled(): boolean { return this.IsMyTurn && !this._isRebuildingCells && !this._firing; }
+  public get BattleFieldWidth(): number { return this.MatchSettings ? this.MatchSettings.BattleFieldWidth : 0; }
 
-  public get CanFire(): boolean { return this.IsMyTurn && !this._firing && !this._isRebuildingCells; }
+  public get IsEnabled(): boolean { return this.IsMyTurn && !this._isUpdatingField && !this._firing; }
+
+  public get CanFire(): boolean { return this.IsMyTurn && !this._firing && !this._isUpdatingField; }
 
   public fire(cell: game_client.IEnemyBattleFieldCell) {
 
@@ -71,9 +78,6 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // const fireResult = this._fireResults[utils.getRandomInt(0, this._fireResults.length - 1)];
-    // this._gridCells[cell.Coord.X][cell.Coord.Y].Status = fireResult;
-
     this._gameService.singleShot(this._matchId, { Coord: cell.Coord } as game.ISingleShotMatchAction)
       .subscribe(
         response => {
@@ -84,15 +88,16 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
             console.log("The server returned null");
           }
           else {
-            //this._ownTurnInfo.EnemyField = response.Content.NewEnemyField;
-            this._isRebuildingCells = true;
+
+            this._isUpdatingField = true;
+
             for (let change of response.Content.EnemyFieldCellChanges) {
-              this._gridCells[change.Coord.X][change.Coord.Y].Status = change.Status;
+              this.Cells[change.Coord.X][change.Coord.Y] = change.Status;
             }
-            this._isRebuildingCells = false;
+
+            this._isUpdatingField = false;
 
             this._ownTurnInfo.OwnsMove = response.Content.DoIOwnMove;
-            //this.rebuildGridCells();
           }
 
           this._firing = false;
@@ -109,75 +114,9 @@ export class EnemyFieldControllerComponent implements OnInit, OnDestroy {
     return ("bf-grid-cell-" + game_client.EnemyBattleFieldCellStatus[cell.Status]).toLowerCase();
   }
 
-  private rebuildGridCells() {
-
-    this._isRebuildingCells = true;
-
-    if (!this._ownTurnInfo || !this._ownTurnInfo.MatchSettings)
-      return;
-
-    if (this._gridCells == null) {
-      this._gridCells = new Array(this._ownTurnInfo.MatchSettings.BattleFieldWidth);
-      for (let x = 0; x < this._ownTurnInfo.MatchSettings.BattleFieldWidth; x++) {
-        this._gridCells[x] = new Array(this._ownTurnInfo.MatchSettings.BattleFieldHeight);
-        for (let y = 0; y < this._ownTurnInfo.MatchSettings.BattleFieldHeight; y++) {
-          this._gridCells[x][y] = {
-            Coord: new game.Coord(x, y),
-            Status: this._ownTurnInfo.EnemyField[x][y]
-          };
-        }
-      }
-    }
-    else {
-      for (let x = 0; x < this._gridCells.length; x++) {
-        for (let y = 0; y < this._gridCells[x].length; y++) {
-          this._gridCells[x][y].Status = this._ownTurnInfo.EnemyField[x][y];
-        }
-      }
-    }
-
-    this._isRebuildingCells = false;
-  }
-
-  private updateInfo() {
-
-    this._gameService
-      .getOwnTurnInfo(this._matchId)
-      .subscribe(
-        response => {
-          if (response.ErrorMessage) {
-            console.log(response.ErrorMessage);
-          }
-          else if (!response.Content) {
-            console.log("The server returned null");
-          }
-          else {
-            this._ownTurnInfo = response.Content;
-
-            if (!this._matchUpdatedeventKey) {
-              this._matchUpdatedeventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchUpdated);
-              this._socketIOService.on(this._matchUpdatedeventKey, () => {
-                this.updateInfo();
-              });
-            }
-
-            this.rebuildGridCells();
-          }
-        },
-        (response: ngHttp.HttpErrorResponse) => {
-          const httpMessage = response.error as net.HttpMessage<string>;
-          console.log(httpMessage ? httpMessage.ErrorMessage : response.message);
-        });
-  }
-
   ngOnInit(): void {
-    this.updateInfo();
   }
 
   ngOnDestroy(): void {
-    if (this._matchUpdatedeventKey) {
-      this._socketIOService.removeListener(this._matchUpdatedeventKey);
-      this._matchUpdatedeventKey = null;
-    }
   }
 }

@@ -27,8 +27,6 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
 
   private readonly _matchId: string;
 
-  private _youGotShotEventKey: string;
-
   constructor(
     private readonly _router: Router,
     private readonly _activatedRoute: ActivatedRoute,
@@ -39,15 +37,13 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  private _matchSettings: game.IMatchSettings;
   @Input()
-  public set MatchSettings(value: game.IMatchSettings) { this._matchSettings = value; }
-  public get MatchSettings() { return this._matchSettings; }
+  public MatchSettings: game.IMatchSettings;
 
-  private _cells: game_client.IOwnBattleFieldCell[][];
   @Input()
-  public set Cells(value: game_client.IOwnBattleFieldCell[][]) { this._cells = value; }
-  public get Cells() { return this._cells; }
+  public OwnSideInfo: gameDTOs.IMatchOwnSideDto;
+
+  public get Cells() { return this.OwnSideInfo.Cells; }
 
   public get BattleFieldWidth(): number { return this.MatchSettings.BattleFieldWidth; }
 
@@ -77,27 +73,9 @@ export class OwnFieldControllerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
-    if (!this.MatchEndedDateTime) {
-
-      if (!this._youGotShotEventKey) {
-        this._youGotShotEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.YouGotShot);
-        this._socketIOService.on(
-          this._youGotShotEventKey,
-          (youGotShotEvent: DTOs.IYouGotShotEventDto) => {
-            for (let change of youGotShotEvent.OwnFieldCellChanges) {
-              this._enemyTurnInfo.OwnField[change.Coord.X][change.Coord.Y].Status = change.Status;
-            }
-          });
-      }
-    }
   }
 
   ngOnDestroy(): void {
-    if (this._youGotShotEventKey) {
-      this._socketIOService.removeListener(this._youGotShotEventKey);
-      this._youGotShotEventKey = null;
-    }
   }
 
 }

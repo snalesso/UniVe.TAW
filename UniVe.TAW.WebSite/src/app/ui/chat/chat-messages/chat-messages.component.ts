@@ -5,7 +5,11 @@ import * as game from '../../../../assets/unive.taw.webservice/infrastructure/ga
 import * as game_client from '../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
@@ -29,9 +33,9 @@ export class ChatMessagesComponent implements OnInit {
 
   //private _messages: DTOs.IChatHistoryMessageDto[];
   @Input()
-  public Messages: DTOs.IChatMessageDto[];
+  public Messages: chatDTOs.IChatMessageDto[];
 
-  public get SortedMessages(): DTOs.IChatMessageDto[] {
+  public get SortedMessages(): chatDTOs.IChatMessageDto[] {
     return this.Reverse ? this.Messages.slice().reverse() : this.Messages;
   }
 

@@ -34,16 +34,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     private readonly _socketIOService: ngxSocketIO.Socket
   ) { }
 
-  private _chats: ReadonlyArray<DTOs.IChatDto>;
+  private _chats: ReadonlyArray<chatDTOs.IChatDto>;
   public get Chats() { return this._chats; }
 
-  public SelectedChat: DTOs.IChatDto;
+  public SelectedChat: chatDTOs.IChatDto;
 
-  public OpenChat(chat: DTOs.IChatDto) {
+  public OpenChat(chat: chatDTOs.IChatDto) {
     this.SelectedChat = chat;
   }
 
-  public handleWhenChatFormMessageIsSent(sentMessage: DTOs.IChatMessageDto) {
+  public handleWhenChatFormMessageIsSent(sentMessage: chatDTOs.IChatMessageDto) {
     this.SelectedChat.Messages.push(sentMessage);
   }
 
@@ -59,7 +59,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
       this._socketIOService.on(
         (this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id)),
-        (newMessage: DTOs.IChatMessageDto) => {
+        (newMessage: chatDTOs.IChatMessageDto) => {
           const chatsToUpdate = this.Chats.filter(chat => chat.Interlocutor.Id == newMessage.SenderId);
           for (let chat of chatsToUpdate)
             chat.Messages.push(newMessage);

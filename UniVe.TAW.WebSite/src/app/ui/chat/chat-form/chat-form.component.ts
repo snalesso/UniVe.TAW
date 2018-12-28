@@ -5,7 +5,11 @@ import * as game from '../../../../assets/unive.taw.webservice/infrastructure/ga
 import * as game_client from '../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
@@ -40,9 +44,9 @@ export class ChatFormComponent implements OnInit {
 
   public get CanSendMessage(): boolean { return !this.IsSendingMessage && this.MessageText != null && this.MessageText.length > 0; }
 
-  private _whenMessageIsSent: Subject<DTOs.IChatMessageDto> = new Subject();
+  private _whenMessageIsSent: Subject<chatDTOs.IChatMessageDto> = new Subject();
   @Output()
-  public get WhenMessageIsSent(): Observable<DTOs.IChatMessageDto> { return this._whenMessageIsSent; }
+  public get WhenMessageIsSent(): Observable<chatDTOs.IChatMessageDto> { return this._whenMessageIsSent; }
 
   public sendMessage(/*text: string*/) {
 

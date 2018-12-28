@@ -265,7 +265,9 @@ export default class MatchesRoutes extends RoutesBase {
                                                 ? game_client.OwnBattleFieldCellStatus.Untouched
                                                 : game_client.OwnBattleFieldCellStatus.Hit
                                     } as game_client.IOwnBattleFieldCell)),
-                                    IsOwnTurn: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(loggedUserObjectId)
+                                    IsOwnTurn: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(loggedUserObjectId),
+                                    DidILose: match.EndDateTime && match.InActionPlayerId.equals(enemyField.PlayerId),
+                                    MatchEndDateTime: match.EndDateTime
                                 } as gameDTOs.IYouGotShotEventDto);
 
                             responseData = new net.HttpMessage(attackResultDto);
@@ -290,18 +292,18 @@ export default class MatchesRoutes extends RoutesBase {
                                     .save();
                                 let removedMatch = await match.remove();
 
-                                const matchEndedEventDto = {
-                                    EndDateTime: endedMatch.EndDateTime,
-                                    WinnerId: endedMatch.WinnerId.toHexString(),
-                                    IsResigned: false
-                                } as gameDTOs.IMatchEndedEventDto;
+                                // const matchEndedEventDto = {
+                                //     EndDateTime: endedMatch.EndDateTime,
+                                //     WinnerId: endedMatch.WinnerId.toHexString(),
+                                //     IsResigned: false
+                                // } as gameDTOs.IMatchEndedEventDto;
 
-                                this._socketIOServer.emit(
-                                    ServiceEventKeys.matchEventForUser(
-                                        match.getEnemyMatchPlayerSide(loggedUserObjectId).PlayerId.toHexString(),
-                                        match._id.toHexString(),
-                                        ServiceEventKeys.MatchEnded),
-                                    matchEndedEventDto);
+                                // this._socketIOServer.emit(
+                                //     ServiceEventKeys.matchEventForUser(
+                                //         match.getEnemyMatchPlayerSide(loggedUserObjectId).PlayerId.toHexString(),
+                                //         match._id.toHexString(),
+                                //         ServiceEventKeys.MatchEnded),
+                                //     matchEndedEventDto);
                             }
                         }
                         catch (ex) {

@@ -27,7 +27,8 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   private _matchStatus: gameDTOs.IMatchDto;
   private _matchStartedEventKey: string;
-  private _matchEndedEventKey: string;
+  private _youGotShotEventKey: string;
+  //private _matchEndedEventKey: string;
   private _matchCanceledEventKey: string;
 
   constructor(
@@ -44,9 +45,9 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   public get MatchSettings() { return this._matchStatus ? this._matchStatus.Settings : undefined; }
 
-  public get OwnFieldCells() { return this._matchStatus ? this._matchStatus.OwnSide.Cells : undefined; }
+  public get OwnSideInfo() { return this._matchStatus ? this._matchStatus.OwnSide : undefined; }
 
-  public get EnemyFieldCells() { return this._matchStatus ? this._matchStatus.EnemySide.Cells : undefined; }
+  public get EnemySideInfo() { return this._matchStatus ? this._matchStatus.EnemySide : undefined; }
 
   public get IsMatchStarted() { return this._matchStatus ? !!this._matchStatus.StartDateTime : undefined; }
 
@@ -93,24 +94,33 @@ export class MatchComponent implements OnInit, OnDestroy {
               }
               if (!this._matchStatus.EndDateTime) {
 
-                this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
-                this._socketIOService.once(
-                  this._matchEndedEventKey,
-                  (matchEndedEvent: gameDTOs.IMatchEndedEventDto) => {
-                    if (this._matchStatus) {
-                      this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
-                      this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
+                this._youGotShotEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.YouGotShot);
+                this._socketIOService.on(
+                  this._youGotShotEventKey,
+                  (youGotShotEvent: gameDTOs.IYouGotShotEventDto) => {
+                    for (let change of youGotShotEvent.OwnFieldCellChanges) {
+                      this._matchStatus.OwnSide.Cells[change.Coord.X][change.Coord.Y].Status = change.Status;
                     }
+                    this._matchStatus.CanFire = youGotShotEvent.IsOwnTurn;
+                  });
+
+                // this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
+                // this._socketIOService.once(
+                //   this._matchEndedEventKey,
+                //   (matchEndedEvent: gameDTOs.IMatchEndedEventDto) => {
+                //     if (this._matchStatus) {
+                //       this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
+                //       this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
+                //     }
+                //   });
+
+                this._socketIOService.once(
+                  (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
+                  (event: any) => {
+                    alert("This match has been canceled!");
+                    this._router.navigate([ViewsRoutingKeys.MatchFinder]);
                   });
               }
-
-              this._socketIOService.once(
-                (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
-                (event: any) => {
-                  alert("This match has been canceled!");
-                  this._router.navigate([ViewsRoutingKeys.MatchFinder]);
-                }
-              );
             }
           },
           (response: http.HttpErrorResponse) => {
@@ -124,10 +134,14 @@ export class MatchComponent implements OnInit, OnDestroy {
       this._socketIOService.removeListener(this._matchStartedEventKey);
       this._matchStartedEventKey = null;
     }
-    if (this._matchEndedEventKey != null) {
-      this._socketIOService.removeListener(this._matchEndedEventKey);
-      this._matchEndedEventKey = null;
+    if (this._youGotShotEventKey) {
+      this._socketIOService.removeListener(this._youGotShotEventKey);
+      this._youGotShotEventKey = null;
     }
+    // if (this._matchEndedEventKey != null) {
+    //   this._socketIOService.removeListener(this._matchEndedEventKey);
+    //   this._matchEndedEventKey = null;
+    // }
     if (this._matchCanceledEventKey != null) {
       this._socketIOService.removeListener(this._matchCanceledEventKey);
       this._matchCanceledEventKey = null;

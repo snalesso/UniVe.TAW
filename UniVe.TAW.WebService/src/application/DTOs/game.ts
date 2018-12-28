@@ -17,6 +17,16 @@ export interface IPendingMatchDto {
 //     readonly MatchStartDateTime: Date;
 // }
 
+export interface IMatchOwnSideDto {
+    IsConfigured: boolean;
+    Cells: game_client.IOwnBattleFieldCell[][];
+}
+
+export interface IMatchEnemySideDto {
+    Player: identityDTOs.ISimpleUserDto;
+    Cells: game_client.EnemyBattleFieldCellStatus[][];
+}
+
 export interface IMatchDto {
     Id: string;
 
@@ -29,14 +39,8 @@ export interface IMatchDto {
     CanFire: boolean;
     DidIWin: boolean;
 
-    OwnSide: {
-        IsConfigured: boolean;
-        Cells: game_client.IOwnBattleFieldCell[][];
-    };
-    EnemySide: {
-        Player: identityDTOs.ISimpleUserDto;
-        Cells: game_client.EnemyBattleFieldCellStatus[][];
-    };
+    OwnSide: IMatchOwnSideDto;
+    EnemySide: IMatchEnemySideDto;
 }
 
 export interface IShipTypeAvailabilityDto extends game.ShipTypeAvailability { };
@@ -72,6 +76,8 @@ export interface IMatchEndedEventDto extends IMatchEventDto {
 export interface IYouGotShotEventDto extends IMatchEventDto {
     readonly OwnFieldCellChanges: ReadonlyArray<game_client.IOwnBattleFieldCell>;
     readonly IsOwnTurn: boolean;
+    readonly MatchEndDateTime: Date;
+    readonly DidILose: boolean;
 }
 
 export interface IAttackResultDto {
