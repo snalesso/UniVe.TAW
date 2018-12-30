@@ -72,9 +72,8 @@ export class MatchComponent implements OnInit, OnDestroy {
 
               if (!this._matchInfo.StartDateTime) {
 
-                this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted);
                 this._socketIOService.once(
-                  this._matchStartedEventKey,
+                  (this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted)),
                   (matchStartedEvent: gameDTOs.IMatchStartedEventDto) => {
                     this._matchInfo.StartDateTime = matchStartedEvent.StartDateTime;
                     this._matchInfo.OwnSide.Cells = matchStartedEvent.OwnCells;

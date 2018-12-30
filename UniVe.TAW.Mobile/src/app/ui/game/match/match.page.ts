@@ -16,7 +16,6 @@ import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
 import Events from '../../../../assets/unive.taw.webservice/application/Events';
 import { ToastController, Tabs, AlertController } from '@ionic/angular';
-import { observe } from 'rxjs-observe';
 import { Observable, Subscription } from 'rxjs';
 import { OwnFieldControllerComponent } from './own-field-controller/own-field-controller.component';
 import { EnemyFieldControllerComponent } from './enemy-field-controller/enemy-field-controller.component';
@@ -129,9 +128,8 @@ export class MatchPage implements OnInit, OnDestroy {
 
               if (!this.MatchInfo.StartDateTime) {
 
-                this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted);
                 this._socketIOService.once(
-                  this._matchStartedEventKey,
+                  (this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted)),
                   (matchStartedEvent: gameDTOs.IMatchStartedEventDto) => {
                     this._matchInfo.StartDateTime = matchStartedEvent.StartDateTime;
                     this._matchInfo.OwnSide.Cells = matchStartedEvent.OwnCells;
@@ -148,7 +146,7 @@ export class MatchPage implements OnInit, OnDestroy {
               if (!this._matchInfo.EndDateTime) {
 
                 this._socketIOService.once(
-                  Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchCanceled),
+                  (this._matchCanceledEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchCanceled)),
                   async (event: any) => {
                     const alert = await this._alertController.create({
                       buttons: [{

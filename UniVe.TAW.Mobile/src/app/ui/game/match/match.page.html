@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Match VS {{EnemyUsername}}</ion-title>
+    <ion-title>Match VS <a routerLink="/users/{{EnemyId}}" *ngIf="EnemyId">{{EnemyUsername}}</a></ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -69,7 +69,7 @@
       </ion-tab-button>
 
       <ion-tab-button tab="enemy-field-controller-tab" *ngIf="AreFieldsVisible">
-        <ion-label>Attack {{EnemyUsername}}</ion-label>
+        <ion-label>Attack</ion-label>
         <ion-icon name="locate"></ion-icon>
       </ion-tab-button>
 

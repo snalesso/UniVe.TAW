@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
               buttons: ["Ok"],
               message: "You have been banned until " + moment(userBannedUntil).format("DD/MM/YYYY HH:mm:ss") +
                 "<br>" + "You have been be logged out.",
-              header: "You got banned!"
+              header: "You have been banned!"
             });
             await alert.present();
           }

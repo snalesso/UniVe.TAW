@@ -3,17 +3,6 @@
   <ion-row>
     <ion-col>
 
-      <h1 text-center>
-        <a routerLink="/users/{{EnemyId}}" *ngIf="EnemyId">{{EnemyUsername}}</a>
-        <span *ngIf="!EnemyId">Enemy</span>
-      </h1>
-
-    </ion-col>
-  </ion-row>
-
-  <ion-row>
-    <ion-col>
-
       <table id="bf-grid" class="bf-grid" [ngClass]="!CanFire ? 'bf-grid-disabled' : ''">
         <tbody>
           <tr *ngFor="let row of Cells">
