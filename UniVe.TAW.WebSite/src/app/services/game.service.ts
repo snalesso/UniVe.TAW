@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import * as ng_http from '@angular/common/http';
 
-import * as DTOs from '../../assets/unive.taw.webservice/application/DTOs';
+import * as identityDTOs from '../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as net from '../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../assets/unive.taw.webservice/infrastructure/game';
 import * as game_client from '../../assets/unive.taw.webservice/infrastructure/game.client';
@@ -32,7 +35,7 @@ export class GameService {
         .set('Authorization', 'Bearer ' + this._authService.Token)
     };
 
-    return this._http.get<net.HttpMessage<DTOs.IPlayablesDto>>(endPoint, options);
+    return this._http.get<net.HttpMessage<gameDTOs.IPlayablesDto>>(endPoint, options);
   }
 
   public createPendingMatch() {
@@ -77,19 +80,7 @@ export class GameService {
       })
     };
 
-    return this._http.get<net.HttpMessage<DTOs.IOwnSideMatchStatus>>(endPoint, options);
-  }
-
-  public getMatchConfigStatus(matchId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/config";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this._authService.Token
-      })
-    };
-
-    return this._http.get<net.HttpMessage<DTOs.IMatchConfigStatus>>(endPoint, options);
+    return this._http.get<net.HttpMessage<gameDTOs.IMatchDto>>(endPoint, options);
   }
 
   public configMatch(matchId: string, fleetConfig: game.ShipPlacement[]) {
@@ -103,18 +94,6 @@ export class GameService {
     return this._http.post<net.HttpMessage<boolean>>(endPoint, fleetConfig, options);
   }
 
-  public getOwnTurnInfo(matchId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/ownTurnInfo";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this._authService.Token
-      })
-    };
-
-    return this._http.get<net.HttpMessage<DTOs.IOwnTurnInfoDto>>(endPoint, options);
-  }
-
   public singleShot(matchId: string, singleShot: game.ISingleShotMatchAction) {
     const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/singleShot";
     const options = {
@@ -124,19 +103,7 @@ export class GameService {
       })
     };
 
-    return this._http.post<net.HttpMessage<DTOs.IAttackResultDto>>(endPoint, singleShot, options);
-  }
-
-  public getEnemyTurnInfo(matchId: string) {
-    const endPoint = ServiceConstants.ServerAddress + "/game/matches/" + matchId + "/enemyTurnInfo";
-    const options = {
-      headers: new ng_http.HttpHeaders({
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this._authService.Token
-      })
-    };
-
-    return this._http.get<net.HttpMessage<DTOs.IEnemyTurnInfoDto>>(endPoint, options);
+    return this._http.post<net.HttpMessage<gameDTOs.IAttackResultDto>>(endPoint, singleShot, options);
   }
 
 }

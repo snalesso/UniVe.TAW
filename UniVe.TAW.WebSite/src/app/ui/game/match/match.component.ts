@@ -4,13 +4,17 @@ import { Router, ActivatedRoute } from '@angular/router';
 import RoutingParamKeys from '../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as game_client from '../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../assets/unive.taw.webservice/infrastructure/game';
 import { AuthService } from '../../../services/auth.service';
 import * as http from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../assets/unive.taw.webservice/application/Events';
 
 @Component({
   selector: 'app-match',
@@ -21,9 +25,8 @@ export class MatchComponent implements OnInit, OnDestroy {
 
   private readonly _matchId: string;
 
-  private _matchStatus: DTOs.IOwnSideMatchStatus;
+  private _matchInfo: gameDTOs.IMatchDto;
   private _matchStartedEventKey: string;
-  private _matchEndedEventKey: string;
   private _matchCanceledEventKey: string;
 
   constructor(
@@ -36,24 +39,18 @@ export class MatchComponent implements OnInit, OnDestroy {
     this._matchId = this._activatedRoute.snapshot.paramMap.get(RoutingParamKeys.matchId);
   }
 
-  public get IsWaitingForEnemyToConfig() { return this._matchStatus != null && !this._matchStatus.IsConfigNeeded && !this._matchStatus.IsMatchStarted; }
+  public get MatchInfo() { return this._matchInfo; }
 
-  public get IsMatchSetupVisible() { return this._matchStatus != null && this._matchStatus.IsConfigNeeded; }
+  public get IsMatchConfigVisible() { return !!this._matchInfo && !this._matchInfo.OwnSide.IsConfigured; }
+  public get AreFieldsVisible() { return !!this._matchInfo ? !!this._matchInfo.StartDateTime : false; }
+  public get IsWaitingForEnemyToConfig() { return !!this._matchInfo ? !this._matchInfo.StartDateTime && this._matchInfo.OwnSide.IsConfigured : false; }
+  public get IsChatVisible() { return !!this._matchInfo; }
 
-  public get AreTurnControllersVisible() { return this._matchStatus != null && this._matchStatus.IsMatchStarted; }
+  public get EnemyId(): string { return !!this._matchInfo ? this._matchInfo.EnemySide.Player.Id : undefined; }
+  public get EnemyUsername(): string { return !!this._matchInfo ? this._matchInfo.EnemySide.Player.Username : undefined; }
 
-  public get EnemyId(): string { return this._matchStatus ? this._matchStatus.Enemy.Id : null; }
-
-  public get EnemyUsername(): string { return this._matchStatus ? this._matchStatus.Enemy.Username : null; }
-
-  public get IsMatchEnded(): boolean { return this._matchStatus ? this._matchStatus.EndDateTime != null : undefined; }
-
-  public get DidIWin(): boolean { return (this._matchStatus && this._matchStatus.EndDateTime != null) ? this._matchStatus.DidIWin : false; }
-
-
-  public handleWhenIsConfigNeededChanged(value: boolean) {
-    this._matchStatus.IsConfigNeeded = value;
-  }
+  public get IsWinnerBannerVissible(): boolean { return !!this._matchInfo && !!this._matchInfo.EndDateTime; }
+  public get DidIWin(): boolean { return (!!this._matchInfo && !!this._matchInfo.EndDateTime) ? this._matchInfo.DidIWin : undefined; }
 
   ngOnInit() {
 
@@ -68,57 +65,44 @@ export class MatchComponent implements OnInit, OnDestroy {
               console.log(response.ErrorMessage);
             }
             else if (!response.Content) {
-              console.log("getOwnSideMatchStatus returned null");
+              console.log("returned null");
             }
             else {
-              this._matchStatus = response.Content;
+              this._matchInfo = response.Content;
 
-              if (!this._matchStatus.IsMatchStarted) {
+              if (!this._matchInfo.StartDateTime) {
 
-                this._matchStartedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchStarted);
+                this._matchStartedEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchStarted);
                 this._socketIOService.once(
                   this._matchStartedEventKey,
-                  (matchStartedEvent: DTOs.IMatchStartedEventDto) => {
-                    this._matchStatus.IsMatchStarted = true;
+                  (matchStartedEvent: gameDTOs.IMatchStartedEventDto) => {
+                    this._matchInfo.StartDateTime = matchStartedEvent.StartDateTime;
+                    this._matchInfo.OwnSide.Cells = matchStartedEvent.OwnCells;
+                    this._matchInfo.EnemySide.Cells = matchStartedEvent.EnemyCells;
+                    this._matchInfo.CanFire = matchStartedEvent.CanFire;
                   });
               }
-              if (!this._matchStatus.EndDateTime) {
+              if (!this._matchInfo.EndDateTime) {
 
-                this._matchEndedEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchEnded);
                 this._socketIOService.once(
-                  this._matchEndedEventKey,
-                  (matchEndedEvent: DTOs.IMatchEndedEventDto) => {
-                    if (this._matchStatus) {
-                      this._matchStatus.EndDateTime = matchEndedEvent.EndDateTime;
-                      this._matchStatus.DidIWin = (matchEndedEvent.WinnerId && matchEndedEvent.WinnerId == this._authService.LoggedUser.Id);
-                    }
+                  (this._matchCanceledEventKey = Events.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, Events.MatchCanceled)),
+                  (event: any) => {
+                    alert("This match has been canceled!");
+                    this._router.navigate([ViewsRoutingKeys.MatchFinder]);
                   });
               }
-
-              this._socketIOService.once(
-                (this._matchCanceledEventKey = ServiceEventKeys.matchEventForUser(this._authService.LoggedUser.Id, this._matchId, ServiceEventKeys.MatchCanceled)),
-                (event: any) => {
-                  alert("This match has been canceled!");
-                  this._router.navigate([ViewsRoutingKeys.MatchFinder]);
-                }
-              );
             }
           },
           (response: http.HttpErrorResponse) => {
-            this._router.navigate([ViewsRoutingKeys.MatchFinder]);
+            this._router.navigate([ViewsRoutingKeys.Root]);
           });
     }
   }
 
   ngOnDestroy(): void {
-    // TODO: removelistener rimuove le sottoscrizioni allo stesso evento per tutti? non è che ci siano altri sottoscritti ad un evento sottoscritto qui, qua viene rimosso e gli altri perdono le comunicazioni?
     if (this._matchStartedEventKey != null) {
       this._socketIOService.removeListener(this._matchStartedEventKey);
       this._matchStartedEventKey = null;
-    }
-    if (this._matchEndedEventKey != null) {
-      this._socketIOService.removeListener(this._matchEndedEventKey);
-      this._matchEndedEventKey = null;
     }
     if (this._matchCanceledEventKey != null) {
       this._socketIOService.removeListener(this._matchCanceledEventKey);

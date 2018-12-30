@@ -3,7 +3,11 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
 
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import ServiceConstants from '../../../services/ServiceConstants';
@@ -11,7 +15,7 @@ import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { Country } from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 import * as game from '../../../../assets/unive.taw.webservice/infrastructure/game';
 import * as http from '@angular/common/http';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/Events';
 import * as ngxSocketIO from 'ngx-socket-io';
 import * as io from 'socket.io-client';
 
@@ -22,7 +26,7 @@ import * as io from 'socket.io-client';
 })
 export class MatchFinderPage implements OnInit, OnDestroy {
 
-  private _playables: DTOs.IPlayablesDto;
+  private _playables: gameDTOs.IPlayablesDto;
   private _socket = io(ServiceConstants.ServerAddress);
 
   private _pendingMatchesChangedEventKey: string;
@@ -146,7 +150,7 @@ export class MatchFinderPage implements OnInit, OnDestroy {
 
               this._pendingMatchJoinedEventKey = ServiceEventKeys.pendingMatchJoined(this._authService.LoggedUser.Id, this._playables.PendingMatchId);
               this._socket.once(this._pendingMatchJoinedEventKey,
-                (pendingMatchJoinedEvent: DTOs.IPendingMatchJoinedEventDto) => {
+                (pendingMatchJoinedEvent: gameDTOs.IPendingMatchJoinedEventDto) => {
                   setTimeout(() => {
                     this._router.navigate([ViewsRoutingKeys.Match, pendingMatchJoinedEvent.MatchId]);
                   }, 100);

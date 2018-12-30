@@ -5,11 +5,15 @@ import * as game from '../../../../assets/unive.taw.webservice/infrastructure/ga
 import * as game_client from '../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/Events';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { IdentityService } from '../../../services/identity.service';
@@ -22,7 +26,7 @@ import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 })
 export class RankingsPage implements OnInit {
 
-  private _rankings: DTOs.IUserRanking[];
+  private _rankings: identityDTOs.IUserRanking[];
 
   constructor(
     private readonly _router: Router,

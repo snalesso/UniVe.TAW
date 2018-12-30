@@ -5,7 +5,11 @@ import * as jwt_decode from 'jwt-decode';
 import * as httpStatusCodes from 'http-status-codes';
 
 import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -25,7 +29,7 @@ export class LoginComponent implements OnInit {
   private _loginRequest = {
     // Username: "Daedalus",
     // Password: "aaa"
-  } as DTOs.ILoginCredentials;
+  } as identityDTOs.ILoginCredentials;
   public get LoginRequest() { return this._loginRequest; }
 
   private _responseError: string;

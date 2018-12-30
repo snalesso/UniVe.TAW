@@ -1,14 +1,14 @@
 <div class="container">
 
-  <div class="row justify-content-center" *ngIf="IsMatchSetupVisible">
-    <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
+  <div class="row justify-content-center" *ngIf="IsMatchConfigVisible">
+    <app-fleet-configurator [MatchInfo]="MatchInfo"></app-fleet-configurator>
   </div>
 
   <div class="row justify-content-center" *ngIf="IsWaitingForEnemyToConfig">
     <h4>Waiting for {{EnemyUsername}} to line-up ...</h4>
   </div>
 
-  <div class="row" *ngIf="IsMatchEnded">
+  <div class="row" *ngIf="IsWinnerBannerVissible">
     <div class="col">
 
       <div class="alert alert-{{DidIWin ? 'success': 'danger'}} w-100 text-center" role="alert">
@@ -18,18 +18,21 @@
     </div>
   </div>
 
-  <div class="row justify-content-center" *ngIf="AreTurnControllersVisible">
+  <div class="row justify-content-center" *ngIf="AreFieldsVisible">
 
     <div class="col-lg-6">
-      <app-enemy-turn-controller></app-enemy-turn-controller>
+      <app-own-field-controller [MatchInfo]="MatchInfo"></app-own-field-controller>
     </div>
 
     <div class="col-lg-6">
-      <app-own-turn-controller></app-own-turn-controller>
+      <app-enemy-field-controller [MatchInfo]="MatchInfo"></app-enemy-field-controller>
     </div>
+
+  </div>
+
+  <div class="row justify-content-center mt-2" *ngIf="IsChatVisible">
 
     <div class="col">
-      <br>
       <app-match-chat [InterlocutorId]="EnemyId"></app-match-chat>
     </div>
 

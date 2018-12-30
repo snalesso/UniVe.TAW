@@ -4,7 +4,11 @@ import { AuthService } from '../../../services/auth.service';
 import { Observable, Subject, BehaviorSubject, Subscription } from 'rxjs';
 import { tap, catchError, map, distinctUntilChanged } from 'rxjs/operators';
 
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import ServiceConstants from '../../../services/ServiceConstants';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 
@@ -25,7 +29,7 @@ export class SideMenuComponent implements OnInit {
     this._subscriptions.push(this._authService.WhenLoggedUserChanged.subscribe(value => this._userData = value));
   }
 
-  private _userData: DTOs.IUserJWTPayload;
+  private _userData: identityDTOs.IUserJWTPayload;
   public get Username() { return this._userData != null ? this._userData.Username : null; }
 
   public get IsLogged() { return this._authService.IsLogged; }

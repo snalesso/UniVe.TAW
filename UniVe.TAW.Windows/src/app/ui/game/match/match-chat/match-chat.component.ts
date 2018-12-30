@@ -4,13 +4,17 @@ import { Router, ActivatedRoute } from '@angular/router';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
-import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
 import { AuthService } from '../../../../services/auth.service';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { ChatService } from '../../../../services/chat.service';
 
 @Component({
@@ -23,9 +27,6 @@ export class MatchChatComponent implements OnInit, OnDestroy {
   private _youGotANewMessageEventKey: string;
 
   constructor(
-    // private readonly _gameService: GameService,
-    // private readonly _router: Router,
-    // private readonly _activatedRoute: ActivatedRoute,
     private readonly _authService: AuthService,
     private readonly _chatService: ChatService,
     private readonly _socketIOService: ngxSocketIO.Socket) { }
@@ -33,10 +34,10 @@ export class MatchChatComponent implements OnInit, OnDestroy {
   @Input()
   public InterlocutorId: string;
 
-  private _chatMessages: DTOs.IChatMessageDto[] = [];
+  private _chatMessages: chatDTOs.IChatMessageDto[] = [];
   public get ChatMessages() { return this._chatMessages; }
 
-  public handleWhenChatFormMessageIsSent(sentMessage: DTOs.IChatMessageDto) {
+  public handleWhenChatFormMessageIsSent(sentMessage: chatDTOs.IChatMessageDto) {
     this._chatMessages.push(sentMessage);
   }
 
@@ -50,10 +51,10 @@ export class MatchChatComponent implements OnInit, OnDestroy {
 
           if (!this._youGotANewMessageEventKey) {
 
-            this._youGotANewMessageEventKey = ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id);
+            this._youGotANewMessageEventKey = Events.chatEventForUser(Events.YouGotANewMessage, this._authService.LoggedUser.Id);
             this._socketIOService.on(
               this._youGotANewMessageEventKey,
-              (newMessage: DTOs.IChatMessageDto) => {
+              (newMessage: chatDTOs.IChatMessageDto) => {
                 this._chatMessages.push(newMessage);
               });
           }

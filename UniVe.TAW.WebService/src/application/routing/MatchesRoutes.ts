@@ -11,13 +11,16 @@ import * as utils from '../../infrastructure/utils';
 import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
 import * as MatchSettings from '../../domain/models/mongodb/mongoose/MatchSettings';
@@ -39,9 +42,9 @@ export default class MatchesRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
-                let responseData: net.HttpMessage<DTOs.IOwnSideMatchStatus> = null;
+                let responseData: net.HttpMessage<gameDTOs.IMatchDto> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
 
@@ -62,68 +65,68 @@ export default class MatchesRoutes extends RoutesBase {
 
                         if (ownSide) {
 
+                            const ownCells: game_client.IOwnBattleFieldCell[][] = [];
+
+                            for (let x = 0; x < ownSide.BattleFieldCells.length; x++) {
+
+                                ownCells[x] = [];
+
+                                for (let y = 0; y < ownSide.BattleFieldCells[x].length; y++) {
+
+                                    ownCells[x].push({
+                                        Coord: {
+                                            X: x,
+                                            Y: y
+                                        },
+                                        ShipType: ownSide.BattleFieldCells[x][y].ShipType,
+                                        Status: (ownSide.BattleFieldCells[x][y].FireReceivedDateTime)
+                                            ? game_client.OwnBattleFieldCellStatus.Hit
+                                            : game_client.OwnBattleFieldCellStatus.Untouched
+                                    } as game_client.IOwnBattleFieldCell);
+                                }
+                            }
+
                             const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
                             const enemy = enemySide.PlayerId as any as User.IMongooseUser;
-                            const ownSideMatchStatusDto = {
-                                IsConfigNeeded: !ownSide.isConfigured(match.Settings),
-                                IsMatchStarted: match.StartDateTime != null,
-                                Enemy: { Id: enemy._id.toHexString(), Username: enemy.Username },
-                                DidIWin: match.EndDateTime != null && match.InActionPlayerId.equals(userObjectId),
-                                DoIOwnMove: match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId)
-                            } as DTOs.IOwnSideMatchStatus;
+                            const matchDto = {
+                                Id: match._id.toHexString(),
 
-                            responseData = new net.HttpMessage(ownSideMatchStatusDto);
-                            return response.status(httpStatusCodes.OK).json(responseData);
-                        }
-                        else {
-                            responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        const msg = "error looking for specified match";
-                        console.log(chalk.red(msg));
-                        //throw new Error("error looking for specified match with specified player");
-                        responseData = new net.HttpMessage(null, msg);
-                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
-                    });
-            });
-
-        this._router.get(
-            "/:" + RoutingParamKeys.matchId + "/config",
-            this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
-
-                let responseData: net.HttpMessage<DTOs.IMatchConfigStatus> = null;
-
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
-                const matchHexId = request.params[RoutingParamKeys.matchId];
-                const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
-
-                Match.getModel()
-                    .findById(matchObjectId)
-                    .then(match => {
-
-                        if (!match) {
-                            responseData = new net.HttpMessage(null, "Could not find requested match");
-                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                        }
-
-                        const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
-
-                        if (ownSide) {
-                            const ownMatchSideConfigStatusDto = {
-                                IsConfigNeeded: ownSide.BattleFieldCells.length < match.Settings.BattleFieldWidth,
                                 Settings: {
                                     BattleFieldWidth: match.Settings.BattleFieldWidth,
                                     BattleFieldHeight: match.Settings.BattleFieldHeight,
                                     MinShipsDistance: match.Settings.MinShipsDistance,
                                     ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
-                                } as game.IMatchSettings
-                            } as DTOs.IMatchConfigStatus;
+                                } as game.IMatchSettings,
 
-                            responseData = new net.HttpMessage(ownMatchSideConfigStatusDto);
+                                StartDateTime: match.StartDateTime,
+                                EndDateTime: match.EndDateTime,
+
+                                CanFire: !!match.StartDateTime && !match.EndDateTime && match.InActionPlayerId && match.InActionPlayerId.equals(userObjectId),
+                                DidIWin: !!match.EndDateTime && match.InActionPlayerId.equals(userObjectId),
+
+                                OwnSide: {
+                                    IsConfigured: ownSide.isConfigured(match.Settings),
+                                    Cells: ownCells
+                                },
+                                EnemySide: {
+                                    Player: {
+                                        Id: enemy._id.toHexString(),
+                                        Username: enemy.Username
+                                    },
+                                    Cells: enemySide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((row, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!row.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (row.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
+                                }
+
+                            } as gameDTOs.IMatchDto;
+
+                            responseData = new net.HttpMessage(matchDto);
                             return response.status(httpStatusCodes.OK).json(responseData);
                         }
                         else {
@@ -134,13 +137,11 @@ export default class MatchesRoutes extends RoutesBase {
                     .catch((error: mongodb.MongoError) => {
                         const msg = "error looking for specified match";
                         console.log(chalk.red(msg));
-                        //throw new Error("error looking for specified match with specified player");
                         responseData = new net.HttpMessage(null, msg);
                         return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
-                    })
+                    });
             });
 
-        // TODO: validare la config che arriva!!!
         this._router.post(
             "/:" + RoutingParamKeys.matchId + "/config",
             this._jwtValidator,
@@ -148,8 +149,8 @@ export default class MatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<boolean> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
+                const currentUserJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
+                const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
                 const matchHexId = request.params[RoutingParamKeys.matchId];
                 const matchObjectId = new mongoose.Types.ObjectId(matchHexId);
 
@@ -161,134 +162,105 @@ export default class MatchesRoutes extends RoutesBase {
                             responseData = new net.HttpMessage(null, "Could not find requested match");
                             return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
                         }
-                        else if (!match.FirstPlayerSide.PlayerId.equals(userObjectId) && !match.SecondPlayerSide.PlayerId.equals(userObjectId)) {
+                        if (!match.FirstPlayerSide.PlayerId.equals(currentUserObjectId) && !match.SecondPlayerSide.PlayerId.equals(currentUserObjectId)) {
                             responseData = new net.HttpMessage(null, "You are not authorized to intervene in this match");
                             return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
                         }
 
-                        const wasConfigSuccessful = match.configFleet(userObjectId, request.body as IMongooseShipPlacement[]);
+                        // TODO: validare la config che arriva!!!
+
+                        const wasConfigSuccessful = match.configFleet(currentUserObjectId, request.body as IMongooseShipPlacement[]);
                         match.save();
 
-                        if (wasConfigSuccessful && match.StartDateTime) {
-                            this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
-                                {
-                                    MatchId: match._id.toHexString(),
-                                    InActionPlayerId: match.InActionPlayerId.toHexString()
-                                } as DTOs.IMatchStartedEventDto);
-                            this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), matchHexId, ServiceEventKeys.MatchStarted),
-                                {
-                                    MatchId: match._id.toHexString(),
-                                    InActionPlayerId: match.InActionPlayerId.toHexString()
-                                } as DTOs.IMatchStartedEventDto);
-                        }
+                        // const configResultDto = {
+                        //     IsConfigured: match.getOwnerMatchPlayerSide(currentUserObjectId).isConfigured(match.Settings),
+                        //     MatchStartDateTime: match.StartDateTime
+                        // } as gameDTOs.IMatchConfigResultDto;
 
-                        if (wasConfigSuccessful) {
-                            responseData = new net.HttpMessage(true);
-                            return response.status(httpStatusCodes.OK).json(responseData);
-                        }
-                        else {
-                            responseData = new net.HttpMessage(
-                                false,
-                                "Match is already configured and cannot be changed");
-
+                        if (!wasConfigSuccessful) {
+                            responseData = new net.HttpMessage(false, "Match is already configured and cannot be changed");
                             return response.status(httpStatusCodes.LOCKED).json(responseData);
+                        }
+
+                        // send response
+
+                        responseData = new net.HttpMessage(true);
+                        response.status(httpStatusCodes.OK).json(responseData);
+
+                        // send match started event
+
+                        if (match.StartDateTime) {
+                            this._socketIOServer.emit(
+                                Events.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), matchHexId, Events.MatchStarted),
+                                {
+                                    CanFire: match.InActionPlayerId.equals(match.FirstPlayerSide.PlayerId),
+                                    StartDateTime: match.StartDateTime,
+                                    OwnCells: match.FirstPlayerSide.BattleFieldCells.map(
+                                        (col, colIndex) =>
+                                            col.map(
+                                                (cell, rowIndex) => ({
+                                                    Coord: { X: colIndex, Y: rowIndex },
+                                                    ShipType: cell.ShipType,
+                                                    Status: (cell.FireReceivedDateTime)
+                                                        ? game_client.OwnBattleFieldCellStatus.Hit
+                                                        : game_client.OwnBattleFieldCellStatus.Untouched
+                                                } as game_client.IOwnBattleFieldCell))),
+                                    EnemyCells: match.SecondPlayerSide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((cell, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!cell.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (cell.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
+                                } as gameDTOs.IMatchStartedEventDto);
+                            this._socketIOServer.emit(
+                                Events.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), matchHexId, Events.MatchStarted),
+                                {
+                                    CanFire: match.InActionPlayerId.equals(match.SecondPlayerSide.PlayerId),
+                                    StartDateTime: match.StartDateTime,
+                                    OwnCells: match.SecondPlayerSide.BattleFieldCells.map(
+                                        (col, colIndex) =>
+                                            col.map(
+                                                (cell, rowIndex) => ({
+                                                    Coord: { X: colIndex, Y: rowIndex },
+                                                    ShipType: cell.ShipType,
+                                                    Status: (cell.FireReceivedDateTime)
+                                                        ? game_client.OwnBattleFieldCellStatus.Hit
+                                                        : game_client.OwnBattleFieldCellStatus.Untouched
+                                                } as game_client.IOwnBattleFieldCell))),
+                                    EnemyCells: match.FirstPlayerSide.BattleFieldCells.map((col, colIndex) =>
+                                        col.map((row, rowIndex) => ({
+                                            Coord: { X: colIndex, Y: rowIndex },
+                                            Status: (!row.FireReceivedDateTime
+                                                ? (game_client.EnemyBattleFieldCellStatus.Unknown)
+                                                : (row.ShipType == game.ShipType.NoShip
+                                                    ? game_client.EnemyBattleFieldCellStatus.Water
+                                                    : game_client.EnemyBattleFieldCellStatus.HitShip))
+                                        } as game_client.IEnemyBattleFieldCell)))
+                                } as gameDTOs.IMatchStartedEventDto);
                         }
                     })
                     .catch((error: mongodb.MongoError) => {
                         const msg = "error looking for specified match with specified player";
                         console.log(chalk.red(msg));
                         //throw new Error("error looking for specified match with specified player");
-                        responseData = new net.HttpMessage(false, msg);
+                        responseData = new net.HttpMessage(null, msg);
                         return response.status(httpStatusCodes.OK).json(responseData);
                     });
             }
         );
-
-        this._router.get(
-            "/:" + RoutingParamKeys.matchId + "/ownTurnInfo",
-            this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
-
-                let responseData: net.HttpMessage<DTOs.IOwnTurnInfoDto> = null;
-
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
-
-                const userModel = User.getModel();
-
-                Match.getModel()
-                    .findById(matchObjectId)
-                    .populate({ path: "FirstPlayerSide.PlayerId", model: userModel })
-                    .populate({ path: "SecondPlayerSide.PlayerId", model: userModel })
-                    .then(match => {
-
-                        if (!match) {
-                            responseData = new net.HttpMessage(null, "Could not find requested match");
-                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                        }
-
-                        const enemySide = match.getEnemyMatchPlayerSide(userObjectId);
-
-                        if (enemySide) {
-
-                            const enemyClientCells: game_client.EnemyBattleFieldCellStatus[][] = enemySide.BattleFieldCells.map(col => col.map(row =>
-                                (!row.FireReceivedDateTime
-                                    ? (game_client.EnemyBattleFieldCellStatus.Unknown) // TODO: add match-finished showing of non-hit ships
-                                    : (row.ShipType == game.ShipType.NoShip
-                                        ? game_client.EnemyBattleFieldCellStatus.Water
-                                        : game_client.EnemyBattleFieldCellStatus.HitShip))));
-
-                            const enemy = enemySide.PlayerId as any as User.IMongooseUser;
-                            const inActionPlayer = match.InActionPlayerId as any as User.IMongooseUser;
-                            const isOwnTurn = (match.StartDateTime != null) && (match.EndDateTime == null) && (inActionPlayer._id.equals(userObjectId));
-                            const ownViewOfEnemySideDto = {
-                                MatchId: match._id.toHexString(),
-                                MatchSettings: {
-                                    BattleFieldWidth: match.Settings.BattleFieldWidth,
-                                    BattleFieldHeight: match.Settings.BattleFieldHeight,
-                                    MinShipsDistance: match.Settings.MinShipsDistance,
-                                    ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
-                                } as game.IMatchSettings,
-                                MatchEndedDateTime: match.EndDateTime,
-                                Enemy: {
-                                    Id: enemy._id.toHexString(),
-                                    Username: enemy.Username,
-                                    CountryId: enemy.CountryId,
-                                    Age: enemy.getAge()
-                                } as DTOs.IUserDto,
-                                EnemyField: enemyClientCells,
-                                OwnsMove: isOwnTurn
-                            } as DTOs.IOwnTurnInfoDto;
-
-                            responseData = new net.HttpMessage(ownViewOfEnemySideDto);
-                            return response.status(httpStatusCodes.OK).json(responseData);
-                        }
-                        else {
-                            responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        const msg = "error looking for specified match";
-                        console.log(chalk.red(msg));
-                        //throw new Error("error looking for specified match with specified player");
-                        responseData = new net.HttpMessage(null, msg);
-                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
-                    });
-            });
 
         this._router.post(
             "/:" + RoutingParamKeys.matchId + "/singleShot",
             this._jwtValidator,
             (request: express.Request, response: express.Response) => {
 
-                let responseData: net.HttpMessage<DTOs.IAttackResultDto> = null;
+                let responseData: net.HttpMessage<gameDTOs.IAttackResultDto> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
+                const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
+                const loggedUserObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
                 const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
                 const singleShotAction = request.body as game.ISingleShotMatchAction;
 
@@ -302,8 +274,8 @@ export default class MatchesRoutes extends RoutesBase {
                         }
 
                         try {
-                            const didHitAShip = match.fire(userObjectId, singleShotAction.Coord);
-                            const enemyField = match.getEnemyMatchPlayerSide(userObjectId);
+                            const didHitAShip = match.fire(loggedUserObjectId, singleShotAction.Coord);
+                            const enemyField = match.getEnemyMatchPlayerSide(loggedUserObjectId);
 
                             match.save();
 
@@ -315,25 +287,15 @@ export default class MatchesRoutes extends RoutesBase {
                                         : game_client.EnemyBattleFieldCellStatus.Water
                                 }];
 
-                            const enemyClientCells: game_client.EnemyBattleFieldCellStatus[][] = enemyField
-                                .BattleFieldCells.map(col => col.map(row =>
-                                    (!row.FireReceivedDateTime
-                                        ? (game_client.EnemyBattleFieldCellStatus.Unknown) // TODO: add match-finished showing of non-hit ships
-                                        : (row.ShipType == game.ShipType.NoShip
-                                            ? game_client.EnemyBattleFieldCellStatus.Water
-                                            : game_client.EnemyBattleFieldCellStatus.HitShip))));
-
                             const attackResultDto = {
-                                NewEnemyField: enemyClientCells,
                                 EnemyFieldCellChanges: enemyCellChanges,
-                                IsMatchEnded: match.EndDateTime != null,
-                                DoIOwnMove: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(userObjectId)
-                            } as DTOs.IAttackResultDto;
-
-                            this._socketIOServer.emit(ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchUpdated));
+                                CanFireAgain: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(loggedUserObjectId),
+                                MatchEndDateTime: match.EndDateTime,
+                                DidWin: (match.StartDateTime != null) && (match.EndDateTime != null) && match.InActionPlayerId.equals(loggedUserObjectId)
+                            } as gameDTOs.IAttackResultDto;
 
                             this._socketIOServer.emit(
-                                ServiceEventKeys.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.YouGotShot),
+                                Events.matchEventForUser(enemyField.PlayerId.toHexString(), match._id.toHexString(), Events.YouGotShot),
                                 {
                                     OwnFieldCellChanges: enemyCellChanges.map(change => ({
                                         Coord: change.Coord,
@@ -342,8 +304,11 @@ export default class MatchesRoutes extends RoutesBase {
                                                 || change.Status == game_client.EnemyBattleFieldCellStatus.Ship)
                                                 ? game_client.OwnBattleFieldCellStatus.Untouched
                                                 : game_client.OwnBattleFieldCellStatus.Hit
-                                    } as game_client.IOwnBattleFieldCell))
-                                } as DTOs.IYouGotShotEventDto);
+                                    } as game_client.IOwnBattleFieldCell)),
+                                    CanFire: (match.StartDateTime != null) && (match.EndDateTime == null) && match.InActionPlayerId.equals(enemyField.PlayerId),
+                                    DidILose: (match.StartDateTime != null) && (match.EndDateTime != null) && match.InActionPlayerId.equals(loggedUserObjectId),
+                                    MatchEndDateTime: match.EndDateTime
+                                } as gameDTOs.IYouGotShotEventDto);
 
                             responseData = new net.HttpMessage(attackResultDto);
                             response.status(httpStatusCodes.OK).json(responseData);
@@ -367,23 +332,23 @@ export default class MatchesRoutes extends RoutesBase {
                                     .save();
                                 let removedMatch = await match.remove();
 
-                                const mee = {
-                                    InActionPlayerId: match.InActionPlayerId.toHexString(),
-                                    EndDateTime: match.EndDateTime,
-                                    IsResigned: false,
-                                    MatchId: match._id.toHexString(),
-                                    DidIWin: match.EndDateTime && match.InActionPlayerId.equals(userObjectId)
-                                } as DTOs.IMatchUpdatedEventDto;
+                                // const matchEndedEventDto = {
+                                //     EndDateTime: endedMatch.EndDateTime,
+                                //     WinnerId: endedMatch.WinnerId.toHexString(),
+                                //     IsResigned: false
+                                // } as gameDTOs.IMatchEndedEventDto;
 
-                                let matchEndedEventKey = ServiceEventKeys.matchEventForUser(match.FirstPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded);
-                                this._socketIOServer.emit(matchEndedEventKey, mee);
-                                matchEndedEventKey = ServiceEventKeys.matchEventForUser(match.SecondPlayerSide.PlayerId.toHexString(), match._id.toHexString(), ServiceEventKeys.MatchEnded);
-                                this._socketIOServer.emit(matchEndedEventKey, mee);
+                                // this._socketIOServer.emit(
+                                //     ServiceEventKeys.matchEventForUser(
+                                //         match.getEnemyMatchPlayerSide(loggedUserObjectId).PlayerId.toHexString(),
+                                //         match._id.toHexString(),
+                                //         ServiceEventKeys.MatchEnded),
+                                //     matchEndedEventDto);
                             }
                         }
                         catch (ex) {
                             console.log(chalk.red(ex));
-                            responseData = new net.HttpMessage(null, JSON.stringify(ex));
+                            responseData = new net.HttpMessage(null, (ex as mongodb.MongoError).message);
                             return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                         }
                     })
@@ -394,87 +359,6 @@ export default class MatchesRoutes extends RoutesBase {
                         responseData = new net.HttpMessage(null, msg);
                         return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
                     })
-            });
-
-        this._router.get(
-            "/:" + RoutingParamKeys.matchId + "/enemyTurnInfo",
-            this._jwtValidator,
-            (request: express.Request, response: express.Response) => {
-
-                let responseData: net.HttpMessage<DTOs.IEnemyTurnInfoDto> = null;
-
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
-                const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
-                const matchObjectId = new mongoose.Types.ObjectId(request.params[RoutingParamKeys.matchId]);
-
-                const userModel = User.getModel();
-
-                Match.getModel()
-                    .findById(matchObjectId)
-                    .populate({ path: "FirstPlayerSide.PlayerId", model: userModel })
-                    .populate({ path: "SecondPlayerSide.PlayerId", model: userModel })
-                    .then(match => {
-
-                        if (!match) {
-                            responseData = new net.HttpMessage(null, "Could not find requested match");
-                            return response.status(httpStatusCodes.NOT_FOUND).json(responseData);
-                        }
-
-                        const ownSide = match.getOwnerMatchPlayerSide(userObjectId);
-
-                        if (ownSide) {
-
-                            const ownClientCells: game_client.IOwnBattleFieldCell[][] = [];
-
-                            for (let x = 0; x < ownSide.BattleFieldCells.length; x++) {
-
-                                ownClientCells[x] = [];
-
-                                for (let y = 0; y < ownSide.BattleFieldCells[x].length; y++) {
-
-                                    ownClientCells[x].push({
-                                        Coord: {
-                                            X: x,
-                                            Y: y
-                                        },
-                                        ShipType: ownSide.BattleFieldCells[x][y].ShipType,
-                                        Status: (ownSide.BattleFieldCells[x][y].FireReceivedDateTime)
-                                            ? game_client.OwnBattleFieldCellStatus.Hit
-                                            : game_client.OwnBattleFieldCellStatus.Untouched
-                                    } as game_client.IOwnBattleFieldCell);
-                                }
-                            }
-
-                            const inActionPlayer = match.InActionPlayerId as any as User.IMongooseUser;
-                            const isEnemyTurn = (match.StartDateTime != null) && (match.EndDateTime == null) && (inActionPlayer._id.equals(userObjectId));
-                            const ownViewOfOwnSideDto = {
-                                MatchId: match._id.toHexString(),
-                                MatchSettings: {
-                                    BattleFieldWidth: match.Settings.BattleFieldWidth,
-                                    BattleFieldHeight: match.Settings.BattleFieldHeight,
-                                    MinShipsDistance: match.Settings.MinShipsDistance,
-                                    ShipTypeAvailabilities: match.Settings.AvailableShips.map(as => ({ ShipType: as.ShipType, Count: as.Count } as game.IShipTypeAvailability))
-                                } as game.IMatchSettings,
-                                MatchEndedDateTime: match.EndDateTime,
-                                OwnField: ownClientCells,
-                                OwnsMove: isEnemyTurn
-                            } as DTOs.IEnemyTurnInfoDto;
-
-                            responseData = new net.HttpMessage(ownViewOfOwnSideDto);
-                            return response.status(httpStatusCodes.OK).json(responseData);
-                        }
-                        else {
-                            responseData = new net.HttpMessage(null, "You cannot access to matches you're not playing!");
-                            return response.status(httpStatusCodes.FORBIDDEN).json(responseData);
-                        }
-                    })
-                    .catch((error: mongodb.MongoError) => {
-                        const msg = "error looking for specified match";
-                        console.log(chalk.red(msg));
-                        //throw new Error("error looking for specified match with specified player");
-                        responseData = new net.HttpMessage(null, msg);
-                        return response.status(httpStatusCodes.INTERNAL_SERVER_ERROR).json(responseData);
-                    });
             });
 
     }

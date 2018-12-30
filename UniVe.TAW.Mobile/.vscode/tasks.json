@@ -6,7 +6,7 @@
         {
             "label": "ionic cordova run browser",
             "type": "shell",
-            "command": "ionic cordova run browser",
+            "command": "ionic cordova run browser -l",
             "options": {
                 "env": {
                     "ServerAddress:": "127.0.0.1"

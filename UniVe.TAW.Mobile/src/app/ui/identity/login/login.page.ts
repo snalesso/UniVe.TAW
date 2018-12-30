@@ -3,7 +3,11 @@ import { Router } from '@angular/router';
 import ViewsRoutingKeys from '../../../ViewsRoutingKeys';
 import { AuthService } from '../../../services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 
 @Component({
   selector: 'app-login',
@@ -20,7 +24,7 @@ export class LoginPage implements OnInit {
   private _loginRequest = {
     // Username: "Furfante",
     // Password: "aaa"
-  } as DTOs.ILoginCredentials;
+  } as identityDTOs.ILoginCredentials;
   public get LoginRequest() { return this._loginRequest; }
 
   private _responseError: string;

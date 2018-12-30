@@ -14,7 +14,7 @@ export enum EnemyBattleFieldCellStatus {
 
 export interface IOwnBattleFieldCell {
     readonly Coord: game.Coord;
-    readonly ShipType: game.ShipType;
+    ShipType: game.ShipType;
     Status: OwnBattleFieldCellStatus; // = OwnBattleFieldCellStatus.Untouched;
 }
 

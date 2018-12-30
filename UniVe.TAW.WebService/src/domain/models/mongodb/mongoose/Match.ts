@@ -22,6 +22,7 @@ export interface IMongooseMatch extends mongoose.Document {
     FirstPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     SecondPlayerSide: MatchPlayerSide.IMongooseMatchPlayerSide,
     areBothConfigured(): boolean,
+    /** returns true if the config is successful, false if the provided placements are not valid or the side is already configured */
     configFleet(playerId: mongoose.Types.ObjectId, shipPlacements: ShipPlacement.IMongooseShipPlacement[]): boolean,
     /** returns true if a ship was hit, false if water, exception if it was already hit */
     fire(firingPlayerId: mongoose.Types.ObjectId, targetCoord: game.Coord): boolean,

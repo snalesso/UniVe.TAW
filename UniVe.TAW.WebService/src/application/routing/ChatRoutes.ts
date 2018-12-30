@@ -13,13 +13,16 @@ import * as utils_2_8 from '../../infrastructure/utils-2.8';
 
 import * as User from '../../domain/models/mongodb/mongoose/User';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import RoutingParamKeys from './RoutingParamKeys';
 import * as moment from 'moment'
 import RoutesBase from './RoutesBase';
 import * as cors from 'cors';
 import * as ChatMessage from '../../domain/models/mongodb/mongoose/ChatMessage';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 
 export default class ChatRoutes extends RoutesBase {
 
@@ -32,15 +35,15 @@ export default class ChatRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<DTOs.IChatDto[]>;
+                let responseData: net.HttpMessage<chatDTOs.IChatDto[]>;
 
-                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const currentUserJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
 
                 const users = await User.getModel().find().exec();
 
-                let chatDtos = new Array<DTOs.IChatDto>();
-                const chatsMap = new Map<string, DTOs.IChatDto>();
+                let chatDtos = new Array<chatDTOs.IChatDto>();
+                const chatsMap = new Map<string, chatDTOs.IChatDto>();
 
                 for (let user of users) {
 
@@ -53,7 +56,7 @@ export default class ChatRoutes extends RoutesBase {
                                 IsMine: false,
                                 Text: msg.Text,
                                 Timestamp: msg.Timestamp
-                            } as DTOs.IChatMessageDto));
+                            } as chatDTOs.IChatMessageDto));
 
                         if (!chatsMap.has(user._id.toHexString())) {
                             chatsMap.set(
@@ -64,7 +67,7 @@ export default class ChatRoutes extends RoutesBase {
                                         Username: user.Username
                                     },
                                     Messages: msgDtos
-                                } as DTOs.IChatDto);
+                                } as chatDTOs.IChatDto);
                         }
                         else {
                             chatsMap.get(user._id.toHexString()).Messages.push(...msgDtos);
@@ -81,7 +84,7 @@ export default class ChatRoutes extends RoutesBase {
                                     IsMine: true,
                                     Text: msg.Text,
                                     Timestamp: msg.Timestamp
-                                } as DTOs.IChatMessageDto));
+                                } as chatDTOs.IChatMessageDto));
 
                             if (!chatsMap.has(interlocutorId as string)) {
 
@@ -96,7 +99,7 @@ export default class ChatRoutes extends RoutesBase {
                                             Username: username
                                         },
                                         Messages: msgDtos
-                                    } as DTOs.IChatDto);
+                                    } as chatDTOs.IChatDto);
                             }
                             else {
                                 chatsMap.get(interlocutorId as string).Messages.push(...msgDtos);
@@ -144,11 +147,11 @@ export default class ChatRoutes extends RoutesBase {
             this._jwtValidator,
             async (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<DTOs.IChatMessageDto>;
+                let responseData: net.HttpMessage<chatDTOs.IChatMessageDto>;
 
-                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const currentUserJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const senderUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
-                const incMsg = request.body as DTOs.INewMessage;
+                const incMsg = request.body as chatDTOs.INewMessage;
 
                 if (!incMsg) {
                     responseData = new net.HttpMessage(null, "Invalid messages format");
@@ -184,14 +187,14 @@ export default class ChatRoutes extends RoutesBase {
                         SenderId: senderId,
                         Text: loggedMsg.Text,
                         Timestamp: loggedMsg.Timestamp
-                    } as DTOs.IChatMessageDto;
+                    } as chatDTOs.IChatMessageDto;
 
                     const addresseeMessageDto = {
                         IsMine: false,
                         SenderId: senderId,
                         Text: loggedMsg.Text,
                         Timestamp: loggedMsg.Timestamp
-                    } as DTOs.IChatMessageDto;
+                    } as chatDTOs.IChatMessageDto;
 
                     responseData = new net.HttpMessage(senderMessageDto);
                     response
@@ -199,11 +202,11 @@ export default class ChatRoutes extends RoutesBase {
                         .json(responseData);
 
                     this._socketIOServer.emit(
-                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId, senderId),
+                        Events.chatEventForUser(Events.YouGotANewMessage, incMsg.AddresseeId, senderId),
                         addresseeMessageDto);
 
                     this._socketIOServer.emit(
-                        ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, incMsg.AddresseeId),
+                        Events.chatEventForUser(Events.YouGotANewMessage, incMsg.AddresseeId),
                         addresseeMessageDto);
                 }
                 catch (ex) {
@@ -221,9 +224,9 @@ export default class ChatRoutes extends RoutesBase {
             this._jwtValidator,
             (request: express.Request, response: express.Response, next: express.NextFunction) => {
 
-                let responseData: net.HttpMessage<DTOs.IChatMessageDto[]>;
+                let responseData: net.HttpMessage<chatDTOs.IChatMessageDto[]>;
 
-                const currentUserJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const currentUserJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const currentUserObjectId = new mongoose.Types.ObjectId(currentUserJWTPayload.Id);
                 const otherUserHexId = request.params[RoutingParamKeys.userId];
                 const otherUserObjectId = new mongoose.Types.ObjectId(otherUserHexId);
@@ -236,7 +239,7 @@ export default class ChatRoutes extends RoutesBase {
                     .then(users => {
                         const [currentUser, otherUser] = users;
 
-                        let messageDtos = new Array<DTOs.IChatMessageDto>();
+                        let messageDtos = new Array<chatDTOs.IChatMessageDto>();
                         if (currentUser.SentMessages) {
                             const cum = currentUser.SentMessages.get(otherUserHexId);
                             if (cum) {
@@ -245,7 +248,7 @@ export default class ChatRoutes extends RoutesBase {
                                         Text: m.Text,
                                         Timestamp: m.Timestamp,
                                         IsMine: true
-                                    } as DTOs.IChatMessageDto)
+                                    } as chatDTOs.IChatMessageDto)
                                 }
                             }
                         }
@@ -257,7 +260,7 @@ export default class ChatRoutes extends RoutesBase {
                                         Text: m.Text,
                                         Timestamp: m.Timestamp,
                                         IsMine: false
-                                    } as DTOs.IChatMessageDto)
+                                    } as chatDTOs.IChatMessageDto)
                                 }
                             }
                         }

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../assets/unive.taw.webservice/application/Events';
 import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
 import { Router, CanActivate } from '@angular/router';
 import * as moment from 'moment';

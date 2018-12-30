@@ -4,13 +4,17 @@ import { Router, ActivatedRoute } from '@angular/router';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ViewsRoutingKeys from '../../../../ViewsRoutingKeys';
-import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as net from '../../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../../assets/unive.taw.webservice/infrastructure/game';
 import { AuthService } from '../../../../services/auth.service';
 import * as ngHttp from '@angular/common/http';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../../assets/unive.taw.webservice/application/Events';
 import { ChatService } from '../../../../services/chat.service';
 import { IdentityService } from '../../../../services/identity.service';
 
@@ -39,7 +43,7 @@ export class MatchHistoryComponent implements OnInit {
   }
   public get UserId() { return this._userId; }
 
-  private _endedMatchSummaries: DTOs.IEndedMatchSummaryDto[];
+  private _endedMatchSummaries: gameDTOs.IEndedMatchSummaryDto[];
   public get EndedMatchSummaries() { return this._endedMatchSummaries; }
 
   ngOnInit() {

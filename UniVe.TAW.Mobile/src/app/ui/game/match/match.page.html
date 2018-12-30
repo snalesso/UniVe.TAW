@@ -12,13 +12,13 @@
   <ion-tabs #_tabs>
 
     <ion-tab tab="fleet-configurator-tab">
-      <ion-content *ngIf="IsMatchSetupVisible || IsWaitingForEnemyToConfig">
+      <ion-content *ngIf="IsMatchConfigVisible || IsWaitingForEnemyToConfig">
 
         <ion-grid>
 
-          <ion-row *ngIf="IsMatchSetupVisible">
+          <ion-row *ngIf="IsMatchConfigVisible">
             <ion-col>
-              <app-fleet-configurator (WhenIsConfigNeededChanged)="handleWhenIsConfigNeededChanged($event)"></app-fleet-configurator>
+              <app-fleet-configurator [MatchInfo]="MatchInfo"></app-fleet-configurator>
             </ion-col>
           </ion-row>
 
@@ -39,50 +39,41 @@
       </ion-content>
     </ion-tab>
 
-    <ion-tab tab="enemy-turn-controller-tab">
-      <ion-content *ngIf="AreTurnControllersVisible">
-        <app-enemy-turn-controller></app-enemy-turn-controller>
+    <ion-tab tab="own-field-controller-tab">
+      <ion-content *ngIf="AreFieldsVisible">
+        <app-own-field-controller #OwnFieldController [MatchInfo]="MatchInfo"> </app-own-field-controller>
       </ion-content>
     </ion-tab>
-
-    <ion-tab tab="own-turn-controller-tab">
-      <ion-content *ngIf="AreTurnControllersVisible">
-        <app-own-turn-controller></app-own-turn-controller>
+    <ion-tab tab="enemy-field-controller-tab">
+      <ion-content *ngIf="AreFieldsVisible">
+        <app-enemy-field-controller #EnemyFieldController [MatchInfo]="MatchInfo"></app-enemy-field-controller>
       </ion-content>
     </ion-tab>
 
     <ion-tab tab="chat-tab">
-      <ion-content>
+      <ion-content *ngIf="IsChatVisible">
         <app-match-chat [InterlocutorId]="EnemyId"></app-match-chat>
       </ion-content>
-      <!-- <ion-content>
-        <app-match-chat-messages #_matchChatMessagesComponent></app-match-chat-messages>
-      </ion-content>
-      <ion-footer>
-        <ion-toolbar>
-          <app-match-chat-form [InterlocutorId]="SelectedChat.Interlocutor.Id" (WhenMessageIsSent)="handleWhenChatFormMessageIsSent($event)"></app-match-chat-form>
-        </ion-toolbar>
-      </ion-footer> -->
     </ion-tab>
 
     <ion-tab-bar slot="bottom">
 
-      <ion-tab-button tab="fleet-configurator-tab" *ngIf="IsMatchSetupVisible || IsWaitingForEnemyToConfig">
+      <ion-tab-button tab="fleet-configurator-tab" *ngIf="IsMatchConfigVisible || IsWaitingForEnemyToConfig">
         <ion-label>Config</ion-label>
         <ion-icon name="boat"></ion-icon>
       </ion-tab-button>
 
-      <ion-tab-button tab="enemy-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+      <ion-tab-button tab="own-field-controller-tab" *ngIf="AreFieldsVisible">
         <ion-label>Defend</ion-label>
         <ion-icon name="heart"></ion-icon>
       </ion-tab-button>
 
-      <ion-tab-button tab="own-turn-controller-tab" *ngIf="AreTurnControllersVisible">
+      <ion-tab-button tab="enemy-field-controller-tab" *ngIf="AreFieldsVisible">
         <ion-label>Attack {{EnemyUsername}}</ion-label>
         <ion-icon name="locate"></ion-icon>
       </ion-tab-button>
 
-      <ion-tab-button tab="chat-tab">
+      <ion-tab-button tab="chat-tab" *ngIf="IsChatVisible">
         <ion-label>Chat</ion-label>
         <ion-icon name="chatbubbles"></ion-icon>
       </ion-tab-button>

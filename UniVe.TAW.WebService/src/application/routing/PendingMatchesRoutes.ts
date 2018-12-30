@@ -11,13 +11,16 @@ import * as utils from '../../infrastructure/utils';
 import * as utilsV2_8 from '../../infrastructure/utils-2.8';
 
 import RoutingParamKeys from './RoutingParamKeys';
-import ServiceEventKeys from '../services/ServiceEventKeys';
+import Events from '../Events';
 import * as User from '../../domain/models/mongodb/mongoose/User';
 import * as Match from '../../domain/models/mongodb/mongoose/Match';
 import * as EndedMatch from '../../domain/models/mongodb/mongoose/EndedMatch';
 import * as PendingMatch from '../../domain/models/mongodb/mongoose/PendingMatch';
 
-import * as DTOs from '../DTOs';
+import * as identityDTOs from '../DTOs/identity';
+import * as gameDTOs from '../DTOs/game';
+import * as chatDTOs from '../DTOs/chat';
+
 import chalk from 'chalk';
 import RoutesBase from './RoutesBase';
 import * as MatchSettings from '../../domain/models/mongodb/mongoose/MatchSettings';
@@ -46,7 +49,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<string> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
 
                 const pendingMatchCriteria = {
@@ -74,7 +77,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
                             .save()
                             .then((newPendingMatch) => {
 
-                                this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                                this._socketIOServer.emit(Events.PendingMatchesChanged);
 
                                 responseData = new net.HttpMessage(newPendingMatch.id);
                                 response
@@ -108,7 +111,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 let responseData: net.HttpMessage<boolean> = null;
 
-                const userJWTPayload = (request.user as DTOs.IUserJWTPayload);
+                const userJWTPayload = (request.user as identityDTOs.IUserJWTPayload);
                 const userObjectId = new mongoose.Types.ObjectId(userJWTPayload.Id);
 
                 const pendingMatchCriteria = {
@@ -127,7 +130,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
                             .status(httpStatusCodes.OK)
                             .json(responseData);
 
-                        this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                        this._socketIOServer.emit(Events.PendingMatchesChanged);
                     }
                     else {
                         responseData = new net.HttpMessage(false, "Could not delete pending match");
@@ -173,7 +176,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 console.log(chalk.green("Pending match identified"));
 
-                const jwtUser = (request.user as DTOs.IUserJWTPayload);
+                const jwtUser = (request.user as identityDTOs.IUserJWTPayload);
                 const jwtUserObjectId = new mongoose.Types.ObjectId(jwtUser.Id);
 
                 // ensure the pending match is not trying to be joined by the same player who created it
@@ -194,7 +197,7 @@ export default class PendingMatchesRoutes extends RoutesBase {
 
                 console.log(chalk.green("PendingMatch (id: " + removedPendingMatch._id.toHexString() + ") deleted"));
 
-                this._socketIOServer.emit(ServiceEventKeys.PendingMatchesChanged);
+                this._socketIOServer.emit(Events.PendingMatchesChanged);
 
                 const newMatchSkel = {
                     FirstPlayerSide: {
@@ -234,13 +237,13 @@ export default class PendingMatchesRoutes extends RoutesBase {
                 console.log("Created match: " + match.id);
 
                 this._socketIOServer.emit(
-                    ServiceEventKeys.pendingMatchJoined(
+                    Events.pendingMatchJoined(
                         pendingMatch.PlayerId.toHexString(),
                         pendingMatch._id.toHexString())
                     , {
                         PendingMatchId: pendingMatch._id.toHexString(),
                         MatchId: matchHexId
-                    } as DTOs.IPendingMatchJoinedEventDto);
+                    } as gameDTOs.IPendingMatchJoinedEventDto);
 
                 responseData = new net.HttpMessage(matchHexId);
                 return response

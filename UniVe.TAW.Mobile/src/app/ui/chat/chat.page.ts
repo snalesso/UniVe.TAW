@@ -5,10 +5,14 @@ import * as game from '../../../assets/unive.taw.webservice/infrastructure/game'
 import * as game_client from '../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../services/ServiceConstants';
 import RoutingParamKeys from '../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngHttp from '@angular/common/http';
-import ServiceEventKeys from '../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../assets/unive.taw.webservice/application/Events';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { IdentityService } from '../../services/identity.service';
@@ -35,18 +39,18 @@ export class ChatPage implements OnInit {
   @ViewChild("_selectedChatTabContent")
   private _selectedChatTabContent: Content;
 
-  private _chats: ReadonlyArray<DTOs.IChatDto>;
+  private _chats: ReadonlyArray<chatDTOs.IChatDto>;
   public get Chats() { return this._chats; }
 
-  public SelectedChat: DTOs.IChatDto;
+  public SelectedChat: chatDTOs.IChatDto;
 
-  public OpenChat(chat: DTOs.IChatDto) {
+  public OpenChat(chat: chatDTOs.IChatDto) {
     this.SelectedChat = chat;
     this._tabs.select("selected-chat-tab");
     //this._selectedChatTabContent.scrollToBottom();
   }
 
-  public handleWhenChatFormMessageIsSent(sentMessage: DTOs.IChatMessageDto) {
+  public handleWhenChatFormMessageIsSent(sentMessage: chatDTOs.IChatMessageDto) {
     this.SelectedChat.Messages.push(sentMessage);
   }
 
@@ -65,7 +69,7 @@ export class ChatPage implements OnInit {
 
       this._socketIOService.on(
         ServiceEventKeys.chatEventForUser(ServiceEventKeys.YouGotANewMessage, this._authService.LoggedUser.Id),
-        (newMessage: DTOs.IChatMessageDto) => {
+        (newMessage: chatDTOs.IChatMessageDto) => {
           const chatsToUpdate = this.Chats.filter(chat => chat.Interlocutor.Id == newMessage.SenderId);
           for (let chat of chatsToUpdate)
             chat.Messages.push(newMessage);

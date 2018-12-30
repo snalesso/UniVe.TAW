@@ -3,7 +3,10 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { GameService } from '../../../services/game.service';
 
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 import * as utils from '../../../../assets/unive.taw.webservice/infrastructure/utils';
 import ServiceConstants from '../../../services/ServiceConstants';
@@ -12,7 +15,7 @@ import { Country } from '../../../../assets/unive.taw.webservice/infrastructure/
 import * as net from '../../../../assets/unive.taw.webservice/infrastructure/net';
 import * as game from '../../../../assets/unive.taw.webservice/infrastructure/game';
 import * as http from '@angular/common/http';
-import ServiceEventKeys from '../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import Events from '../../../../assets/unive.taw.webservice/application/Events';
 import * as ngxSocketIO from 'ngx-socket-io';
 import { Subscription } from 'rxjs';
 import * as httpStatusCodes from 'http-status-codes';
@@ -26,7 +29,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
 
   private readonly _subscriptions: Subscription[] = [];
 
-  private _playables: DTOs.IPlayablesDto;
+  private _playables: gameDTOs.IPlayablesDto;
 
   private _pendingMatchesChangedEventKey: string;
   private _pendingMatchJoinedEventKey: string;
@@ -132,8 +135,8 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
             if (this._playables.PendingMatchId) {
 
               this._socketIOService.once(
-                (this._pendingMatchJoinedEventKey = ServiceEventKeys.pendingMatchJoined(this._authService.LoggedUser.Id, this._playables.PendingMatchId)),
-                (pendingMatchJoinedEvent: DTOs.IPendingMatchJoinedEventDto) => {
+                (this._pendingMatchJoinedEventKey = Events.pendingMatchJoined(this._authService.LoggedUser.Id, this._playables.PendingMatchId)),
+                (pendingMatchJoinedEvent: gameDTOs.IPendingMatchJoinedEventDto) => {
                   this._router.navigate([ViewsRoutingKeys.Match, pendingMatchJoinedEvent.MatchId]);
                 });
             }
@@ -165,7 +168,7 @@ export class MatchFinderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this._pendingMatchesChangedEventKey = ServiceEventKeys.PendingMatchesChanged;
+    this._pendingMatchesChangedEventKey = Events.PendingMatchesChanged;
     this._socketIOService.on(this._pendingMatchesChangedEventKey, () => this.updatePlayables());
 
     this.updatePlayables();
