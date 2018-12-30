@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import * as ngxSocketIO from 'ngx-socket-io';
 import { AuthService } from './services/auth.service';
 import * as moment from 'moment';
-import ServiceEventKeys from '../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../assets/unive.taw.webservice/application/Events';
 import * as identity from '../assets/unive.taw.webservice/infrastructure/identity';
 import ViewsRoutingKeys from './ViewsRoutingKeys';
 

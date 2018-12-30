@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 //import { Router } from '@angular/router';
 //import { NavController } from 'ionic-angular';
 
-import * as DTOs from '../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as identity from '../../../../assets/unive.taw.webservice/infrastructure/identity';
 //import ViewsRoutingKeys from '../../../presentation/ViewsRoutingKeys';
 import { AuthService } from '../../../services/auth.service';
@@ -22,7 +26,7 @@ export class SignupPage implements OnInit {
     //Password: "aaa",
     // BirthDate: new Date('1993-03-16'),
     CountryId: identity.Country.Undefined
-  } as DTOs.ISignupRequestDto;
+  } as identityDTOs.ISignupRequestDto;
 
   constructor(
     private readonly _authService: AuthService,

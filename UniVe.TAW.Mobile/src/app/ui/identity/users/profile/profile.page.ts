@@ -8,10 +8,14 @@ import * as game from '../../../../../assets/unive.taw.webservice/infrastructure
 import * as game_client from '../../../../../assets/unive.taw.webservice/infrastructure/game.client';
 import ServiceConstants from '../../../../services/ServiceConstants';
 import RoutingParamKeys from '../../../../../assets/unive.taw.webservice/application/routing/RoutingParamKeys';
-import * as DTOs from '../../../../../assets/unive.taw.webservice/application/DTOs';
+
+import * as identityDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/identity';
+import * as gameDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/game';
+import * as chatDTOs from '../../../../../assets/unive.taw.webservice/application/DTOs/chat';
+
 import * as utils from '../../../../../assets/unive.taw.webservice/infrastructure/utils';
 import * as ngxSocketIO from 'ngx-socket-io';
-import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/services/ServiceEventKeys';
+import ServiceEventKeys from '../../../../../assets/unive.taw.webservice/application/Events';
 import BanOption from './BanOption';
 import * as identity from '../../../../../assets/unive.taw.webservice/infrastructure/identity';
 import UserRole from './UserRole';
@@ -29,8 +33,8 @@ export class ProfilePage implements OnInit, OnDestroy {
 
   private _userId: string;
 
-  private _userPowers: DTOs.IUserPowers;
-  private _userProfile: DTOs.IUserProfile;
+  private _userPowers: identityDTOs.IUserPowers;
+  private _userProfile: identityDTOs.IUserProfile;
 
   constructor(
     private readonly _router: Router,

@@ -14,7 +14,7 @@
   <ion-row>
     <ion-col>
 
-      <table id="bf-grid" class="bf-grid" [ngClass]="!IsEnabled ? 'bf-grid-disabled' : ''">
+      <table id="bf-grid" class="bf-grid" [ngClass]="!CanFire ? 'bf-grid-disabled' : ''">
         <tbody>
           <tr *ngFor="let row of Cells">
             <td class="bf-grid-cell" (click)="fire(cell)" [attr.data-x]="cell.Coord.X" [attr.data-y]="cell.Coord.Y"
