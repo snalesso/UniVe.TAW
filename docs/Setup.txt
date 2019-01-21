@@ -1,9 +1,0 @@
-- installare Visual Studio Code	https://code.visualstudio.com/download
-- installare node.js	https://nodejs.org/en/download/
-- installare MongoDB - Community Server	https://www.mongodb.com/download-center?jmp=nav#community
-- aggiungere la path della CARTELLA che contiene mongod.exe (es. C:\Program Files\MongoDB\Server\4.0\bin\mongod.exe) alla variabile di ambiente "Path" (utente o sistema)
-- riavviare perchè la shell "veda" la nuova variabile (provare anche riavviando solo VSCode)
-- npm i -g @angular/cli
-- npm i -g ionic cordova
-- npm i -g gulp-cli
-- npm i (in tutti i progetti)
